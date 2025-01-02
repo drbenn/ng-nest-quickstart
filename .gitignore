@@ -1,0 +1,115 @@
+
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+
+##############################################################################
+#
+#                         Angular project specific gitignore
+#
+#############################################################################
+
+# Angular Compiled output
+ui/dist
+ui/tmp
+ui/out-tsc
+ui/bazel-out
+
+# Angular Node
+ui/node_modules
+ui/npm-debug.log
+ui/yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+ui/.angular/cache
+.sass-cache/
+ui/connect.lock
+ui/coverage
+ui/libpeerconnection.log
+ui/testem.log
+ui/typings
+
+# System files
+.DS_Store
+ui/Thumbs.db
+
+
+##############################################################################
+#
+#                           NestJS project specific gitignore
+#
+#############################################################################
+
+
+# compiled output
+api/dist
+api/node_modules
+api/build
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+api/coverage
+api/.nyc_output
+
+# IDEs and editors
+api/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# temp directory
+.temp
+.tmp
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+api/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

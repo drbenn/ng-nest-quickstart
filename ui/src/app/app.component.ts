@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+import { NavbarComponent } from '../components/navbar/navbar.component';
 
 
 interface City {
@@ -15,7 +16,7 @@ interface City {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ButtonModule, SelectModule, CommonModule, FormsModule],
+  imports: [RouterOutlet, ButtonModule, SelectModule, CommonModule, FormsModule, NavbarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
