@@ -3,6 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strictPropertyInitialization": false,
     "checkJs":true,
     "outDir": "./dist/out-tsc",
     "strict": true,

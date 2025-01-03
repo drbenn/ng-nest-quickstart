@@ -8,8 +8,7 @@ describe('[TEST]: AuthStore', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-       providers: [provideStore([AuthState])]
-      
+      providers: [provideStore([AuthState])]
     });
 
     store = TestBed.inject(Store);

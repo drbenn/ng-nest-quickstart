@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { navbarRoutes } from '../../navbar-routes';
 
 @Component({
   selector: 'mobile-nav-popover',
@@ -8,15 +9,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './mobile-nav-popover.component.scss'
 })
 export class MobileNavPopoverComponent {
-  protected navRoutes: any[] = [
-    {
-      name: 'Landing',
-      route: '/'
-    },
-    {
-      name: 'Contact',
-      route: '/contact'
-    },
-  ];
-
+  @Input() isUserLoggedIn: boolean;
+  protected navRoutes = navbarRoutes;
 }

@@ -1,16 +1,31 @@
 <main class="py-4 w-36 mr-2">
-  <ul class="font-semibold text-md">
-    @for (item of navRoutes; track item.name; let i = $index) {
-      <li [class]="i !==0 ? 
-      'w-full py-2 px-6 transition duration-100 ease-in-out hover:bg-slate-400 cursor-pointer' : 
-      'w-full py-2 px-6 transition duration-100 ease-in-out hover:bg-slate-400 cursor-pointer'
-      ">
-        <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
-        class="transition duration-100 ease-in-out hover:text-gray-600"
-        >
-          {{ item.name }}
-        </a>
-      </li>
+  <ul class="font-base text-md">
+    @if (isUserLoggedIn) {
+      @for (item of navRoutes.loggedInNavRoutes; track item.name; let i = $index) {
+        <li [class]="i !==0 ? 
+        'w-full py-2 px-6 transition duration-100 ease-in-out hover:bg-slate-400 cursor-pointer' : 
+        'w-full py-2 px-6 transition duration-100 ease-in-out hover:bg-slate-400 cursor-pointer'
+        ">
+          <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+          class="transition duration-100 ease-in-out hover:text-gray-600"
+          >
+            {{ item.name }}
+          </a>
+        </li>
+      }
+    } @else {
+      @for (item of navRoutes.loggedOutNavRoutes; track item.name; let i = $index) {
+        <li [class]="i !==0 ? 
+        'w-full py-2 px-6 transition duration-100 ease-in-out hover:bg-slate-400 cursor-pointer' : 
+        'w-full py-2 px-6 transition duration-100 ease-in-out hover:bg-slate-400 cursor-pointer'
+        ">
+          <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+          class="transition duration-100 ease-in-out hover:text-gray-600"
+          >
+            {{ item.name }}
+          </a>
+        </li>
+      }
     }
   </ul>
 </main>

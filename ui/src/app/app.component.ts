@@ -37,8 +37,5 @@ export class AppComponent implements OnInit {
         { name: 'Paris', code: 'PRS' }
     ];
   }
-toggleDarkMode() {
-  const element = document.querySelector('html');
-  element?.classList.toggle('my-app-dark');
-}
+
 }

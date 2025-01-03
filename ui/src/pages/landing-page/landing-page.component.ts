@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { StandardPageWrapperComponent } from '../../components/standard-page-wrapper/standard-page-wrapper.component';
 import { dispatch, select } from '@ngxs/store';
-import { Add } from '../../app/app.actions';
-import { getCount } from '../../app/app.state';
+import { Add } from '../../store/app/app.actions';
+import { getCount } from '../../store/app/app.state';
 
 @Component({
   selector: 'landing-page',
