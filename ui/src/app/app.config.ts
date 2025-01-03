@@ -11,13 +11,14 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimationsAsync(),
     providePrimeNG({
-        theme: {
-            // preset: Aura
-            preset: MyYellowPreset,
-            options: {
-              darkModeSelector: '.my-app-dark'
-          }
-        }
+      ripple: true,
+      inputStyle: 'outlined', // 'outlined' | 'filled';
+      theme: {
+          preset: MyYellowPreset,
+          options: {
+            darkModeSelector: '.dark',
+        },
+      }
     }),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes)

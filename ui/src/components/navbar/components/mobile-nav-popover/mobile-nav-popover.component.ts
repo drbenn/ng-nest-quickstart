@@ -8,5 +8,15 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './mobile-nav-popover.component.scss'
 })
 export class MobileNavPopoverComponent {
+  protected navRoutes: any[] = [
+    {
+      name: 'Landing',
+      route: '/'
+    },
+    {
+      name: 'Contact',
+      route: '/contact'
+    },
+  ];
 
 }
