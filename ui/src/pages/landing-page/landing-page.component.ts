@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { StandardPageWrapperComponent } from '../../components/standard-page-wrapper/standard-page-wrapper.component';
+import { dispatch, select } from '@ngxs/store';
+import { Add } from '../../app/app.actions';
+import { getCount } from '../../app/app.state';
 
 @Component({
   selector: 'landing-page',
@@ -8,5 +11,10 @@ import { StandardPageWrapperComponent } from '../../components/standard-page-wra
   styleUrl: './landing-page.component.scss'
 })
 export class LandingPageComponent {
+  count = select(getCount);
+  add = dispatch(Add);
 
+  onClick(value: number) {
+    this.add(value);
+  }
 }

@@ -18,6 +18,8 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
+    "@ngxs/devtools-plugin": "^19.0.0",
+    "@ngxs/store": "^19.0.0",
     "@primeng/themes": "^19.0.2",
     "primeicons": "^7.0.0",
     "primeng": "^19.0.2",
