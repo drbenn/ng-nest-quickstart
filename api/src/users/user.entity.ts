@@ -6,25 +6,31 @@ export class User {
   id: string;
 
   @Column({ nullable: false })
-  firstName: string;
+  first_name: string;
 
   @Column({ nullable: false })
-  lastName: string;
+  last_name: string;
 
   @Column({ nullable: false })
-  fullName: string;
+  full_name: string;
 
   @Column({ unique: true, nullable: false })
   email: string;
 
   @Column({ nullable: true })
-  imgUrl: string;
+  img_url: string;
+
+  @Column({ nullable: true })
+  provider: string;
 
   @Column('simple-array', { nullable: true })
   roles: string[];
 
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  dateJoined: Date;
+  date_joined: Date;
+
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  last_login: Date;
 
   @Column({ type: 'jsonb', nullable: true })
   settings: Record<string, any>;
