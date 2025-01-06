@@ -17,6 +17,10 @@ export const navbarRoutes: any = {
     {
       name: 'Contact',
       route: '/contact',
+    },
+    {
+      name: 'Todo',
+      route: '/todo',
     }
   ]
 };

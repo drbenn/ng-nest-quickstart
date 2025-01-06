@@ -10,9 +10,11 @@ import { MyYellowPreset } from '../assets/theme/mytheme';
 import { AppState } from '../store/app/app.state';
 import { AuthState } from '../store/auth/auth.state';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideHttpClient(withFetch()),
     provideAnimationsAsync(),
     providePrimeNG({
       ripple: true,

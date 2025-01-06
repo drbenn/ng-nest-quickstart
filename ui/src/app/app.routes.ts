@@ -8,6 +8,7 @@ import { CookiePolicyPageComponent } from '../pages/cookie-policy-page/cookie-po
 import { SigninPageComponent } from '../pages/signin-page/signin-page.component';
 import { HomePageComponent } from '../pages/home-page/home-page.component';
 import { RegisterPageComponent } from '../pages/register-page/register-page.component';
+import { TodoPageComponent } from '../pages/todo-page/todo-page.component';
 
 export const routes: Routes = [
     // Routes accessible by all
@@ -20,5 +21,6 @@ export const routes: Routes = [
     { path: 'cookie-policy', component: CookiePolicyPageComponent },
     // Routes accessible by logged in users only
     { path: 'home', component: HomePageComponent },
+    { path: 'todo', component: TodoPageComponent },
     { path: '**', component: PageNotFoundPageComponent }
 ];
