@@ -1,46 +1,53 @@
-<main class="w-full flex flex-col justify-around items-center">
-  <!-- input section -->
-  <section class="my-4">
-    <div class=" w-full bg-slate-300surface-100 flex flex-row justify-between">
-      <div class="flex justify-center">
-        <p-button label="Add Lorem 20" (click)="addLorem20()"/>
+<standard-page-wrapper>
+  <main class="w-full flex flex-col justify-around items-center">
+    <h1 class="text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-slate-100">
+      Todo
+    </h1>
+    <!-- input section -->
+    <section class="my-4">
+      <div class=" w-full flex flex-row justify-between">
+        <div class="flex justify-center">
+          <p-button label="Add Lorem 20" size="small" (click)="addLorem20()"/>
+        </div>
+        @if (!isUpdateMode) {
+          <div class="card flex justify-center">
+            <p-button label="Submit" size="small" (click)="submitTodo()"/>
+          </div>
+        }
+        @if (isUpdateMode) {
+          <div class="card flex justify-center">
+            <p-button label="Update" (click)="updateTodo()" severity="warn" />
+          </div>
+        }
       </div>
-      @if (!isUpdateMode) {
-        <div class="card flex justify-center">
-          <p-button label="Submit" (click)="submitTodo()"/>
-        </div>
-      }
-      @if (isUpdateMode) {
-        <div class="card flex justify-center">
-          <p-button label="Update" (click)="updateTodo()" severity="warn" />
-        </div>
-      }
-    </div>
-    <div class="card flex justify-center my-4 border">
-      <textarea rows="5" cols="30" pTextarea [(ngModel)]="todoText"></textarea>
-    </div>
-  </section>
-
-  <hr class="w-full">
-
-  <!-- listing section -->
-  <section class="flex flex-row flex-wrap justify-around items-center">
-    @for (item of todos; track item.id) {
-      @if (item.id) {
-        <div class="m-4 p-4 bg-slate-600 border rounded-full w-16rem h-12rem overflow-y-scroll flex flex-col">
-          <div class="mt-2 w-full flex flex-row flex-nowrap justify-end">
-            <div>
-              <p-button icon="pi pi-search" severity="warn" (click)="switchToUpdateMode(item)"/>
+      <div class="card flex justify-center my-4 border-2 rounded">
+        <textarea rows="8" cols="34" pTextarea [(ngModel)]="todoText"></textarea>
+      </div>
+    </section>
+  
+    <p-divider [align]="'center'" [ngStyle]="{width: '90%'}"/>
+  
+    <!-- listing section -->
+    <section class="flex flex-row flex-wrap justify-around items-center py-8">
+      @for (item of todos; track item.id) {
+        @if (item.id) {
+          <div class="m-4 p-4 border-2 rounded-lg w-96 h-48 overflow-y-scroll flex flex-col bg-slate-50 dark:bg-zinc-800">
+            <div class="mt-2 w-full flex flex-row flex-nowrap justify-end">
+              <div>
+                <p-button icon="pi pi-file-edit" size="small" severity="info" pTooltip="Edit Todo" tooltipPosition="top"
+                  [rounded]="true" [outlined]="true" (click)="switchToUpdateMode(item)"/>
+              </div>
+              <div class="ml-2">
+                <p-button icon="pi pi-times" size="small" severity="danger" pTooltip="Delete Todo" tooltipPosition="top"
+                  [rounded]="true" [outlined]="true" (click)="deleteTodo(item.id)"/>
+              </div>
             </div>
-            <div class="ml-2">
-              <p-button icon="pi pi-times" severity="danger" (click)="deleteTodo(item.id)"/>
+            <div class="mt-2 text-sm font-extralight subpixel-antialiased leading-5 tracking-tight">
+              {{ item.detail}}
             </div>
           </div>
-          <div class="mt-2">
-            {{ item.title}}
-          </div>
-        </div>
+        }
       }
-    }
-  </section>
-</main>
+    </section>
+  </main>
+</standard-page-wrapper>

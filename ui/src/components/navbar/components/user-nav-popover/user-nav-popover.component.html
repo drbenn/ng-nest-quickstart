@@ -1,11 +1,17 @@
-<main class="w-36 mr-2">
+<main class="w-48 mr-2">
+  <div class="pl-2 text-xs font-extralight">
+    {{ user?.email }}
+  </div>
+  <div class="pl-2 text-xs font-extralight">
+    joined: {{ user?.dateJoined | date: 'dd MMM YYYY' }}
+  </div>
   <ul class="font-base text-md w">
-    <li class="py-2 px-6 w-full transition duration-100 ease-in-out hover:bg-gray-400 cursor-pointer" (click)="signOut()">
+    <li class="py-2 pl-2 pr-10 w-full transition duration-100 ease-in-out hover:bg-gray-400 cursor-pointer" (click)="signOut()">
       <a>
         Logout
       </a>
     </li>
-    <li class="py-2 px-6 w-full transition duration-100 ease-in-out hover:bg-gray-400 cursor-pointer">
+    <li class="py-2 pl-2 pr-10 w-full transition duration-100 ease-in-out hover:bg-gray-400 cursor-pointer">
       <a routerLink="/alt" routerLinkActive="active" ariaCurrentWhenActive="page">
         Option 2
       </a>

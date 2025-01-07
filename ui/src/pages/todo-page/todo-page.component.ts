@@ -3,30 +3,29 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { TodoService } from './services/todo.service';
-import { Todo } from './types/todo.types';
+import { TooltipModule } from 'primeng/tooltip';
+import { CreateTodoDto, TodoDto } from '../../types/todoDto.types';
+import { StandardPageWrapperComponent } from '../../components/standard-page-wrapper/standard-page-wrapper.component';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'todo-page',
-  imports: [CommonModule, FormsModule, ButtonModule],
+  imports: [CommonModule, FormsModule, ButtonModule, TooltipModule, DividerModule, StandardPageWrapperComponent],
   providers: [TodoService],
   templateUrl: './todo-page.component.html',
   styleUrl: './todo-page.component.scss'
 })
 export class TodoPageComponent implements OnInit {
-  protected todos: Todo[] = [];
+  protected todos: TodoDto[] = [];
   protected isUpdateMode: boolean = false;
-  protected storedUpdatedTodo: Todo | undefined;
+  protected storedUpdatedTodo: TodoDto | undefined;
   protected todoText: string = '';
   
   constructor(private todoService: TodoService) {}
 
   ngOnInit(): void {
-    console.log('TODO COMP INIT');
-    
-    this.todoService.getTodos().subscribe((todos: Todo[]) => {
+    this.todoService.getTodos().subscribe((todos: TodoDto[]) => {
       this.todos = todos;
-      console.log(todos);
-      
     })
   }
 
@@ -35,10 +34,10 @@ export class TodoPageComponent implements OnInit {
   }
 
   protected submitTodo(): void {
-    const newTodo: Partial<Todo> = { title: this.todoText, isCompleted: false};
+    const newTodo: CreateTodoDto = { detail: this.todoText };
     this.todoService.createTodo(newTodo).subscribe({
-      next: (r: Todo) => {
-        this.todos.push(r);
+      next: (todo: TodoDto) => {
+        this.todos.push(todo);
       },
       error: (err: any) => {
         console.error(err);
@@ -47,53 +46,48 @@ export class TodoPageComponent implements OnInit {
     this.todoText = '';
   }
 
-  loadTodos(): void {
+  private loadTodos(): void {
     this.todoService.getTodos().subscribe((data) => {
       this.todos = data;
     });
   }
 
-  addTodo(): void {
+  private addTodo(): void {
     if (!this.todoText.trim()) return;
-
-    const newTodo: Partial<Todo> = {
-      title: this.todoText,
-      isCompleted: false,
-    };
-    console.log(newTodo);
-    
-
+    const newTodo: CreateTodoDto = {
+      detail: this.todoText
+    }; 
     this.todoService.createTodo(newTodo).subscribe((todo) => {
       this.todos.push(todo);
       this.todoText = '';
     });
   }
 
-  toggleCompletion(todo: Todo): void {
+  private toggleCompletion(todo: TodoDto): void {
     const updatedTodo = { ...todo, isCompleted: !todo.isCompleted };
     this.todoService.updateTodo(todo.id!, updatedTodo).subscribe((updated) => {
       todo.isCompleted = updated.isCompleted;
     });
   }
 
-  deleteTodo(id: number): void {
+  protected deleteTodo(id: string): void {
     this.todoService.deleteTodo(id).subscribe(() => {
       this.todos = this.todos.filter((todo) => todo.id !== id);
     });
   };
 
 
-  switchToUpdateMode(todo: Todo) {
+  protected switchToUpdateMode(todo: TodoDto) {
     this.isUpdateMode = true;
     this.storedUpdatedTodo = todo;
-    this.todoText = todo.title;
+    this.todoText = todo.detail;
   }
 
-  updateTodo(): void {
+  protected updateTodo(): void {
     if (this.storedUpdatedTodo && this.storedUpdatedTodo.id) {
-      this.storedUpdatedTodo.title = this.todoText;
-      this.todoService.updateTodo(this.storedUpdatedTodo.id, this.storedUpdatedTodo).subscribe((updatedTodo: Todo) => {
-        const updateIndex: number = this.todos.findIndex((existingTodo: Todo) => existingTodo.id === updatedTodo.id);
+      this.storedUpdatedTodo.detail = this.todoText;
+      this.todoService.updateTodo(this.storedUpdatedTodo.id, this.storedUpdatedTodo).subscribe((updatedTodo: TodoDto) => {
+        const updateIndex: number = this.todos.findIndex((existingTodo: TodoDto) => existingTodo.id === updatedTodo.id);
         this.todos[updateIndex] = updatedTodo;
       });
       this.isUpdateMode = false;

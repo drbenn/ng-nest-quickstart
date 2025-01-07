@@ -1,15 +1,19 @@
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { dispatch } from '@ngxs/store';
 import { LogoutUser } from '../../../../store/auth/auth.actions';
 import { Router } from '@angular/router';
+import { AuthStateModel } from '../../../../store/auth/auth.state';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'user-nav-popover',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './user-nav-popover.component.html',
-  styleUrl: './user-nav-popover.component.scss'
+  styleUrl: './user-nav-popover.component.scss',
+  providers: [DatePipe],
 })
-export class UserNavPopoverComponent {
+export class UserNavPopoverComponent implements OnInit {
+  @Input() user: Partial<AuthStateModel> | null = null;
   @Output() close = new EventEmitter<void>();
   private logout = dispatch(LogoutUser);
   private router = inject(Router)
@@ -19,5 +23,10 @@ export class UserNavPopoverComponent {
     this.close.emit();
     this.router.navigate(['/']);
   };
+
+  ngOnInit(): void {
+    console.log(this.user);
+    
+  }
 
 }

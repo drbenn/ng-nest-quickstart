@@ -119,6 +119,6 @@
 </p-popover>
 
 <p-popover #userMenuPopover>
-  <user-nav-popover (close)="userMenuPopover.hide()"></user-nav-popover>
+  <user-nav-popover (close)="userMenuPopover.hide()" [user]="authUser"></user-nav-popover>
 </p-popover>
 
