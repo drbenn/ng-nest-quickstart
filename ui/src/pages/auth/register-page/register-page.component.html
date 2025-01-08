@@ -1,1 +1,81 @@
-<p>register-page works!</p>
+<standard-page-wrapper>
+  <main class="border rounded flex flex-col justify-start items-center pt-6 pb-6 px-8">
+    <div>
+      <p-divider [align]="'center'" type="solid">
+        <span>Register Account</span>
+      </p-divider>
+
+      <div class="my-8"></div>
+
+      <form (ngSubmit)="onSubmitRegisterUser()" [formGroup]="form">
+        <p-floatlabel variant="on">
+          <input 
+            pInputText
+            class="w-full"
+            id="on_label"
+            type="email"
+            formControlName="email"
+            autocomplete="off" 
+          />
+          <label for="on_label">Email</label>
+        </p-floatlabel>
+
+        <div class="mt-6">
+          <p-floatlabel variant="on">
+            <input 
+              pInputText
+              class="w-full"
+              id="on_label"
+              formControlName="password"
+              autocomplete="off"
+              [type]="form.value.isPasswordInView ? 'text' : 'password' "
+            />
+            <label for="on_label">Password</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="mt-6 mb-1">
+          <p-floatlabel variant="on">
+            <input 
+              pInputText
+              class="w-full"
+              id="on_label"
+              formControlName="retypePassword"
+              autocomplete="off"
+              [type]="form.value.isPasswordInView ? 'text' : 'password' "
+  
+            />
+            <label for="on_label">Re-type Password</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="">
+          <p-checkbox
+            binary="true"
+            size="small"
+            id="on_label"
+            formControlName="isPasswordInView"
+            (onChange)="handlePasswordInView($event)"
+            inputId="checkbox" />
+          <label for="on_label" class="ml-2 font-light text-sm">View Password</label>
+        </div>
+
+        <div class="w-full flex flex-row justify-end mt-8">
+          <p-button
+            class="mr-2"
+            label="Clear"
+            (click)="form.reset()"
+          />
+          <p-button
+            [disabled]="!isFormValid()"
+            label="Register"
+            type="submit"
+          />
+        </div>
+      </form>
+    </div>
+
+  </main>
+
+
+</standard-page-wrapper>

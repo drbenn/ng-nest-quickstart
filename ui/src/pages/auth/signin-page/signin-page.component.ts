@@ -51,7 +51,6 @@ export class SigninPageComponent {
 
   protected googleSignIn(): void {
     console.log('google sign in todo');
-
   };
 
 }
