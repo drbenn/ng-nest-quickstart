@@ -1,0 +1,25 @@
+<mxfile host="65bd71144e">
+    <diagram id="Hvg_vFcXe_EE8H56llz_" name="Page-1">
+        <mxGraphModel dx="1806" dy="724" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="&lt;li&gt;&lt;p&gt;&lt;strong&gt;User Authentication Options:&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Username and password&lt;/strong&gt; using a local strategy (&lt;code&gt;passport-local&lt;/code&gt;).&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Google OAuth&lt;/strong&gt; using &lt;code&gt;passport-google-oauth20&lt;/code&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;JWT for API Access:&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Generate a JWT on successful login.&lt;/li&gt;&lt;li&gt;Send the JWT as an HTTP-only cookie to the client.&lt;/li&gt;&lt;li&gt;Use the JWT for guarding API routes.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;Authorization:&lt;/strong&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Implement route guards using &lt;code&gt;@nestjs/passport&lt;/code&gt; and &lt;code&gt;@nestjs/jwt&lt;/code&gt;.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;" parent="1" vertex="1">
+                    <mxGeometry x="-180" y="50" width="430" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="&lt;h3&gt;&lt;strong&gt;2. Setup Unified Login Flow&lt;/strong&gt;&lt;/h3&gt;&lt;h4&gt;&lt;strong&gt;For Email/Password Authentication&lt;/strong&gt;&lt;/h4&gt;&lt;ol&gt;&lt;li&gt;Validate the email and password from the database.&lt;/li&gt;&lt;li&gt;If valid, generate a JWT and return it.&lt;/li&gt;&lt;/ol&gt;&lt;h4&gt;&lt;strong&gt;For OAuth Authentication&lt;/strong&gt;&lt;/h4&gt;&lt;ol&gt;&lt;li&gt;After OAuth provider validation, use the user's email (from the provider) to find or create a user in your database.&lt;/li&gt;&lt;li&gt;Generate a JWT based on the email and return it.&lt;/li&gt;&lt;/ol&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="60" width="460" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&lt;li&gt;&lt;p&gt;&lt;strong&gt;Email/Password&lt;/strong&gt;:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;User submits credentials to &lt;code&gt;/auth/login&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;Server validates the credentials and generates a JWT.&lt;/li&gt;&lt;li&gt;JWT is sent back as an HTTP-only cookie.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;OAuth (e.g., Google)&lt;/strong&gt;:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;User clicks &quot;Login with Google&quot; and is redirected to Google.&lt;/li&gt;&lt;li&gt;After successful authentication, Google redirects the user to &lt;code&gt;/auth/google/callback&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;Server generates a JWT and sends it back as an HTTP-only cookie.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;Protected Routes&lt;/strong&gt;:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Client includes the JWT (via cookie) in subsequent API requests.&lt;/li&gt;&lt;li&gt;&lt;code&gt;JwtAuthGuard&lt;/code&gt; validates the JWT and allows access to protected resources.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6a00ff;fontColor=#ffffff;strokeColor=#3700CC;" parent="1" vertex="1">
+                    <mxGeometry x="-140" y="480" width="520" height="440" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="Email/Password&lt;br&gt;User Login" style="ellipse;whiteSpace=wrap;html=1;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="-820" y="80" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="OAuth&lt;br&gt;User Login" style="ellipse;whiteSpace=wrap;html=1;fillColor=#6d8764;strokeColor=#3A5431;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="-810" y="215" width="120" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
