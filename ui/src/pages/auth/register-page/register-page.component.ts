@@ -9,6 +9,8 @@ import { StandardPageWrapperComponent } from '../../../components/standard-page-
 import { DividerModule } from 'primeng/divider';
 import { dispatch } from '@ngxs/store';
 import { LoginUser } from '../../../store/auth/auth.actions';
+import { CreateStandardUserDto } from '../../../types/userDto.types';
+import { StandardAuthService } from '../services/standard-auth.service';
 
 @Component({
   selector: 'register-page',
@@ -21,6 +23,10 @@ import { LoginUser } from '../../../store/auth/auth.actions';
 export class RegisterPageComponent {
   private login = dispatch(LoginUser);
 
+  constructor(
+    private standardAuthService: StandardAuthService
+  ) {}
+
   protected form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]),
@@ -30,6 +36,11 @@ export class RegisterPageComponent {
 
   protected onSubmitRegisterUser(): void {
     console.log(this.form.value);
+    const createStandardUserDto: CreateStandardUserDto = {
+      email: <string>this.form.value.email,
+      password: <string>this.form.value.password
+    };
+    this.standardAuthService.registerStandardUser(createStandardUserDto);
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {

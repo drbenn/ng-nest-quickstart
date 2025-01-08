@@ -10,6 +10,8 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CheckboxChangeEvent, CheckboxModule } from 'primeng/checkbox';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { StandardAuthService } from '../services/standard-auth.service';
+import { LoginStandardUserDto } from '../../../types/userDto.types';
 
 @Component({
   selector: 'signin-page',
@@ -23,6 +25,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class SigninPageComponent {
   private login = dispatch(LoginUser);
 
+  constructor(
+    private standardAuthService: StandardAuthService
+  ) {}
+
   protected form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]),
@@ -31,6 +37,11 @@ export class SigninPageComponent {
 
   protected onSubmitBasicLogin(): void {
     console.log(this.form.value);
+    const loginStandardUserDto: LoginStandardUserDto = {
+      email: <string>this.form.value.email,
+      password: <string>this.form.value.password
+    };
+    this.standardAuthService.loginStandardUser(loginStandardUserDto);
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {
