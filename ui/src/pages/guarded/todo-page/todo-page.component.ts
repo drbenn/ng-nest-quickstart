@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { TodoService } from './services/todo.service';
 import { TooltipModule } from 'primeng/tooltip';
-import { CreateTodoDto, TodoDto } from '../../types/todoDto.types';
-import { StandardPageWrapperComponent } from '../../components/standard-page-wrapper/standard-page-wrapper.component';
+import { CreateTodoDto, TodoDto } from '../../../types/todoDto.types';
+import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
 import { DividerModule } from 'primeng/divider';
 
 @Component({

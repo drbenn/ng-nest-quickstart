@@ -1,18 +1,22 @@
 import { Component } from '@angular/core';
-import { StandardPageWrapperComponent } from '../../components/standard-page-wrapper/standard-page-wrapper.component';
+import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
 import { ButtonModule } from 'primeng/button';
 import { dispatch } from '@ngxs/store';
-import { LoginUser, LogoutUser } from '../../store/auth/auth.actions';
+import { LoginUser, LogoutUser } from '../../../store/auth/auth.actions';
 import { DividerModule } from 'primeng/divider';
 import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CheckboxChangeEvent, CheckboxModule } from 'primeng/checkbox';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'signin-page',
-  imports: [StandardPageWrapperComponent, ButtonModule, DividerModule, InputTextModule, FloatLabelModule, CommonModule, FormsModule, ReactiveFormsModule, CheckboxModule],
+  imports: [
+    StandardPageWrapperComponent, ButtonModule, DividerModule, InputTextModule,
+    FloatLabelModule, CommonModule, FormsModule, ReactiveFormsModule, CheckboxModule,
+    RouterLink, RouterLinkActive],
   templateUrl: './signin-page.component.html',
   styleUrl: './signin-page.component.scss'
 })
