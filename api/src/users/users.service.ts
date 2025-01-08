@@ -29,7 +29,23 @@ export class UsersService {
     }
   };
 
-  createUser(user: CreateUserDto): Promise<User> {
+  findOneUserByEmailAndPassword(email: string, password: string): Promise<User> {
+    try {
+      return this.userRepository.findOneBy({ email, password });
+    } catch (error: unknown) {
+      this.logger.log('error', `Error finding one user by email: ${error}`);
+    }
+  };
+
+  createStandardUser(user: CreateUserDto): Promise<User> {
+    try {
+      return this.userRepository.save(user);
+    } catch (error: unknown) {
+      this.logger.log('error', `Error creating user: ${error}`);
+    }
+  };
+
+  createOAuthUser(user: any): Promise<User> {
     try {
       return this.userRepository.save(user);
     } catch (error: unknown) {
