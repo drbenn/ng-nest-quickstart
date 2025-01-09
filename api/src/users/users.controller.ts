@@ -7,10 +7,10 @@ import { CreateUserDto } from './dto/user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  createUser(@Body() user: CreateUserDto): Promise<User> {
-    return this.usersService.createUser(user);
-  }
+  // @Post()
+  // createUser(@Body() user: CreateUserDto): Promise<User> {
+  //   return this.usersService.createUser(user);
+  // }
 
   @Get(':id')
   findOneUserById(

@@ -2,59 +2,69 @@ import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
+import { RegisterUserDto } from 'src/users/dto/user.dto';
+import { User } from 'src/users/user.entity';
 
 @Controller('auth')
 export class AuthController {
+
   constructor(private readonly authService: AuthService) {}
 
+  @Post('register-standard')
+  async register(@Body() registerUserDto: RegisterUserDto): Promise<User> {
+    return this.authService.register(registerUserDto);
+  }
+  
+  // constructor(private readonly authService: AuthService) {}
+
   // Email/Password Login
-  @Post('login')
-  @UseGuards(LocalAuthGuard) // LocalAuthGuard verifies email/password
-  async login(@Req() req: Request, @Res() res: Response) {
-    const user = req.user; // The user object returned by LocalStrategy
-    const token = this.authService.generateJwtToken(user); // Generate the JWT
-    res.cookie('jwt', token, {
-      httpOnly: true, // Prevent access to the token from client-side JavaScript
-      secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-    });
-    return res.json({ message: 'Login successful', token }); // Optionally return the token
-  }
+  // @Post('login')
+  // @UseGuards(LocalAuthGuard) // LocalAuthGuard verifies email/password
+  // async login(@Req() req: Request, @Res() res: Response) {
+  //   const user = req.user; // The user object returned by LocalStrategy
+  //   const token = this.authService.generateJwtToken(user); // Generate the JWT
+  //   res.cookie('jwt', token, {
+  //     httpOnly: true, // Prevent access to the token from client-side JavaScript
+  //     secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
+  //   });
+  //   return res.json({ message: 'Login successful', token }); // Optionally return the token
+  // }
 
-  // Google OAuth Login
-  @Get('google')
-  @UseGuards(GoogleAuthGuard) // Redirects to Google's OAuth page
-  async googleLogin() {
-    // No implementation needed; Passport will handle the redirect
-  }
+  // // Google OAuth Login
+  // @Get('google')
+  // @UseGuards(GoogleAuthGuard) // Redirects to Google's OAuth page
+  // async googleLogin() {
+  //   // No implementation needed; Passport will handle the redirect
+  // }
 
-  @Get('google/callback')
-  @UseGuards(GoogleAuthGuard) // Callback after successful Google authentication
-  async googleCallback(@Req() req: Request, @Res() res: Response) {
-    const user = req.user; // The user object returned by GoogleStrategy
-    const token = this.authService.generateJwtToken(user); // Generate the JWT
-    res.cookie('jwt', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-    });
-    return res.redirect('/'); // Redirect to the frontend after login
-  }
+  // @Get('google/callback')
+  // @UseGuards(GoogleAuthGuard) // Callback after successful Google authentication
+  // async googleCallback(@Req() req: Request, @Res() res: Response) {
+  //   const user = req.user; // The user object returned by GoogleStrategy
+  //   const token = this.authService.generateJwtToken(user); // Generate the JWT
+  //   res.cookie('jwt', token, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === 'production',
+  //   });
+  //   return res.redirect('/'); // Redirect to the frontend after login
+  // }
 
-  // Protected Route Example
-  @Get('protected')
-  @UseGuards(JwtAuthGuard) // Protect this route with the JWT Guard
-  async getProtectedData(@Req() req: Request) {
-    return {
-      message: 'You have access to this protected route!',
-      user: req.user,
-    };
-  }
+  // // Protected Route Example
+  // @Get('protected')
+  // @UseGuards(JwtAuthGuard) // Protect this route with the JWT Guard
+  // async getProtectedData(@Req() req: Request) {
+  //   return {
+  //     message: 'You have access to this protected route!',
+  //     user: req.user,
+  //   };
+  // }
 
-  // Logout
-  @Post('logout')
-  logout(@Res() res: Response) {
-    res.clearCookie('jwt'); // Clear the JWT cookie
-    return res.json({ message: 'Logout successful' });
-  }
+  // // Logout
+  // @Post('logout')
+  // logout(@Res() res: Response) {
+  //   res.clearCookie('jwt'); // Clear the JWT cookie
+  //   return res.json({ message: 'Logout successful' });
+  // }
   // constructor(private authService: AuthService) {}
 
   // // login using OAuth

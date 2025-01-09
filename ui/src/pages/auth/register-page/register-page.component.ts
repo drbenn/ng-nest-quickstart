@@ -40,7 +40,17 @@ export class RegisterPageComponent {
       email: <string>this.form.value.email,
       password: <string>this.form.value.password
     };
-    this.standardAuthService.registerStandardUser(createStandardUserDto);
+    this.standardAuthService.registerStandardUser(createStandardUserDto)
+    .subscribe({
+    next: (user) => {
+      console.log('User registered successfully:', user);
+      // Handle success (e.g., navigate to another page or show a success message)
+    },
+    error: (errorMessage) => {
+      console.error('Registration failed:', errorMessage);
+      // Display the error message to the user (e.g., via a toast or error UI)
+    },
+  });
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {

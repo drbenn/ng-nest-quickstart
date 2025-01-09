@@ -24,3 +24,15 @@ export class CreateUserDto {
   last_login: Date;
   settings?: Record<string, any>;
 }
+
+
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+
+export class RegisterUserDto {
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @MinLength(6) // Minimum password length
+  password: string;
+}

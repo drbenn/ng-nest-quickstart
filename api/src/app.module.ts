@@ -62,9 +62,8 @@ import * as winston from 'winston';
         ],
       })
     }),
-    UsersModule,
     UsersModule, AuthModule, TodoModule],
-  controllers: [AppController, AuthController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

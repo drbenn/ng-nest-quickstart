@@ -19,16 +19,17 @@ psql -U $DB_USER -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 psql -U $DB_USER -d $DB_NAME -c "
 CREATE TABLE IF NOT EXISTS \"user\" (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+
+  email VARCHAR(50),
+  password VARCHAR(100),
+  oauth_provider VARCHAR(100),
+  oauth_provider_id VARCHAR(100),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   first_name VARCHAR(20),
   last_name VARCHAR(20),
   full_name VARCHAR(40),
-  email VARCHAR(50),
-  password VARCHAR(100),
   img_url VARCHAR(100),
-  provider VARCHAR(50),
-  roles TEXT[],
-  date_joined TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  last_login TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   settings JSONB NULL
 );
 
@@ -40,7 +41,21 @@ CREATE TABLE IF NOT EXISTS \"todos\" (
   date_modified TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 "
-
+# psql -U $DB_USER -d $DB_NAME -c "
+# CREATE TABLE IF NOT EXISTS \"user\" (
+#   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+#   first_name VARCHAR(20),
+#   last_name VARCHAR(20),
+#   full_name VARCHAR(40),
+#   email VARCHAR(50),
+#   password VARCHAR(100),
+#   img_url VARCHAR(100),
+#   provider VARCHAR(50),
+#   roles TEXT[],
+#   date_joined TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+#   last_login TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+#   settings JSONB NULL
+# );
 
 # CREATE TABLE IF NOT EXISTS \"session_note\" (
 #   id SERIAL PRIMARY KEY,
