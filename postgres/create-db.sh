@@ -17,7 +17,7 @@ psql -U $DB_USER -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 
 # Run the SQL commands to create tables
 psql -U $DB_USER -d $DB_NAME -c "
-CREATE TABLE IF NOT EXISTS \"user\" (
+CREATE TABLE IF NOT EXISTS \"users\" (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
 
   email VARCHAR(50),

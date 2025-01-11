@@ -1,34 +1,79 @@
-import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { RegisterUserDto } from 'src/users/dto/user.dto';
+import { LoginStandardUserDto, RegisterStandardUserDto, UserLoginJwtDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
 
 @Controller('auth')
 export class AuthController {
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService
+  ) {}
 
+  // registers user then provides jwt for use in automatic login
   @Post('register-standard')
-  async register(@Body() registerUserDto: RegisterUserDto): Promise<User> {
-    return this.authService.register(registerUserDto);
-  }
+  async register(
+    @Body() registerStandardUserDto: RegisterStandardUserDto,
+    @Res({ passthrough: true }) res: Response, // Enables passing response
+  ): Promise<Partial<User>> {
+    // register user and provide newUser record with user id record
+    const newUser: {user: Partial<User>, jwtToken: string} = await this.authService.registerStandardUser(registerStandardUserDto);
   
-  // constructor(private readonly authService: AuthService) {}
+    // Set the JWT as a httpOnly cookie in response
+    res.cookie('jwt', newUser.jwtToken, {
+      httpOnly: true,                                 // Prevent access from JavaScript
+      secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
+      sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
+      maxAge: 48 * 60 * 60 * 1000,                    // Expiration time (48 hours in milliseconds)
+    });
+    
+    // Return basic user info for ui
+    return newUser.user;
+  };
 
-  // Email/Password Login
-  // @Post('login')
-  // @UseGuards(LocalAuthGuard) // LocalAuthGuard verifies email/password
-  // async login(@Req() req: Request, @Res() res: Response) {
-  //   const user = req.user; // The user object returned by LocalStrategy
-  //   const token = this.authService.generateJwtToken(user); // Generate the JWT
-  //   res.cookie('jwt', token, {
-  //     httpOnly: true, // Prevent access to the token from client-side JavaScript
-  //     secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-  //   });
-  //   return res.json({ message: 'Login successful', token }); // Optionally return the token
-  // }
+  
+  @Post('login-standard')
+  async login(
+    @Body() loginStandardUserDto: LoginStandardUserDto,
+    @Res({ passthrough: true }) res: Response, // Enables passing response
+  ): Promise<Partial<User>> {
+    const login: {user: Partial<User>, jwtToken: string} = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
+
+    // Set the JWT as a httpOnly cookie in response
+    res.cookie('jwt', login.jwtToken, {
+      httpOnly: true,                                 // Prevent access from JavaScript
+      secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
+      sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
+      maxAge: 48 * 60 * 60 * 1000,                    // Expiration time (48 hours in milliseconds)
+    });
+    
+    // Return basic user info for ui
+    return login.user;
+  };
+
+  // logs out of both standard and OAuth users by clearing the jwt from client browser
+  @Post('logout')
+  async logout(@Res() res: Response) {
+    // Clear the JWT cookie
+    res.clearCookie('jwt', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    // Clear the refresh token cookie, if used
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    res.redirect(`${process.env.FRONTEND_URL_LOGIN_REDIRECT}`);
+    return res.status(200).json({ message: 'Logged out successfully' });
+  };
+
 
   // // Google OAuth Login
   // @Get('google')
@@ -59,14 +104,6 @@ export class AuthController {
   //   };
   // }
 
-  // // Logout
-  // @Post('logout')
-  // logout(@Res() res: Response) {
-  //   res.clearCookie('jwt'); // Clear the JWT cookie
-  //   return res.json({ message: 'Logout successful' });
-  // }
-  // constructor(private authService: AuthService) {}
-
   // // login using OAuth
   // @Get(':provider')
   // @UseGuards(AuthGuard('oauth'))
@@ -79,13 +116,4 @@ export class AuthController {
   //   res.redirect('/'); // Redirect to your UI after login
   // };
 
-  // // login using basic email/password combination
-  // @Post('login')
-  // async login(@Body() body: { email: string; password: string }, @Res() res: Response) {
-  //   const { jwt } = await this.authService.loginWithEmail(body.email, body.password);
-
-  //   // Set JWT as an HttpOnly cookie
-  //   res.cookie('jwt', jwt, { httpOnly: true, secure: true });
-  //   res.json({ message: 'Login successful' });
-  // }
 }

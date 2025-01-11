@@ -11,14 +11,15 @@ export class User {
   email: string;
 
   @Column({ nullable: true })
-  @Exclude()
-  password: string; // Optional for OAuth users
+  @Exclude()                    // exclude from responses
+  password: string;             // Optional for OAuth users
 
   @Column({ nullable: true })
   oauth_provider: string; // e.g., 'google', 'facebook', 'github'
 
   @Column({ nullable: true })
-  oauth_provider_id: string; // Provider-specific ID
+  @Exclude()                    // exclude from responses
+  oauth_provider_id: string;    // Provider-specific ID
 
   @CreateDateColumn()
   created_at: Date;

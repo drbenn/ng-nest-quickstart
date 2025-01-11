@@ -9,28 +9,33 @@ import { StandardPageWrapperComponent } from '../../../components/standard-page-
 import { DividerModule } from 'primeng/divider';
 import { dispatch } from '@ngxs/store';
 import { LoginUser } from '../../../store/auth/auth.actions';
-import { CreateStandardUserDto } from '../../../types/userDto.types';
+import { CreateStandardUserDto, UserLoginJwtDto } from '../../../types/userDto.types';
 import { StandardAuthService } from '../services/standard-auth.service';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'register-page',
+  standalone:true,
   imports: [
     StandardPageWrapperComponent, ButtonModule, InputTextModule, DividerModule,
-    FloatLabelModule, CommonModule, FormsModule, ReactiveFormsModule, CheckboxModule],
+    FloatLabelModule, CommonModule, FormsModule, ReactiveFormsModule, CheckboxModule, ToastModule],
   templateUrl: './register-page.component.html',
-  styleUrl: './register-page.component.scss'
+  styleUrl: './register-page.component.scss',
+  providers: [MessageService]
 })
 export class RegisterPageComponent {
-  private login = dispatch(LoginUser);
+  private loginUser = dispatch(LoginUser);
 
   constructor(
-    private standardAuthService: StandardAuthService
+    private standardAuthService: StandardAuthService,
+    private messageService: MessageService
   ) {}
 
   protected form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]),
-    retypePassword: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(26)]),
+    retypePassword: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(26)]),
     isPasswordInView: new FormControl(false)
   });
 
@@ -42,13 +47,11 @@ export class RegisterPageComponent {
     };
     this.standardAuthService.registerStandardUser(createStandardUserDto)
     .subscribe({
-    next: (user) => {
-      console.log('User registered successfully:', user);
-      // Handle success (e.g., navigate to another page or show a success message)
+    next: (user: UserLoginJwtDto) => {
+      this.loginUser(user);
     },
-    error: (errorMessage) => {
-      console.error('Registration failed:', errorMessage);
-      // Display the error message to the user (e.g., via a toast or error UI)
+    error: (error) => {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
     },
   });
   };

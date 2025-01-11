@@ -28,11 +28,28 @@ export class CreateUserDto {
 
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
-export class RegisterUserDto {
+export class RegisterStandardUserDto {
   @IsEmail()
   email: string;
 
   @IsNotEmpty()
   @MinLength(6) // Minimum password length
   password: string;
+}
+
+export class LoginStandardUserDto {
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @MinLength(6) // Minimum password length
+  password: string;
+}
+
+export class UserLoginJwtDto {
+  @IsNotEmpty()
+  accessToken: string;
+
+  @IsNotEmpty()
+  expiresIn: number;
 }

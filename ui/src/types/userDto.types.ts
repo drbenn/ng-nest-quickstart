@@ -38,3 +38,17 @@ export interface LoginStandardUserDto {
 export interface ResetStandardUserDto {
   email: string,
 }
+
+export interface UserLoginJwtDto {
+  id: string | null,
+  email: string | null,
+  first_name: string | null,
+  last_name: string | null,
+  full_name: string | null,
+  img_url: string | null,
+  oauth_provider: string | null,
+  created_at: Date | null,
+  updated_at: Date | null,
+  roles: string[] | null,
+  settings: any,
+}

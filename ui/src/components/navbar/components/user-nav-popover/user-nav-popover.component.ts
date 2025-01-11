@@ -21,7 +21,6 @@ export class UserNavPopoverComponent implements OnInit {
   protected signOut(): void {
     this.logout();
     this.close.emit();
-    this.router.navigate(['/']);
   };
 
   ngOnInit(): void {

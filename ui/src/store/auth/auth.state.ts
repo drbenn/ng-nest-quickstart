@@ -1,21 +1,25 @@
 import { Injectable } from '@angular/core';
 import { Action, Selector, State, StateContext } from '@ngxs/store';
-import { LoginUser, LogoutUser, SetAuthData } from './auth.actions';
+import { LoginUser, LogoutUser } from './auth.actions';
 import { patch } from '@ngxs/store/operators';
+import { Router } from '@angular/router';
 
 export interface NesteStateModel {
   option1: string[],
   option2: number
 }
 export interface AuthStateModel {
-  id: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  email: string;
-  imgUrl: string,
-  roles: string[];
-  dateJoined: Date;
+  id: string | null;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  fullName: string | null;
+  imgUrl: string | null,
+  oauthProvider: string | null,
+  createdAt: Date | null,
+  updatedAt: Date | null,
+  roles: string[] | null;
+  settings: any | null;
   /**
    * Redux DevTools can only display serializable data (e.g., plain objects, arrays, numbers, strings).
    * If you store non-serializable data, it won't appear in the extension.
@@ -27,14 +31,17 @@ export interface AuthStateModel {
 @State<AuthStateModel>({
   name: 'authState',
   defaults: {
-    id: '',
-    firstName: '',
-    lastName: '',
-    fullName: '',
-    email: '',
-    imgUrl: '',
-    roles: [],
-    dateJoined: new Date(),
+    id: null,
+    email: null,
+    firstName: null,
+    lastName: null,
+    fullName: null,
+    imgUrl: null,
+    oauthProvider: null,
+    createdAt: null,
+    updatedAt: null,
+    roles: null,
+    settings: null,
     privateData: new WeakMap(),
     nestedData: {
       option1: [],
@@ -45,43 +52,54 @@ export interface AuthStateModel {
 @Injectable()
 export class AuthState {
 
+  constructor(private router: Router) {}
+
   @Selector()
   static getNavUserData(state: AuthStateModel): Partial<AuthStateModel> {
     return {
       id: state.id,
       fullName: state.fullName,
       email: state.email,
+      createdAt: state.createdAt
     };
   }
 
   @Action(LoginUser)
   loginUser( { patchState }: StateContext<AuthStateModel>, { loginData }: LoginUser) {
-    console.log('LOGIN USER');
-    console.log(loginData);
-    
-    
     patchState({
       id: loginData.id,
-      firstName: loginData.firstName,
-      lastName: loginData.lastName,
-      fullName: loginData.fullName,
       email: loginData.email,
+      firstName: loginData.first_name,
+      lastName: loginData.last_name,
+      fullName: loginData.full_name,
+      imgUrl: loginData.img_url,
+      oauthProvider: loginData.oauth_provider,
+      createdAt: loginData.created_at,
+      updatedAt: loginData.updated_at,
       roles: loginData.roles,
-      dateJoined: loginData.dateJoined
+      settings: loginData.settings
     });
+
+    this.router.navigate(['home']);
   }
 
   @Action(LogoutUser)
   logoutUser( { patchState }: StateContext<AuthStateModel>) {
     patchState({
-      id: '',
-      firstName: '',
-      lastName: '',
-      fullName: '',
-      email: '',
-      roles: [],
-      dateJoined: new Date()
+      id: null,
+      email: null,
+      firstName: null,
+      lastName: null,
+      fullName: null,
+      imgUrl: null,
+      oauthProvider: null,
+      createdAt: null,
+      updatedAt: null,
+      roles: null,
+      settings: null
     });
+
+    this.router.navigate(['']);
   }
 
 
@@ -109,13 +127,13 @@ export class AuthState {
   //   })}));
   // }
 
-  @Action(SetAuthData)
-  setAuthData(
-    { setState }: StateContext<AuthStateModel>,
-    { payload }: SetAuthData
-  ) {
-    setState(payload);
-  }
+  // @Action(SetAuthData)
+  // setAuthData(
+  //   { setState }: StateContext<AuthStateModel>,
+  //   { payload }: SetAuthData
+  // ) {
+  //   setState(payload);
+  // }
 }
 
 

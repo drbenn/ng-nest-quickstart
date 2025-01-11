@@ -49,6 +49,8 @@ export class NavbarComponent implements OnInit {
 
   private listenForUser(): void {
     this.authState$.pipe(takeUntil(this.destroy$)).subscribe((userData: Partial<AuthStateModel>) => {
+      console.log(userData);
+      
       userData.id ? this.authUser = userData : this.authUser = null;
     });
   };

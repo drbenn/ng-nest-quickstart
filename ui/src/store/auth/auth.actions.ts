@@ -1,14 +1,8 @@
-import { AuthStateModel } from './auth.state';
-
-export class SetAuthData {
-  static readonly type = '[Auth] Auth data';
-  constructor(readonly payload: AuthStateModel) {}
-}
-
+import { UserLoginJwtDto } from '../../types/userDto.types';
 
 export class LoginUser {
   static readonly type = '[Auth] Login User';
-  constructor(readonly loginData: Partial<AuthStateModel>) {}
+  constructor(readonly loginData: UserLoginJwtDto) {}
 }
 
 export class LogoutUser {
