@@ -79,6 +79,17 @@ export class AuthService {
     return user; // Authentication successful
   };
 
+  async findOneUserById(id: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by id. User id not found: ${id}`);
+      return null; // User not found
+    };
+
+    return instanceToPlain(user); // Authentication successful
+  };
+
   // async loginWithOAuth(profile: any): Promise<any> {
   //   let user = await this.usersService.findOneUserByEmail(profile.email);
   //   if (!user) {

@@ -7,6 +7,8 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
+import { dispatch } from '@ngxs/store';
+import { CheckAuthenticatedUser } from '../store/auth/auth.actions';
 
 
 interface City {
@@ -22,6 +24,8 @@ interface City {
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
+private checkAuthenticatedUser = dispatch(CheckAuthenticatedUser);
+  
 
   cities: City[] | undefined;
 
@@ -29,6 +33,7 @@ export class AppComponent implements OnInit {
 
   title = 'ui';
   ngOnInit() {
+    this.checkAuthenticatedUser();
     this.cities = [
         { name: 'New York', code: 'NY' },
         { name: 'Rome', code: 'RM' },

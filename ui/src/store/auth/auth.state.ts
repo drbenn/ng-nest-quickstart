@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Action, Selector, State, StateContext } from '@ngxs/store';
-import { LoginUser, LogoutUser } from './auth.actions';
+import { Action, Selector, State, StateContext, Store } from '@ngxs/store';
+import { CheckAuthenticatedUser, LoginUser, LogoutUser } from './auth.actions';
 import { patch } from '@ngxs/store/operators';
 import { Router } from '@angular/router';
+import { AuthService } from '../../pages/auth/services/auth.service';
+import { UserLoginJwtDto } from '../../types/userDto.types';
 
 export interface NesteStateModel {
   option1: string[],
@@ -52,7 +54,11 @@ export interface AuthStateModel {
 @Injectable()
 export class AuthState {
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private store: Store
+  ) {}
 
   @Selector()
   static getNavUserData(state: AuthStateModel): Partial<AuthStateModel> {
@@ -100,7 +106,27 @@ export class AuthState {
     });
 
     this.router.navigate(['']);
-  }
+  };
+
+  @Action(CheckAuthenticatedUser)
+  async checkAuthenticatedUser( { patchState }: StateContext<AuthStateModel>) {
+    console.log('checking authenticated user in state hit');
+    
+    this.authService.getAuthenticatedUser().subscribe({
+      next: (user: UserLoginJwtDto) => {
+        console.log('User is logged in:', user);
+        this.store.dispatch(new LoginUser(user));
+        // Update your app's state to reflect that the user is logged in
+        // For example, store the user in a service or state management library
+      },
+      error: (err) => {
+        console.log('User is not logged in:', err);
+        // Handle the case where the user is not authenticated
+      },
+    });
+
+    this.router.navigate(['']);
+  };
 
 
   /**

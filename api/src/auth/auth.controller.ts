@@ -2,8 +2,9 @@ import { Body, Controller, Get, Param, Post, Req, Res, UnauthorizedException, Us
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { LoginStandardUserDto, RegisterStandardUserDto, UserLoginJwtDto } from 'src/users/dto/user.dto';
+import { LoginStandardUserDto, RegisterStandardUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -72,6 +73,28 @@ export class AuthController {
 
     res.redirect(`${process.env.FRONTEND_URL_LOGIN_REDIRECT}`);
     return res.status(200).json({ message: 'Logged out successfully' });
+  };
+
+  @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard
+  @Get('restore-user')
+  async restoreUser(@Req() req: Request, @Res() res: Response): Promise<Partial<User>> {
+    const restoredUser: Partial<User> = req['user'];
+    
+    // get fresh token for user restoring session
+    const jwtToken: string = await this.authService.generateJwt(restoredUser.id, restoredUser.email);
+
+    // Set the JWT as a httpOnly cookie in response
+    res.cookie('jwt', jwtToken, {
+      httpOnly: true,                                 // Prevent access from JavaScript
+      secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
+      sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
+      maxAge: 48 * 60 * 60 * 1000,                    // Expiration time (48 hours in milliseconds)
+    });
+    
+    console.log(restoredUser);
+    
+    // // Return basic user info for ui
+    return restoredUser;
   };
 
 
