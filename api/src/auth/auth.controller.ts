@@ -5,12 +5,14 @@ import { Response } from 'express';
 import { LoginStandardUserDto, RegisterStandardUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
 
   constructor(
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService
   ) {}
 
   // registers user then provides jwt for use in automatic login
@@ -58,27 +60,33 @@ export class AuthController {
   @Post('logout')
   async logout(@Res() res: Response) {
     // Clear the JWT cookie
+    console.log(process.env.NODE_ENV);
+    
     res.clearCookie('jwt', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
     });
 
     // Clear the refresh token cookie, if used
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
+    // res.clearCookie('refreshToken', {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'strict',
+    // });
 
-    res.redirect(`${process.env.FRONTEND_URL_LOGIN_REDIRECT}`);
     return res.status(200).json({ message: 'Logged out successfully' });
   };
 
-  @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard
+  @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard which if cookie present will retrieve and include user data in req
   @Get('restore-user')
   async restoreUser(@Req() req: Request, @Res() res: Response): Promise<Partial<User>> {
+    // console.log('RESTORE USER HIT!!');
+    // console.log(req);
+    
     const restoredUser: Partial<User> = req['user'];
+    // console.log(restoredUser);
+    
     
     // get fresh token for user restoring session
     const jwtToken: string = await this.authService.generateJwt(restoredUser.id, restoredUser.email);
@@ -91,7 +99,9 @@ export class AuthController {
       maxAge: 48 * 60 * 60 * 1000,                    // Expiration time (48 hours in milliseconds)
     });
     
-    console.log(restoredUser);
+    // console.log('RESTORED USER');
+    
+    // console.log(restoredUser);
     
     // // Return basic user info for ui
     return restoredUser;

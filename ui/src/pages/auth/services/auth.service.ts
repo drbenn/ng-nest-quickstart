@@ -14,8 +14,18 @@ export class AuthService {
       private http: HttpClient
   ) { }
 
-  public  getAuthenticatedUser(): Observable<UserLoginJwtDto> {
+  public getAuthenticatedUser(): Observable<UserLoginJwtDto> {
+    console.log('in get authenticated user in auth user');
+    
     return this.http.get<UserLoginJwtDto>(`${this.baseUrl}/restore-user`, {
+      withCredentials: true,
+    });
+  };
+
+  public logoutAuthenticatedUser(): Observable<any> {
+    console.log('in get authenticated user in auth user');
+    
+    return this.http.post<any>(`${this.baseUrl}/logout`, {
       withCredentials: true,
     });
   };

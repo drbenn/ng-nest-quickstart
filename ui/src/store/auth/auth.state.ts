@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Action, Selector, State, StateContext, Store } from '@ngxs/store';
 import { CheckAuthenticatedUser, LoginUser, LogoutUser } from './auth.actions';
 import { patch } from '@ngxs/store/operators';
@@ -55,7 +55,7 @@ export interface AuthStateModel {
 export class AuthState {
 
   constructor(
-    private router: Router,
+    @Inject(Router) private router: Router,
     private authService: AuthService,
     private store: Store
   ) {}
@@ -91,21 +91,28 @@ export class AuthState {
 
   @Action(LogoutUser)
   logoutUser( { patchState }: StateContext<AuthStateModel>) {
-    patchState({
-      id: null,
-      email: null,
-      firstName: null,
-      lastName: null,
-      fullName: null,
-      imgUrl: null,
-      oauthProvider: null,
-      createdAt: null,
-      updatedAt: null,
-      roles: null,
-      settings: null
+    this.authService.logoutAuthenticatedUser().subscribe({
+      next: (user: UserLoginJwtDto) => {
+        patchState({
+          id: null,
+          email: null,
+          firstName: null,
+          lastName: null,
+          fullName: null,
+          imgUrl: null,
+          oauthProvider: null,
+          createdAt: null,
+          updatedAt: null,
+          roles: null,
+          settings: null
+        });
+        this.router.navigate(['']);
+      },
+      error: (err) => {
+        console.log('User logout failed:', err);
+      },
     });
 
-    this.router.navigate(['']);
   };
 
   @Action(CheckAuthenticatedUser)
