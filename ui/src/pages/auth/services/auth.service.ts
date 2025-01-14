@@ -1,6 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { CreateStandardUserDto, LoginStandardUserDto, ResetStandardUserDto, UserLoginJwtDto } from '../../../types/userDto.types';
 import { environment } from '../../../environments/environment';
 import { catchError, Observable, throwError } from 'rxjs';
 
@@ -14,19 +13,29 @@ export class AuthService {
       private http: HttpClient
   ) { }
 
-  public getAuthenticatedUser(): Observable<UserLoginJwtDto> {
-    console.log('in get authenticated user in auth user');
-    
-    return this.http.get<UserLoginJwtDto>(`${this.baseUrl}/restore-user`, {
+  public getAuthenticatedUser(): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/restore-user`, null, {
       withCredentials: true,
     });
   };
 
   public logoutAuthenticatedUser(): Observable<any> {
-    console.log('in get authenticated user in auth user');
-    
-    return this.http.post<any>(`${this.baseUrl}/logout`, {
-      withCredentials: true,
-    });
+    return this.http.post<any>(`${this.baseUrl}/logout`, null, {withCredentials: true})
+      .pipe(
+        catchError((error: HttpErrorResponse) => this.handleError(error))
+      );
+  };
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    if (error.error instanceof ErrorEvent) {
+      // Client-side or network error
+      console.error('Client-side error:', error.error.message);
+    } else {
+      // Backend error
+      console.error(`Backend returned code ${error.status}, body was:`, error.error);
+    };
+
+    // Return an observable with a user-facing error message
+    return throwError(() => error.error?.message || 'Something went wrong. Please try again.');
   };
 }

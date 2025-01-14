@@ -59,35 +59,20 @@ export class AuthController {
   // logs out of both standard and OAuth users by clearing the jwt from client browser
   @Post('logout')
   async logout(@Res() res: Response) {
-    // Clear the JWT cookie
-    console.log(process.env.NODE_ENV);
-    
+    // Clear the JWT cookie    
     res.clearCookie('jwt', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
-
-    // Clear the refresh token cookie, if used
-    // res.clearCookie('refreshToken', {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict',
-    // });
-
     return res.status(200).json({ message: 'Logged out successfully' });
   };
 
   @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard which if cookie present will retrieve and include user data in req
-  @Get('restore-user')
-  async restoreUser(@Req() req: Request, @Res() res: Response): Promise<Partial<User>> {
-    // console.log('RESTORE USER HIT!!');
-    // console.log(req);
-    
+  @Post('restore-user')
+  async restoreUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<User>> {
     const restoredUser: Partial<User> = req['user'];
-    // console.log(restoredUser);
-    
-    
+
     // get fresh token for user restoring session
     const jwtToken: string = await this.authService.generateJwt(restoredUser.id, restoredUser.email);
 
@@ -98,12 +83,7 @@ export class AuthController {
       sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
       maxAge: 48 * 60 * 60 * 1000,                    // Expiration time (48 hours in milliseconds)
     });
-    
-    // console.log('RESTORED USER');
-    
-    // console.log(restoredUser);
-    
-    // // Return basic user info for ui
+    // Return basic user info for ui
     return restoredUser;
   };
 
