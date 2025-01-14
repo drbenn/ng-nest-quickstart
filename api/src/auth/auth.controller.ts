@@ -88,24 +88,33 @@ export class AuthController {
   };
 
 
-  // // Google OAuth Login
-  // @Get('google')
-  // @UseGuards(GoogleAuthGuard) // Redirects to Google's OAuth page
-  // async googleLogin() {
-  //   // No implementation needed; Passport will handle the redirect
-  // }
+  // Google OAuth
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {
+    // Initiates the Google OAuth2 login flow, caught and processed by google authguard strategy
+  }
 
-  // @Get('google/callback')
-  // @UseGuards(GoogleAuthGuard) // Callback after successful Google authentication
-  // async googleCallback(@Req() req: Request, @Res() res: Response) {
-  //   const user = req.user; // The user object returned by GoogleStrategy
-  //   const token = this.authService.generateJwtToken(user); // Generate the JWT
-  //   res.cookie('jwt', token, {
-  //     httpOnly: true,
-  //     secure: process.env.NODE_ENV === 'production',
-  //   });
-  //   return res.redirect('/'); // Redirect to the frontend after login
-  // }
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    return this.handleRedirect(req, res);
+  }
+
+  private handleRedirect(req: Request, res: Response) {
+    const user: Partial<User> = req['user'];
+    const jwtToken = this.authService.getUserandJwtForOAuth(user.email);
+
+    // Redirect to frontend with JWT token
+    // It's safer to set the JWT as an HTTP-only cookie
+    res.cookie('jwt', jwtToken, { 
+      httpOnly: true,                                 // Prevent access from JavaScript
+      secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
+      sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
+      maxAge: 48 * 60 * 60 * 1000,                    // Expiration time (48 hours in milliseconds)
+    });
+    res.redirect(`${process.env.FRONTEND_URL}`);
+  }
 
   // // Protected Route Example
   // @Get('protected')
