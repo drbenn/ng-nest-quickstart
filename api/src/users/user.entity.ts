@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Index } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 @Entity('users')
@@ -7,7 +7,14 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  /**
+   * When you run your TypeORM migrations or synchronize the schema with your database, the @Index decorator
+   * will automatically create an index on the email column. If you set unique: true in the @Column decorator,
+   * it will enforce the uniqueness constraint at the database level. No adjustments required in the database 
+   * creation bash/sql, typeORM will take care of everything.
+   */
   @Column({ unique: true })
+  @Index() // This creates an index on the email column
   email: string;
 
   @Column({ nullable: true })

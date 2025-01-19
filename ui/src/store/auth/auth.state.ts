@@ -194,3 +194,4 @@ export class AuthState {
   // static getAuthData(state: AuthStateModel): AuthStateModel {
   //   return {...state };
   // }
+// 

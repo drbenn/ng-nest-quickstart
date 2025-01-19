@@ -52,3 +52,9 @@ export interface UserLoginJwtDto {
   roles: string[] | null,
   settings: any,
 }
+
+export interface CreateOAuthUserDto {
+  email: string,
+  full_name?: string | null,
+  img_url?: string | null
+}

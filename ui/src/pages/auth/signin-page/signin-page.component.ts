@@ -14,6 +14,7 @@ import { StandardAuthService } from '../services/standard-auth.service';
 import { LoginStandardUserDto, UserLoginJwtDto } from '../../../types/userDto.types';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { OauthAuthService } from '../services/oauth-auth.service';
 
 @Component({
   selector: 'signin-page',
@@ -31,6 +32,7 @@ export class SigninPageComponent {
 
   constructor(
     private readonly standardAuthService: StandardAuthService,
+    private readonly oauthAuthService: OauthAuthService,
     private readonly messageService: MessageService
   ) {}
 
@@ -60,8 +62,8 @@ export class SigninPageComponent {
     event.checked ? this.form.get('isPasswordInView')?.setValue(true) : this.form.get('isPasswordInView')?.setValue(false);
   };
 
-  protected googleSignIn(): void {
-    console.log('google sign in todo');
+  protected oAuthSignIn(provider: 'google' | 'facebook' | 'github'): void {
+    this.oauthAuthService.oAuthSignIn('google');
   };
 
 }

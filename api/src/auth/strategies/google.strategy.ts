@@ -19,11 +19,18 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
+    // accessToken received in response from google oauth console, do not remove or else argument 
+    // count will be incorrect and you will not receive the necessary profile value.
     accessToken: string,
+    // refreshToken received in response from google oauth console, do not remove or else argument 
+    // count will be incorrect and you will not receive the necessary profile value.       
     refreshToken: string,
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
+    console.log('google strategy profile');
+    
+    console.log(profile);
     const user = await this.authService.validateOAuthLogin(profile, 'google');
     done(null, user);
   }

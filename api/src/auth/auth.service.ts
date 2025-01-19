@@ -9,6 +9,7 @@ import { Logger, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { instanceToPlain } from 'class-transformer';
+import { Profile } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -61,7 +62,7 @@ export class AuthService {
     const jwtToken = this.jwtService.sign(payload);
     return jwtToken;
   };
-
+  
   async validateStandardUser(email: string, password: string): Promise<User | null> {
     const user = await this.userRepository.findOne({ where: { email } });
 
@@ -90,17 +91,65 @@ export class AuthService {
     return instanceToPlain(user); // Authentication successful
   };
 
-  // async loginWithOAuth(profile: any): Promise<any> {
-  //   let user = await this.usersService.findOneUserByEmail(profile.email);
-  //   if (!user) {
-  //     // Create user if they don't exist
-  //     user = await this.usersService.createOAuthUser({
-  //       email: profile.email,
-  //       id: profile.id,
-  //     });
-  //   };
-  //   const jwt = await this.generateJwt(user.email, user.id);
-  //   return { jwt };
-  // };
+  async findOneUserByEmail(email: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by email. User id not found: ${email}`);
+      return null; // User not found
+    };
+
+    return instanceToPlain(user); // Authentication successful
+  };
+
+  // used by every OAuth Auth Guard Strategy to validate user
+  async validateOAuthLogin(profile: Profile, provider: string): Promise<any> {    
+    // Extract user information based on provider
+    let email: string;
+    let full_name: string;
+    let img_url: string = '';
+    let oauth_provider: string = '';
+    console.log('profile in auth service validatoe oath login');
+    console.log(provider);
+    console.log(profile);
+    
+    
+    
+    switch (provider) {
+      case 'google':
+        email = profile.emails[0].value;
+        full_name = profile.displayName || null;
+        img_url = profile.photos[0].value || null;
+        oauth_provider = profile.provider;
+        break;
+      // case 'facebook':
+      //   email = profile.emails[0].value;
+      //   name = profile.displayName;
+      //   break;
+      // case 'github':
+      //   email = profile.emails[0].value;
+      //   name = profile.username;
+      //   break;
+      // case 'apple':
+      //   email = profile.emails[0].value;
+      //   name = `${profile.name.givenName} ${profile.name.familyName}`;
+      //   break;
+      default:
+        throw new Error('Unsupported provider');
+    }
+
+    // Check if user exists
+    let user: Partial<User> = await this.findOneUserByEmail(email);
+
+    if (!user) {
+      // Create and save the new user
+      user = this.userRepository.create({ email, full_name, img_url, oauth_provider });
+      await this.userRepository.save(user);
+    };
+
+    console.log('user being returned from validate oauth login');
+    
+    return user;
+  };
 
 }
