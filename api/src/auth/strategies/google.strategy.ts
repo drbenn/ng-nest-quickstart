@@ -5,6 +5,7 @@ import { AuthService } from '../auth.service';
 
 
 // https://console.cloud.google.com to setup google Oauth for flobro
+// in the data access page, dont forget to add scopes for userinfo.email, userinfo.profile, and openid
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(

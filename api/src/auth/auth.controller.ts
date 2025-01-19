@@ -99,9 +99,6 @@ export class AuthController {
     return restoredUser;
   };
 
-
-  // Google OAuth
-  // https://console.cloud.google.com to setup google Oauth for flobro
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {
@@ -111,6 +108,18 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    return this.handleOAuthRedirect(req, res);
+  }
+
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  async githubAuth(@Req() req) {
+    // Initiates the Google OAuth2 login flow, caught and processed by google authguard strategy
+  }
+
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  async githubAuthRedirect(@Req() req: Request, @Res() res: Response) {
     return this.handleOAuthRedirect(req, res);
   }
 

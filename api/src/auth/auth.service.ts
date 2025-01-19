@@ -102,6 +102,17 @@ export class AuthService {
     return instanceToPlain(user); // Authentication successful
   };
 
+  async findOneUserByProvider(oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { oauth_provider, oauth_provider_user_id } });
+
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by provider. User not found: ${oauth_provider} - ${oauth_provider_user_id}`);
+      return null; // User not found
+    };
+
+    return instanceToPlain(user); // Authentication successful
+  };
+
   // used by every OAuth Auth Guard Strategy to validate user
   async validateOAuthLogin(profile: Profile, provider: string): Promise<any> {    
     // Extract user information based on provider
@@ -109,6 +120,7 @@ export class AuthService {
     let full_name: string;
     let img_url: string = '';
     let oauth_provider: string = '';
+    let oauth_provider_user_id: string = '';
     console.log('profile in auth service validatoe oath login');
     console.log(provider);
     console.log(profile);
@@ -121,15 +133,19 @@ export class AuthService {
         full_name = profile.displayName || null;
         img_url = profile.photos[0].value || null;
         oauth_provider = profile.provider;
+        oauth_provider_user_id = profile.id;
         break;
       // case 'facebook':
       //   email = profile.emails[0].value;
       //   name = profile.displayName;
       //   break;
-      // case 'github':
-      //   email = profile.emails[0].value;
-      //   name = profile.username;
-      //   break;
+      case 'github':
+        email = null; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
+        full_name = profile.displayName || null;
+        img_url = profile.photos[0].value || null;
+        oauth_provider = profile.provider;
+        oauth_provider_user_id = profile.id
+        break;
       // case 'apple':
       //   email = profile.emails[0].value;
       //   name = `${profile.name.givenName} ${profile.name.familyName}`;
@@ -139,15 +155,17 @@ export class AuthService {
     }
 
     // Check if user exists
-    let user: Partial<User> = await this.findOneUserByEmail(email);
+    let user: Partial<User> = await this.findOneUserByProvider(oauth_provider, oauth_provider_user_id);
 
     if (!user) {
       // Create and save the new user
-      user = this.userRepository.create({ email, full_name, img_url, oauth_provider });
+      user = this.userRepository.create({ email, full_name, img_url, oauth_provider, oauth_provider_user_id });
       await this.userRepository.save(user);
     };
 
     console.log('user being returned from validate oauth login');
+    console.log(user);
+    
     
     return user;
   };

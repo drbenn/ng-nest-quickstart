@@ -63,7 +63,7 @@ export class SigninPageComponent {
   };
 
   protected oAuthSignIn(provider: 'google' | 'facebook' | 'github'): void {
-    this.oauthAuthService.oAuthSignIn('google');
+    this.oauthAuthService.oAuthSignIn(provider);
   };
 
 }
