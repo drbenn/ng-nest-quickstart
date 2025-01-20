@@ -19,6 +19,87 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                            USER FINDER HELPERS                               //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+  async findOneUserById(id: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by id. User id not found: ${id}`);
+      return null; // User not found
+    };
+    return instanceToPlain(user); // Authentication successful
+  };
+
+  async findOneUserByEmail(email: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by email. User id not found: ${email}`);
+      return null; // User not found
+    };
+
+    return instanceToPlain(user); // Authentication successful
+  };
+
+  async findOneUserByProvider(oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { oauth_provider, oauth_provider_user_id } });
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by provider. User not found: ${oauth_provider} - ${oauth_provider_user_id}`);
+      return null; // User not found
+    };
+
+    return instanceToPlain(user); // Authentication successful
+  };
+
+  async findOneUserByRefreshToken(refresh_token: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { refresh_token } });
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by refresh_token. User not found: ${refresh_token}`);
+      return null; // User not found
+    };
+
+    return instanceToPlain(user); // Authentication successful
+  };
+
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                           JWT ACCESS/REFRESH HELPERS                         //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+  async generateAccessJwt(userId: string): Promise<string> {
+    const payload = { userId };
+    const jwtAccessToken = this.jwtService.sign(payload, { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION });
+    return jwtAccessToken;
+  };
+
+  async generateRefreshJwt(): Promise<string> {
+    const jwtToken = randomBytes(64).toString('hex'); // Generate a random token
+    const saltRounds = 10;
+    const hashedJwtRefreshToken = await bcrypt.hash(jwtToken, saltRounds);
+    return hashedJwtRefreshToken;
+  };
+
+  async updateUsersRefreshTokenInDatabase(userId: string, refreshToken: string): Promise<UpdateResult> {
+    try {
+      return this.userRepository.update({ id: userId }, { refresh_token: refreshToken });
+    } catch (error: unknown) {
+      this.logger.log('warn', `Error updating refresh token: ${error}`);
+    };
+  };
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                           STANDARD USER HELPERS                              //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+
   async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto): Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}> {
     const { email, password } = registerStandardUserDto;
 
@@ -61,13 +142,6 @@ export class AuthService {
     return { user: instanceToPlain(user), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
   };
 
-
-  async generateAccessJwt(userId: string): Promise<string> {
-    const payload = { userId };
-    const jwtAccessToken = this.jwtService.sign(payload, { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION });
-    return jwtAccessToken;
-  };
-  
   async validateStandardUser(email: string, password: string): Promise<User | null> {
     const user = await this.userRepository.findOne({ where: { email } });
 
@@ -85,49 +159,12 @@ export class AuthService {
     return user; // Authentication successful
   };
 
-  async findOneUserById(id: string): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { id } });
 
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by id. User id not found: ${id}`);
-      return null; // User not found
-    };
-
-    return instanceToPlain(user); // Authentication successful
-  };
-
-  async findOneUserByEmail(email: string): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
-
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by email. User id not found: ${email}`);
-      return null; // User not found
-    };
-
-    return instanceToPlain(user); // Authentication successful
-  };
-
-  async findOneUserByProvider(oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { oauth_provider, oauth_provider_user_id } });
-
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by provider. User not found: ${oauth_provider} - ${oauth_provider_user_id}`);
-      return null; // User not found
-    };
-
-    return instanceToPlain(user); // Authentication successful
-  };
-
-  async findOneUserByRefreshToken(refresh_token: string): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { refresh_token } });
-
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by refresh_token. User not found: ${refresh_token}`);
-      return null; // User not found
-    };
-
-    return instanceToPlain(user); // Authentication successful
-  };
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                            OAUTH USER HELPERS                                //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
 
   // used by every OAuth Auth Guard Strategy to validate user
   async validateOAuthLogin(profile: Profile, provider: string): Promise<any> {    
@@ -176,21 +213,6 @@ export class AuthService {
     };
 
     return user;
-  };
-
-  async generateRefreshJwt(): Promise<string> {
-    const jwtToken = randomBytes(64).toString('hex'); // Generate a random token
-    const saltRounds = 10;
-    const hashedJwtRefreshToken = await bcrypt.hash(jwtToken, saltRounds);
-    return hashedJwtRefreshToken;
-  };
-
-  async updateUsersRefreshTokenInDatabase(userId: string, refreshToken: string): Promise<UpdateResult> {
-    try {
-      return this.userRepository.update({ id: userId }, { refresh_token: refreshToken });
-    } catch (error: unknown) {
-      this.logger.log('warn', `Error updating refresh token: ${error}`);
-    };
   };
 
 }
