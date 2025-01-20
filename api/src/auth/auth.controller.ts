@@ -27,70 +27,11 @@ export class AuthController {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
-  // registers user then provides jwt for use in automatic login
-  @Post('register-standard')
-  async register(
-    @Body() registerStandardUserDto: RegisterStandardUserDto,
-    @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<Partial<User>> {
-    try {
-      // register user and provide newUser record with user id record
-      const newUser: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.registerStandardUser(registerStandardUserDto);
-    
-      res.cookie('jwt', newUser.jwtAccessToken, {
-        httpOnly: true,                                           // Prevent access from JavaScript
-        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-      });
-  
-      res.cookie('refreshToken', newUser.jwtRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
-      });
-      
-      // Return basic user info for ui
-      return newUser.user;
-    } catch (error: unknown) {
-      this.logger.error(`Error during standard registration: ${error}`);
-      // Redirect the user to an error page
-      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
-    };
-  };
-
-  
-  @Post('login-standard')
-  async login(
-    @Body() loginStandardUserDto: LoginStandardUserDto,
-    @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<Partial<User>> {
-    try {
-      const login: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
-
-      res.cookie('jwt', login.jwtAccessToken, {
-        httpOnly: true,                                           // Prevent access from JavaScript
-        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-      });
-
-      res.cookie('refreshToken', login.jwtRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
-      });
-
-      // Return basic user info for ui
-      return login.user;
-    } catch (error: unknown) {
-      this.logger.error(`Error during OAuth redirect: ${error}`);
-      // Redirect the user to an error page
-      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
-    };
-  };
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                  AUTH METHOD INDEPENDENT USER CONTROLLERS                    //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
 
   // logs out of both standard and OAuth users by clearing the jwt from client browser
   @Post('logout')
@@ -137,18 +78,82 @@ export class AuthController {
     };
   };
 
-  @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard which if cookie present will retrieve and include user data in req
-  @Post('get-user')
-  async getUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<User>> {
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                           STANDARD USER CONTROLLERS                          //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+  // registers user then provides jwt for use in automatic login
+  @Post('register-standard')
+  async register(
+    @Body() registerStandardUserDto: RegisterStandardUserDto,
+    @Res({ passthrough: true }) res: Response, // Enables passing response
+  ): Promise<Partial<User>> {
     try {
-      const user: Partial<User> = req['user'];
-      return user;
+      // register user and provide newUser record with user id record
+      const newUser: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.registerStandardUser(registerStandardUserDto);
+    
+      res.cookie('jwt', newUser.jwtAccessToken, {
+        httpOnly: true,                                           // Prevent access from JavaScript
+        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+      });
+  
+      res.cookie('refreshToken', newUser.jwtRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+      });
+      
+      // Return basic user info for ui
+      return newUser.user;
     } catch (error: unknown) {
-      this.logger.error(`Error getting user after Oauth login and redirect: ${error}`);
+      this.logger.error(`Error during standard registration: ${error}`);
       // Redirect the user to an error page
       res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
     };
   };
+
+  @Post('login-standard')
+  async login(
+    @Body() loginStandardUserDto: LoginStandardUserDto,
+    @Res({ passthrough: true }) res: Response, // Enables passing response
+  ): Promise<Partial<User>> {
+    try {
+      const login: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
+
+      res.cookie('jwt', login.jwtAccessToken, {
+        httpOnly: true,                                           // Prevent access from JavaScript
+        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+      });
+
+      res.cookie('refreshToken', login.jwtRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+      });
+
+      // Return basic user info for ui
+      return login.user;
+    } catch (error: unknown) {
+      this.logger.error(`Error during OAuth redirect: ${error}`);
+      // Redirect the user to an error page
+      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+    };
+  };
+
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                           OAUTH USER CONTROLLERS                             //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
