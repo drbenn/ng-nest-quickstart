@@ -25,15 +25,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_SECRET'),
     });
-  }
+  };
 
   async validate(payload: any): Promise<Partial<User> | null> {
     const user = await this.authService.findOneUserById(payload.sub);
-    console.log('wt strategy validate function user');
-    console.log(user);
-    
-    
     return user;
-    
   }
 }

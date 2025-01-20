@@ -100,13 +100,23 @@
     }
 
     <!-- logged in user avatar -->
-    @if (authUser !== null) {
+    @if (authUser !== null && authUser.imgUrl) {
       <div class="flex justify-end items-center mr-1">
         <p-avatar (click)="userMenuPopover.toggle($event)"
         class="cursor-pointer"
         [style]="{height: '24px', width: '24px'}"
-        image="https://primefaces.org/cdn/primeng/images/demo/avatar/asiyajavayant.png" 
+        [image]="authUser.imgUrl" 
         shape="circle" />
+      </div>
+    }
+
+    @if (authUser !== null && authUser.imgUrl === null && authUser.fullName) {
+      <div class="flex justify-end items-center mr-1">
+        <div class="flex justify-center items-center h-[24px] w-[24px] bg-slate-700 rounded-full">
+          <div class="font-bold">
+            {{ authUser.fullName[0] }}
+          </div>
+        </div>
       </div>
     }
 

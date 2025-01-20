@@ -13,7 +13,7 @@ export class User {
    * it will enforce the uniqueness constraint at the database level. No adjustments required in the database 
    * creation bash/sql, typeORM will take care of everything.
    */
-  @Column({ unique: true, nullable: true })
+  @Column({ nullable: true })
   @Index() // This creates an index on the email column
   email: string;
 
@@ -22,11 +22,11 @@ export class User {
   password: string;               // Optional for OAuth users
 
   @Column({ nullable: true })
-  oauth_provider: string;         // e.g., 'google', 'facebook', 'github'
+  @Index() // This creates an index on the refresh_token column
+  refresh_token: string;
 
   @Column({ nullable: true })
-  @Exclude()                      // exclude from responses
-  oauth_provider_id: string;      // Provider-specific ID
+  oauth_provider: string;         // e.g., 'google', 'facebook', 'github'
 
   @Column({ nullable: true })
   @Exclude()                      // exclude from responses

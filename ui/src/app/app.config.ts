@@ -6,7 +6,8 @@ import Aura from '@primeng/themes/aura';
 import { provideStore } from '@ngxs/store';
 
 import { routes } from './app.routes';
-import { MyYellowPreset } from '../assets/theme/mytheme';
+import { MyYellowPreset } from '../assets/theme/mytheme-yellow';
+import { MyDarkPreset } from '../assets/theme/mytheme';
 import { AppState } from '../store/app/app.state';
 import { AuthState } from '../store/auth/auth.state';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
@@ -20,7 +21,7 @@ export const appConfig: ApplicationConfig = {
       ripple: true,
       inputStyle: 'outlined', // 'outlined' | 'filled';
       theme: {
-          preset: MyYellowPreset,
+          preset: MyDarkPreset,
           options: {
             darkModeSelector: '.dark',
         },

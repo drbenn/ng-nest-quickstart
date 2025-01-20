@@ -33,19 +33,31 @@ export class AuthController {
     @Body() registerStandardUserDto: RegisterStandardUserDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
   ): Promise<Partial<User>> {
-    // register user and provide newUser record with user id record
-    const newUser: {user: Partial<User>, jwtToken: string} = await this.authService.registerStandardUser(registerStandardUserDto);
-  
-    // Set the JWT as a httpOnly cookie in response
-    res.cookie('jwt', newUser.jwtToken, {
-      httpOnly: true,                                 // Prevent access from JavaScript
-      secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
-      sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
-      maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),     // Expiration time (30 minutes in milliseconds)
-    });
+    try {
+      // register user and provide newUser record with user id record
+      const newUser: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.registerStandardUser(registerStandardUserDto);
     
-    // Return basic user info for ui
-    return newUser.user;
+      res.cookie('jwt', newUser.jwtAccessToken, {
+        httpOnly: true,                                           // Prevent access from JavaScript
+        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+      });
+  
+      res.cookie('refreshToken', newUser.jwtRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+      });
+      
+      // Return basic user info for ui
+      return newUser.user;
+    } catch (error: unknown) {
+      this.logger.error(`Error during standard registration: ${error}`);
+      // Redirect the user to an error page
+      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+    };
   };
 
   
@@ -54,49 +66,88 @@ export class AuthController {
     @Body() loginStandardUserDto: LoginStandardUserDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
   ): Promise<Partial<User>> {
-    const login: {user: Partial<User>, jwtToken: string} = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
+    try {
+      const login: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
 
-    // Set the JWT as a httpOnly cookie in response
-    res.cookie('jwt', login.jwtToken, {
-      httpOnly: true,                                 // Prevent access from JavaScript
-      secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
-      sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
-      maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),     // Expiration time (30 minutes in milliseconds)
-    });
-    
-    // Return basic user info for ui
-    return login.user;
+      res.cookie('jwt', login.jwtAccessToken, {
+        httpOnly: true,                                           // Prevent access from JavaScript
+        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+      });
+
+      res.cookie('refreshToken', login.jwtRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+      });
+
+      // Return basic user info for ui
+      return login.user;
+    } catch (error: unknown) {
+      this.logger.error(`Error during OAuth redirect: ${error}`);
+      // Redirect the user to an error page
+      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+    };
   };
 
   // logs out of both standard and OAuth users by clearing the jwt from client browser
   @Post('logout')
   async logout(@Res() res: Response) {
-    // Clear the JWT cookie    
-    res.clearCookie('jwt', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
-    return res.status(200).json({ message: 'Logged out successfully' });
+    try {
+      // Clear the JWT cookie    
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+      return res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error: unknown) {
+      this.logger.error(`Error during user logout: ${error}`);
+      // Redirect the user to an error page
+      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+    };
   };
 
   @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard which if cookie present will retrieve and include user data in req
   @Post('restore-user')
   async restoreUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<User>> {
-    const restoredUser: Partial<User> = req['user'];
+    try {
+      const restoredUser: Partial<User> = req['user'];
 
-    // get fresh token for user restoring session
-    const jwtToken: string = await this.authService.generateJwt(restoredUser.id, restoredUser.email);
+      // get fresh token for user restoring session
+      const jwtToken: string = await this.authService.generateAccessJwt(restoredUser.id);
 
-    // Set the JWT as a httpOnly cookie in response
-    res.cookie('jwt', jwtToken, {
-      httpOnly: true,                                 // Prevent access from JavaScript
-      secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
-      sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
-      maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),     // Expiration time (30 minutes in milliseconds)
-    });
-    // Return basic user info for ui
-    return restoredUser;
+      // Set the JWT as a httpOnly cookie in response
+      res.cookie('jwt', jwtToken, {
+        httpOnly: true,                                           // Prevent access from JavaScript
+        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+      });
+
+      // res.redirect(`${process.env.FRONTEND_URL}`);
+      // Return basic user info for ui
+      return restoredUser;
+    } catch (error: unknown) {
+      this.logger.error(`Error during OAuth redirect: ${error}`);
+      // Redirect the user to an error page
+      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+    };
+  };
+
+  @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard which if cookie present will retrieve and include user data in req
+  @Post('get-user')
+  async getUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<User>> {
+    try {
+      const user: Partial<User> = req['user'];
+      return user;
+    } catch (error: unknown) {
+      this.logger.error(`Error getting user after Oauth login and redirect: ${error}`);
+      // Redirect the user to an error page
+      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+    };
   };
 
   @Get('google')
@@ -139,39 +190,35 @@ export class AuthController {
   // Either way, with successful Oauth interchange with provider, req now includes user data of type User from the db.
   private async handleOAuthRedirect(req: Request, res: Response) {
     try {
-      const oAuthUser: Partial<User> = req['user'];
-      const jwtToken: string = await this.authService.generateJwt(oAuthUser.id, oAuthUser.email);
-      // const refreshToken: string = await this.authService.generateRefreshToken(oAuthUser.id);
+      const user: Partial<User> = req['user'];            // user from database, not oauth user profile
+      const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id);
+      const jwtRefreshToken: string = await this.authService.generateRefreshJwt();
+      await this.authService.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
 
       if (!process.env.FRONTEND_URL) {
         this.logger.log('warn', `FRONTEND_URL is not set in environment variables`);
         throw new Error('FRONTEND_URL is not set in environment variables');
       };
-
-      console.log('token expiration in handleoauth redirect');
-      console.log(process.env.JWT_ACCESS_TOKEN_EXPIRATION);
       
-      // respond with httpOnly cookie
-      // It's safer to set the JWT as an HTTP-only cookie
-      res.cookie('jwt', jwtToken, { 
-        httpOnly: true,                                 // Prevent access from JavaScript
-        secure: process.env.NODE_ENV === 'production',  // Ensure it's sent over HTTPS (only works in production with HTTPS)
-        sameSite: 'strict',                             // Mitigates CSRF (adjust as per your requirements)
-        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),     // Expiration time (30 minutes in milliseconds)
+      res.cookie('jwt', jwtAccessToken, {
+        httpOnly: true,                                           // Prevent access from JavaScript
+        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+      });
+  
+      res.cookie('refreshToken', jwtRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),
       });
 
-      // res.cookie('refreshToken', refreshToken, {
-      //   httpOnly: true,
-      //   secure: process.env.NODE_ENV === 'production',
-      //   sameSite: 'strict',
-      //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      // });
-
-      // Redirect to frontend with JWT token
-      res.redirect(`${process.env.FRONTEND_URL}`);
+      // oauth requires redirect as ui redirected away from site, cannot return user data, 
+      // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly
+      res.redirect(`${process.env.FRONTEND_URL}/oauth/callback`);   
     } catch (error: unknown) {
       this.logger.error(`Error during OAuth redirect: ${error}`);
-
       // Redirect the user to an error page
       res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
     };

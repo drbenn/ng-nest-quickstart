@@ -12,6 +12,7 @@ import { CookiePolicyPageComponent } from '../pages/public/cookie-policy-page/co
 import { SigninPageComponent } from '../pages/auth/signin-page/signin-page.component';
 import { RegisterPageComponent } from '../pages/auth/register-page/register-page.component';
 import { ResetPasswordPageComponent } from '../pages/auth/reset-password-page/reset-password-page.component';
+import { OauthCallbackComponent } from '../pages/auth/oauth-callback/oauth-callback.component';
 
 // GUARDED Routes accessible by logged in users only
 import { TodoPageComponent } from '../pages/guarded/todo-page/todo-page.component';
@@ -28,6 +29,7 @@ export const routes: Routes = [
     { path: 'sign-in', component: SigninPageComponent },
     { path: 'register-account', component: RegisterPageComponent },
     { path: 'reset-password', component: ResetPasswordPageComponent },
+    { path: 'oauth/callback', component: OauthCallbackComponent },
     // GUARDED Routes accessible by logged in users only
     { path: 'home', component: HomePageComponent },
     { path: 'todo', component: TodoPageComponent },

@@ -3,11 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterStandardUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
-import { Logger, Repository } from 'typeorm';
+import { Logger, Repository, UpdateResult } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { instanceToPlain } from 'class-transformer';
 import { Profile } from 'passport';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto): Promise<{user: Partial<User>, jwtToken: string}> {
+  async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto): Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}> {
     const { email, password } = registerStandardUserDto;
 
     // Check if the user already exists
@@ -36,27 +37,35 @@ export class AuthService {
     const newUser = this.userRepository.create({ email, password: hashedPassword });
     await this.userRepository.save(newUser);
 
-    // create jwt for users first login
-    const jwtToken = await this.generateJwt(newUser.id, newUser.email);
-    return { user: instanceToPlain(newUser), jwtToken: jwtToken };
+    // create access and refresh jwts for users first login
+    const jwtAccessToken = await this.generateAccessJwt(newUser.id);
+    const jwtRefreshToken = await this.generateRefreshJwt();
+
+    // update refresh jwt in database for future access
+    this.updateUsersRefreshTokenInDatabase(newUser.id, jwtRefreshToken);
+
+    return { user: instanceToPlain(newUser), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
   };
 
-  async loginStandardUser(email: string, password: string): Promise<{user: Partial<User>, jwtToken: string}> {
+  async loginStandardUser(email: string, password: string): Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}> {
     const user = await this.validateStandardUser(email, password);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
-    };
+    if (!user) throw new UnauthorizedException('Invalid email or password');
 
-    const jwtToken = await this.generateJwt(user.id, user.email);
-    return { user: instanceToPlain(user), jwtToken: jwtToken };
+    const jwtAccessToken = await this.generateAccessJwt(user.id);
+    const jwtRefreshToken = await this.generateRefreshJwt();
+
+    // update refresh jwt in database for future access
+    this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
+
+    return { user: instanceToPlain(user), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
   };
 
 
-  async generateJwt(id: string, email: string): Promise<string> {
-    const payload = { sub: id, email: email }; // Customize your payload
-    const jwtToken = this.jwtService.sign(payload);
-    return jwtToken;
+  async generateAccessJwt(userId: string): Promise<string> {
+    const payload = { userId };
+    const jwtAccessToken = this.jwtService.sign(payload, { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION });
+    return jwtAccessToken;
   };
   
   async validateStandardUser(email: string, password: string): Promise<User | null> {
@@ -147,7 +156,14 @@ export class AuthService {
     }
 
     // Check if user exists
+    console.log('finding one user un validate oauth login:');
+    console.log(oauth_provider, oauth_provider_user_id);
+    
+    
     let user: Partial<User> = await this.findOneUserByProvider(oauth_provider, oauth_provider_user_id);
+
+    console.log(user);
+    
 
     if (!user) {
       // Create and save the new user
@@ -157,5 +173,22 @@ export class AuthService {
 
     return user;
   };
+
+  async generateRefreshJwt(): Promise<string> {
+    const jwtToken = randomBytes(64).toString('hex'); // Generate a random token
+    const saltRounds = 10;
+    const hashedJwtRefreshToken = await bcrypt.hash(jwtToken, saltRounds);
+    return hashedJwtRefreshToken;
+  };
+
+  async updateUsersRefreshTokenInDatabase(userId: string, refreshToken: string): Promise<UpdateResult> {
+    try {
+      return this.userRepository.update({ id: userId }, { refresh_token: refreshToken });
+    } catch (error: unknown) {
+      this.logger.log('warn', `Error updating refresh token: ${error}`);
+    };
+  }
+
+
 
 }

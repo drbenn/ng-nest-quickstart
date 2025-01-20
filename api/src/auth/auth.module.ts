@@ -18,8 +18,8 @@ import { FacebookStrategy } from './strategies/facebook.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'), // Load the secret from .env
-        signOptions: { expiresIn: '48h' }, // Set token expiration time
+        // Load the secret from .env
+        secret: configService.get<string>('JWT_SECRET')
       }),
     }),
   ],

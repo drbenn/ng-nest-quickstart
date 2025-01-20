@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS \"users\" (
 
   email VARCHAR(50),
   password VARCHAR(100),
+  refresh_token VARCHAR(100),
   oauth_provider VARCHAR(100),
   oauth_provider_user_id VARCHAR(100),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

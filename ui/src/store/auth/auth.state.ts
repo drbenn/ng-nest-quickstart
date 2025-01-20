@@ -66,7 +66,8 @@ export class AuthState {
       id: state.id,
       fullName: state.fullName,
       email: state.email,
-      createdAt: state.createdAt
+      createdAt: state.createdAt,
+      imgUrl: state.imgUrl
     };
   }
 
@@ -123,8 +124,7 @@ export class AuthState {
       next: (user: UserLoginJwtDto) => {
         console.log('User is logged in:', user);
         this.store.dispatch(new LoginUser(user));
-        // Update your app's state to reflect that the user is logged in
-        // For example, store the user in a service or state management library
+        this.router.navigate(['home']);
       },
       error: (err) => {
         console.log('User is not logged in:', err);
@@ -132,7 +132,7 @@ export class AuthState {
       },
     });
 
-    this.router.navigate(['']);
+
   };
 
 

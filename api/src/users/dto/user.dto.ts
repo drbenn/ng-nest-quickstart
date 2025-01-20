@@ -51,5 +51,5 @@ export class UserLoginJwtDto {
   accessToken: string;
 
   @IsNotEmpty()
-  expiresIn: number;
+  expiresIn: number | string;
 }
