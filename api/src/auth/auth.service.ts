@@ -129,18 +129,21 @@ export class AuthService {
     
     switch (provider) {
       case 'google':
-        email = profile.emails[0].value;
+        email = profile.emails[0].value || null;
         full_name = profile.displayName || null;
         img_url = profile.photos[0].value || null;
         oauth_provider = profile.provider;
         oauth_provider_user_id = profile.id;
         break;
-      // case 'facebook':
-      //   email = profile.emails[0].value;
-      //   name = profile.displayName;
-      //   break;
+      case 'facebook':
+        email = profile.emails[0].value || null;
+        full_name = `${profile.name.givenName} ${profile.name.familyName}` || null;
+        img_url = profile.photos[0].value || null;
+        oauth_provider = profile.provider;
+        oauth_provider_user_id = profile.id;
+        break;
       case 'github':
-        email = null; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
+        email = profile.emails[0].value || null; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
         full_name = profile.displayName || null;
         img_url = profile.photos[0].value || null;
         oauth_provider = profile.provider;

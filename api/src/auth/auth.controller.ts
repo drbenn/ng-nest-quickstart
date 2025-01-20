@@ -123,6 +123,18 @@ export class AuthController {
     return this.handleOAuthRedirect(req, res);
   }
 
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuth(@Req() req) {
+    // Initiates the Google OAuth2 login flow, caught and processed by google authguard strategy
+  }
+
+  @Get('facebook/callback')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookbAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    return this.handleOAuthRedirect(req, res);
+  }
+
   // async validateOAuthLogin(profile: Profile, provider: string): Promise<any> {    
   //   // Extract user information based on provider
   //   let email: string;
