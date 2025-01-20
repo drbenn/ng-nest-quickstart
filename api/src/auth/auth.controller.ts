@@ -131,7 +131,7 @@ export class AuthController {
       // Return basic user info for ui
       return restoredUser;
     } catch (error: unknown) {
-      this.logger.error(`Error during OAuth redirect: ${error}`);
+      this.logger.error(`Error during OAuth redirect, new access token potentially generated for existing user: ${error}`);
       // Redirect the user to an error page
       res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
     };

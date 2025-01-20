@@ -118,6 +118,17 @@ export class AuthService {
     return instanceToPlain(user); // Authentication successful
   };
 
+  async findOneUserByRefreshToken(refresh_token: string): Promise<Partial<User> | null> {
+    const user = await this.userRepository.findOne({ where: { refresh_token } });
+
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user by refresh_token. User not found: ${refresh_token}`);
+      return null; // User not found
+    };
+
+    return instanceToPlain(user); // Authentication successful
+  };
+
   // used by every OAuth Auth Guard Strategy to validate user
   async validateOAuthLogin(profile: Profile, provider: string): Promise<any> {    
     // Extract user information based on provider
@@ -153,17 +164,10 @@ export class AuthService {
       // apple oauth login requires a developer account which is $99/year. So just no.
       default:
         throw new Error('Unsupported provider');
-    }
+    };
 
     // Check if user exists
-    console.log('finding one user un validate oauth login:');
-    console.log(oauth_provider, oauth_provider_user_id);
-    
-    
     let user: Partial<User> = await this.findOneUserByProvider(oauth_provider, oauth_provider_user_id);
-
-    console.log(user);
-    
 
     if (!user) {
       // Create and save the new user
@@ -187,8 +191,6 @@ export class AuthService {
     } catch (error: unknown) {
       this.logger.log('warn', `Error updating refresh token: ${error}`);
     };
-  }
-
-
+  };
 
 }
