@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
 import { AuthService } from '../auth.service';
 
+// https://developers.facebook.com/apps
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(private authService: AuthService) {
@@ -22,25 +23,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     done: (err: any, user?: any, info?: any) => void,
   ): Promise<any> {
     try {
-
-      console.log('1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11111');
-      console.log(accessToken);
-      console.log('22222222222222!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!22222');
-      console.log(refreshToken);
-      
-      console.log('Facebook Profile:', profile);
-
-      // Extract user information
-      // const { id, emails, name, photos } = profile;
-      // const user = {
-      //   oauth_provider: 'facebook',
-      //   facebookId: id,
-      //   email: emails?.[0]?.value || null,
-      //   full_name: `${name?.givenName || ''} ${name?.familyName || ''}`.trim(),
-      //   img_url: photos?.[0]?.value || null,
-      // };
-
-      // Validate or create the user
       const validatedUser = await this.authService.validateOAuthLogin(profile, 'facebook');
       done(null, validatedUser);
     } catch (err) {

@@ -29,6 +29,7 @@ import { OauthAuthService } from '../services/oauth-auth.service';
 })
 export class SigninPageComponent {
   private loginUser = dispatch(LoginUser);
+  protected facebookSvg: string = '../../../assets/icons/facebook.svg';
 
   constructor(
     private readonly standardAuthService: StandardAuthService,

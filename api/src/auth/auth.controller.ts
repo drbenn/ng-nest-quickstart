@@ -135,51 +135,6 @@ export class AuthController {
     return this.handleOAuthRedirect(req, res);
   }
 
-  // async validateOAuthLogin(profile: Profile, provider: string): Promise<any> {    
-  //   // Extract user information based on provider
-  //   let email: string;
-  //   let name: string;
-  //   let picture: string = '';
-  //   switch (provider) {
-  //     case 'google':
-  //       email = profile.emails[0].value;
-  //       name = profile.displayName;
-  //       picture = profile.photos[0].value;
-  //       break;
-  //     // case 'facebook':
-  //     //   email = profile.emails[0].value;
-  //     //   name = profile.displayName;
-  //     //   break;
-  //     // case 'github':
-  //     //   email = profile.emails[0].value;
-  //     //   name = profile.username;
-  //     //   break;
-  //     // case 'apple':
-  //     //   email = profile.emails[0].value;
-  //     //   name = `${profile.name.givenName} ${profile.name.familyName}`;
-  //     //   break;
-  //     default:
-  //       throw new Error('Unsupported provider');
-  //   }
-
-  //   // Check if user exists
-  //   let user = await this.validateUserByEmail(email);
-
-  //   if (!user) {
-  //     // Create a new user
-  //     const newUser: CreateUserDto = {
-  //       name: name,
-  //       provider: provider,
-  //       email: email,
-  //       username: name,
-  //       picture: picture,
-  //       membership: 'basic'
-  //     };      
-  //     this.createUser(newUser);
-  //   };
-  //   return user;
-  // }
-
   // User has already been authenticated by OAuth and new user added to db or user db information fetched.
   // Either way, with successful Oauth interchange with provider, req now includes user data of type User from the db.
   private async handleOAuthRedirect(req: Request, res: Response) {
@@ -221,28 +176,5 @@ export class AuthController {
       res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
     };
   };
-
-
-  // // Protected Route Example
-  // @Get('protected')
-  // @UseGuards(JwtAuthGuard) // Protect this route with the JWT Guard
-  // async getProtectedData(@Req() req: Request) {
-  //   return {
-  //     message: 'You have access to this protected route!',
-  //     user: req.user,
-  //   };
-  // }
-
-  // // login using OAuth
-  // @Get(':provider')
-  // @UseGuards(AuthGuard('oauth'))
-  // async loginOAuth(@Req() req: any, @Res() res: Response, @Param('provider') provider: string) {
-  //   const profile = req.user; // User profile from OAuth provider
-  //   const { jwt } = await this.authService.loginWithOAuth(profile);
-
-  //   // Set JWT as an HttpOnly cookie
-  //   res.cookie('jwt', jwt, { httpOnly: true, secure: true });
-  //   res.redirect('/'); // Redirect to your UI after login
-  // };
 
 }

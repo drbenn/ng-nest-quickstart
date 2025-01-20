@@ -1,10 +1,8 @@
 import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterStandardUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
-import { UsersService } from 'src/users/users.service';
 import { Logger, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -17,9 +15,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    // private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
-    private configService: ConfigService
+    private readonly jwtService: JwtService
   ) {}
 
   async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto): Promise<{user: Partial<User>, jwtToken: string}> {
@@ -121,12 +117,7 @@ export class AuthService {
     let img_url: string = '';
     let oauth_provider: string = '';
     let oauth_provider_user_id: string = '';
-    console.log('profile in auth service validatoe oath login');
-    console.log(provider);
-    console.log(profile);
-    
-    
-    
+
     switch (provider) {
       case 'google':
         email = profile.emails[0].value || null;
@@ -150,9 +141,7 @@ export class AuthService {
         oauth_provider_user_id = profile.id
         break;
       // case 'apple':
-      //   email = profile.emails[0].value;
-      //   name = `${profile.name.givenName} ${profile.name.familyName}`;
-      //   break;
+      // apple oauth login requires a developer account which is $99/year. So just no.
       default:
         throw new Error('Unsupported provider');
     }
@@ -166,10 +155,6 @@ export class AuthService {
       await this.userRepository.save(user);
     };
 
-    console.log('user being returned from validate oauth login');
-    console.log(user);
-    
-    
     return user;
   };
 
