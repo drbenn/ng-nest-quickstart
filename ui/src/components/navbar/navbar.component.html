@@ -99,7 +99,7 @@
       </ul>
     }
 
-    <!-- logged in user avatar -->
+    <!-- logged in user - avatar image provided -->
     @if (authUser !== null && authUser.imgUrl) {
       <div class="flex justify-end items-center mr-1">
         <p-avatar (click)="userMenuPopover.toggle($event)"
@@ -110,6 +110,7 @@
       </div>
     }
 
+    <!-- logged in user - no image but fullname -->
     @if (authUser !== null && authUser.imgUrl === null && authUser.fullName) {
       <div class="flex justify-end items-center mr-1">
         <div class="flex justify-center items-center h-[24px] w-[24px] bg-slate-700 rounded-full">
@@ -117,6 +118,17 @@
             {{ authUser.fullName[0] }}
           </div>
         </div>
+      </div>
+    }
+
+    <!-- logged in standard user - no image but fullname -->
+    @if (authUser !== null && authUser.imgUrl === null && !authUser.fullName) {
+      <div class="flex justify-end items-center mr-1">
+        <p-avatar (click)="userMenuPopover.toggle($event)"
+        class="cursor-pointer"
+        [style]="{height: '24px', width: '24px'}"
+        image="../../assets/img/blank-user-avatar.webp" 
+        shape="circle" />
       </div>
     }
 

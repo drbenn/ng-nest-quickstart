@@ -100,32 +100,41 @@ export class AuthService {
   //////////////////////////////////////////////////////////////////////////////////
 
 
-  async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto): Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}> {
+  async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto)
+  : Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} | { message: 'Email Already Registered', email: string , provider: string }> {
     const { email, password } = registerStandardUserDto;
 
     // Check if the user already exists
-    const existingUser = await this.userRepository.findOne({ where: { email } });
-    if (existingUser) {
+    const existingUser = await this.userRepository.findOne({ 
+      where: {
+        email,
+        oauth_provider: null
+      }});
+    if (!existingUser) {
       this.logger.log('warn', `Cannot register user. User email already exists: ${existingUser.email}`);
-      throw new ConflictException('User with this email already exists.');
+      return { 
+        message: 'Email Already Registered',
+        email: existingUser[0].email ,
+        provider: existingUser[0].oauth_provider
+      };
+    } else {
+      // Hash the password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Create and save the new user
+      const newUser = this.userRepository.create({ email, password: hashedPassword });
+      await this.userRepository.save(newUser);
+
+      // create access and refresh jwts for users first login
+      const jwtAccessToken = await this.generateAccessJwt(newUser.id);
+      const jwtRefreshToken = await this.generateRefreshJwt();
+
+      // update refresh jwt in database for future access
+      this.updateUsersRefreshTokenInDatabase(newUser.id, jwtRefreshToken);
+
+      return { user: instanceToPlain(newUser), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
     };
-
-    // Hash the password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create and save the new user
-    const newUser = this.userRepository.create({ email, password: hashedPassword });
-    await this.userRepository.save(newUser);
-
-    // create access and refresh jwts for users first login
-    const jwtAccessToken = await this.generateAccessJwt(newUser.id);
-    const jwtRefreshToken = await this.generateRefreshJwt();
-
-    // update refresh jwt in database for future access
-    this.updateUsersRefreshTokenInDatabase(newUser.id, jwtRefreshToken);
-
-    return { user: instanceToPlain(newUser), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
   };
 
   async loginStandardUser(email: string, password: string): Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}> {
@@ -167,52 +176,63 @@ export class AuthService {
   //////////////////////////////////////////////////////////////////////////////////
 
   // used by every OAuth Auth Guard Strategy to validate user
-  async validateOAuthLogin(profile: Profile, provider: string): Promise<any> {    
+  async validateOAuthLogin(profile: Profile, provider: string)
+  : Promise<User | { message: 'Email Already Registered', email: string , provider: string }> {    
     // Extract user information based on provider
-    let email: string;
-    let full_name: string;
+    let email: string =  profile.emails[0].value || '';
+    let full_name: string = '';
     let img_url: string = '';
     let oauth_provider: string = '';
     let oauth_provider_user_id: string = '';
 
-    switch (provider) {
-      case 'google':
-        email = profile.emails[0].value || null;
-        full_name = profile.displayName || null;
-        img_url = profile.photos[0].value || null;
-        oauth_provider = profile.provider;
-        oauth_provider_user_id = profile.id;
-        break;
-      case 'facebook':
-        email = profile.emails[0].value || null;
-        full_name = `${profile.name.givenName} ${profile.name.familyName}` || null;
-        img_url = profile.photos[0].value || null;
-        oauth_provider = profile.provider;
-        oauth_provider_user_id = profile.id;
-        break;
-      case 'github':
-        email = profile.emails[0].value || null; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
-        full_name = profile.displayName || null;
-        img_url = profile.photos[0].value || null;
-        oauth_provider = profile.provider;
-        oauth_provider_user_id = profile.id
-        break;
-      // case 'apple':
-      // apple oauth login requires a developer account which is $99/year. So just no.
-      default:
-        throw new Error('Unsupported provider');
+    // Check if email already exists, if so return email and provider/standard for user to know what to login with
+    let existingUser: User[] = await this.userRepository.find({ where: { email } });  
+    
+    if (existingUser.length && existingUser[0].oauth_provider !== provider) {
+      return { 
+        message: 'Email Already Registered',
+        email: existingUser[0].email ,
+        provider: existingUser[0].oauth_provider
+      };
+    } else {
+      // Otherwise continue and login and/or create account on first login return appropriate user information
+      let user: User = existingUser[0];
+      switch (provider) {
+        case 'google':
+          email = profile.emails[0].value || null;
+          full_name = profile.displayName || null;
+          img_url = profile.photos[0].value || null;
+          oauth_provider = profile.provider;
+          oauth_provider_user_id = profile.id;
+          break;
+        case 'facebook':
+          email = profile.emails[0].value || null;
+          full_name = `${profile.name.givenName} ${profile.name.familyName}` || null;
+          img_url = profile.photos[0].value || null;
+          oauth_provider = profile.provider;
+          oauth_provider_user_id = profile.id;
+          break;
+        case 'github':
+          email = profile.emails[0].value || null; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
+          full_name = profile.displayName || null;
+          img_url = profile.photos[0].value || null;
+          oauth_provider = profile.provider;
+          oauth_provider_user_id = profile.id
+          break;
+        // case 'apple':
+        // apple oauth login requires a developer account which is $99/year. So just no.
+        default:
+          throw new Error('Unsupported provider');
+      };
+  
+      if (!user) {
+        // Create and save the new user
+        user = this.userRepository.create({ email, full_name, img_url, oauth_provider, oauth_provider_user_id });
+        await this.userRepository.save(user);
+      };
+  
+      return user;
     };
-
-    // Check if user exists
-    let user: Partial<User> = await this.findOneUserByProvider(oauth_provider, oauth_provider_user_id);
-
-    if (!user) {
-      // Create and save the new user
-      user = this.userRepository.create({ email, full_name, img_url, oauth_provider, oauth_provider_user_id });
-      await this.userRepository.save(user);
-    };
-
-    return user;
   };
 
 }

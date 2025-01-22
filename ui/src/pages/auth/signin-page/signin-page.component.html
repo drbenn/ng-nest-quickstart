@@ -33,7 +33,7 @@
           </p-floatlabel>
         </div>
 
-        <div class="">
+        <div class="flex flex-row flex-nowrap justify-start items-start">
           <p-checkbox
             binary="true"
             size="small"
@@ -41,9 +41,12 @@
             formControlName="isPasswordInView"
             (onChange)="handlePasswordInView($event)"
             inputId="checkbox" />
-          <label for="on_label" class="ml-2 font-light text-sm">
+          <!-- <label for="on_label" class="ml-2 font-light text-sm">
             View Password
-          </label>
+          </label> -->
+          <div class="ml-2 mt-2 font-light text-xs select-none">
+            View Password
+          </div>
         </div>
 
         <div class="mt-4">
@@ -63,15 +66,15 @@
 
         <div class="w-full flex flex-row justify-end mt-6">
           <p-button
-            variant="outlined"
             class="mr-2"
             label="Clear"
+            size="small"
             (click)="form.reset()"
           />
           <p-button
-            variant="outlined"
             [disabled]="!form.valid"
             label="Login"
+            size="small"
             type="submit"
           />
         </div>
@@ -83,53 +86,74 @@
     </p-divider>
 
     <div class="mt-3">
-      <p-button class="w-64" label="Google" variant="outlined" (click)="oAuthSignIn('google')">
-        <svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none">
-          <path fill="#4285F4" d="M14.9 8.161c0-.476-.039-.954-.121-1.422h-6.64v2.695h3.802a3.24 3.24 0 01-1.407 2.127v1.75h2.269c1.332-1.22 2.097-3.02 2.097-5.15z"/>
-          <path fill="#34A853" d="M8.14 15c1.898 0 3.499-.62 4.665-1.69l-2.268-1.749c-.631.427-1.446.669-2.395.669-1.836 0-3.393-1.232-3.952-2.888H1.85v1.803A7.044 7.044 0 008.14 15z"/>
-          <path fill="#FBBC04" d="M4.187 9.342a4.17 4.17 0 010-2.68V4.859H1.849a6.97 6.97 0 000 6.286l2.338-1.803z"/>
-          <path fill="#EA4335" d="M8.14 3.77a3.837 3.837 0 012.7 1.05l2.01-1.999a6.786 6.786 0 00-4.71-1.82 7.042 7.042 0 00-6.29 3.858L4.186 6.66c.556-1.658 2.116-2.89 3.952-2.89z"/>
-        </svg>
-      </p-button>
+      <div class="w-32 p-2 flex flex-row flex-nowrap justify-center items-center cursor-pointer pRipple pButton
+      border text-slate-700 border-slate-400 rounded-sm bg-white hover:bg-slate-100 transition-colors duration-75 ease-in"
+      (click)="oAuthSignIn('google')">
+        <div>
+          <svg width="24px" height="24px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none">
+            <path fill="#4285F4" d="M14.9 8.161c0-.476-.039-.954-.121-1.422h-6.64v2.695h3.802a3.24 3.24 0 01-1.407 2.127v1.75h2.269c1.332-1.22 2.097-3.02 2.097-5.15z"/>
+            <path fill="#34A853" d="M8.14 15c1.898 0 3.499-.62 4.665-1.69l-2.268-1.749c-.631.427-1.446.669-2.395.669-1.836 0-3.393-1.232-3.952-2.888H1.85v1.803A7.044 7.044 0 008.14 15z"/>
+            <path fill="#FBBC04" d="M4.187 9.342a4.17 4.17 0 010-2.68V4.859H1.849a6.97 6.97 0 000 6.286l2.338-1.803z"/>
+            <path fill="#EA4335" d="M8.14 3.77a3.837 3.837 0 012.7 1.05l2.01-1.999a6.786 6.786 0 00-4.71-1.82 7.042 7.042 0 00-6.29 3.858L4.186 6.66c.556-1.658 2.116-2.89 3.952-2.89z"/>
+          </svg>
+        </div>
+        <div class="ml-2 text-base">
+          Google
+        </div>
+      </div>
     </div>
     <div class="mt-3">
-      <p-button [ngStyle]="{'width': '20rem'}" label="Github" variant="outlined" (click)="oAuthSignIn('github')">
-        <svg width="24px" height="24px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -7559.000000)" fill="#000000">
-              <g id="icons" transform="translate(56.000000, 160.000000)">
-                <path d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,
-                7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,
-                7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,
-                7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,
-                7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,
-                7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,
-                7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,
-                7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,
-                7409.253 C84,7403.59 88.478,7399 94,7399" id="github-[#142]">
-                </path>
+      <div class="w-32 p-2 flex flex-row flex-nowrap justify-center items-center cursor-pointer pRipple pButton 
+      border text-slate-700 border-slate-400 rounded-sm bg-white hover:bg-slate-100 transition-colors duration-75 ease-in" 
+      (click)="oAuthSignIn('github')">
+        <div>
+          <svg width="24px" height="24px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -7559.000000)" fill="#000000">
+                  <g id="icons" transform="translate(56.000000, 160.000000)">
+                    <path d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,
+                    7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,
+                    7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,
+                    7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,
+                    7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,
+                    7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,
+                    7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,
+                    7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,
+                    7409.253 C84,7403.59 88.478,7399 94,7399" id="github-[#142]">
+                    </path>
+                  </g>
+                </g>
               </g>
-            </g>
-          </g>
-      </svg>
-      </p-button>
+          </svg>
+        </div>  
+        <div class="ml-2 text-base">
+          Github
+        </div>
+    </div>
     </div>
     <div class="mt-3">
-      <p-button  label="Facebook" variant="outlined" (click)="oAuthSignIn('facebook')">
-        <svg width="24px" height="24px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <g id="Color-" transform="translate(-200.000000, -160.000000)" fill="#4460A0">
-              <path d="M225.638355,208 L202.649232,208 C201.185673,208 200,206.813592 200,205.350603 L200,162.649211 C200,161.18585 201.185859,160 202.649232,160 L245.350955,
-              160 C246.813955,160 248,161.18585 248,162.649211 L248,205.350603 C248,206.813778 246.813769,208 245.350955,208 L233.119305,208 L233.119305,189.411755 L239.358521,
-              189.411755 L240.292755,182.167586 L233.119305,182.167586 L233.119305,177.542641 C233.119305,175.445287 233.701712,174.01601 236.70929,
-              174.01601 L240.545311,174.014333 L240.545311,167.535091 C239.881886,167.446808 237.604784,167.24957 234.955552,167.24957 C229.424834,167.24957 225.638355,
-              170.625526 225.638355,176.825209 L225.638355,182.167586 L219.383122,182.167586 L219.383122,189.411755 L225.638355,189.411755 L225.638355,208 L225.638355,
-              208 Z" id="Facebook">
-              </path>
-            </g>
-          </g>
-        </svg>
-      </p-button>
+      <div class="w-32 p-2 flex flex-row flex-nowrap justify-center items-center cursor-pointer pRipple pButton
+      border text-slate-700 border-slate-400 rounded-sm bg-white hover:bg-slate-100 transition-colors duration-75 ease-in"
+      (click)="oAuthSignIn('facebook')">
+        <div>
+          <svg width="24px" height="24px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <g id="Color-" transform="translate(-200.000000, -160.000000)" fill="#4460A0">
+                  <path d="M225.638355,208 L202.649232,208 C201.185673,208 200,206.813592 200,205.350603 L200,162.649211 C200,161.18585 201.185859,160 202.649232,160 L245.350955,
+                  160 C246.813955,160 248,161.18585 248,162.649211 L248,205.350603 C248,206.813778 246.813769,208 245.350955,208 L233.119305,208 L233.119305,189.411755 L239.358521,
+                  189.411755 L240.292755,182.167586 L233.119305,182.167586 L233.119305,177.542641 C233.119305,175.445287 233.701712,174.01601 236.70929,
+                  174.01601 L240.545311,174.014333 L240.545311,167.535091 C239.881886,167.446808 237.604784,167.24957 234.955552,167.24957 C229.424834,167.24957 225.638355,
+                  170.625526 225.638355,176.825209 L225.638355,182.167586 L219.383122,182.167586 L219.383122,189.411755 L225.638355,189.411755 L225.638355,208 L225.638355,
+                  208 Z" id="Facebook">
+                  </path>
+                </g>
+              </g>
+            </svg>
+        </div>
+        <div class="ml-2 text-base">
+          Facebook
+        </div>
+      </div>
       <!-- style="width: 30rem;" -->
       <!-- <button pButton pRipple [ngStyle]="{'width': '100vw'}" severity="success" [raised]="true" variant="outlined">
         YOLO

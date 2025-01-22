@@ -1,15 +1,11 @@
-import { Body, Controller, Get, Inject, Logger, Param, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { LoginStandardUserDto, RegisterStandardUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
-import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-
-
-// TODO: REFRESH TOKEN AND CSRF Protection once OAUTH Working
 
 export interface OAuthUser {
   id: number;
@@ -23,7 +19,6 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
@@ -89,27 +84,39 @@ export class AuthController {
   async register(
     @Body() registerStandardUserDto: RegisterStandardUserDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<Partial<User>> {
+  ): Promise<Partial<User> | { message: 'Email Already Registered', email: string , provider: string }> {
     try {
       // register user and provide newUser record with user id record
-      const newUser: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.registerStandardUser(registerStandardUserDto);
+      type NewUserResponse =
+        | { user: Partial<User>; jwtAccessToken: string; jwtRefreshToken: string }
+        | { message: 'Email Already Registered'; email: string; provider: string };
+
+      const newUserResponse: NewUserResponse = await this.authService.registerStandardUser(registerStandardUserDto);
     
-      res.cookie('jwt', newUser.jwtAccessToken, {
-        httpOnly: true,                                           // Prevent access from JavaScript
-        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-      });
-  
-      res.cookie('refreshToken', newUser.jwtRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
-      });
+      if ('message' in newUserResponse) {
+        const { email, provider } = newUserResponse;
+        const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
+        res.redirect(redirectUrl);  
       
-      // Return basic user info for ui
-      return newUser.user;
+      } else if ('user' in newUserResponse) {
+        const { user, jwtAccessToken, jwtRefreshToken } = newUserResponse;
+        res.cookie('jwt', jwtAccessToken, {
+          httpOnly: true,                                           // Prevent access from JavaScript
+          secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+          sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+          maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+        });
+    
+        res.cookie('refreshToken', jwtRefreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+        });
+        
+        // Return basic user info for ui
+        return user;
+      }
     } catch (error: unknown) {
       this.logger.error(`Error during standard registration: ${error}`);
       // Redirect the user to an error page
@@ -142,7 +149,7 @@ export class AuthController {
       // Return basic user info for ui
       return login.user;
     } catch (error: unknown) {
-      this.logger.error(`Error during OAuth redirect: ${error}`);
+      this.logger.error(`Error during OAuth redirect from login-standard: ${error}`);
       // Redirect the user to an error page
       res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
     };
@@ -194,39 +201,51 @@ export class AuthController {
   // User has already been authenticated by OAuth and new user added to db or user db information fetched.
   // Either way, with successful Oauth interchange with provider, req now includes user data of type User from the db.
   private async handleOAuthRedirect(req: Request, res: Response) {
-    try {
-      const user: Partial<User> = req['user'];            // user from database, not oauth user profile
-      const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id);
-      const jwtRefreshToken: string = await this.authService.generateRefreshJwt();
-      await this.authService.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
-
-      if (!process.env.FRONTEND_URL) {
-        this.logger.log('warn', `FRONTEND_URL is not set in environment variables`);
-        throw new Error('FRONTEND_URL is not set in environment variables');
-      };
-      
-      res.cookie('jwt', jwtAccessToken, {
-        httpOnly: true,                                           // Prevent access from JavaScript
-        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-      });
+    // console.log('handle OATH REDIRECT');
+    // console.log(req);
+    const response: Partial<User> | { message: 'Email Already Registered', email: string , provider: string } = req['user'];                      // user from database, not oauth user profile
+    let user: Partial<User> | null = response['message'] ? null : response;
+    
+    // if duplicate user attempt do not provide user and redirect to inform user of existing login method
+    if (!user) {
+      const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(response['email'])}&provider=${encodeURIComponent(response['provider'])}`;
+      res.redirect(redirectUrl);  
+    } else {
+      // return jwt access and refresh tokens and redirect to oauth/callback to fetch appropriate user data
+      try {
+        const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id);
+        const jwtRefreshToken: string = await this.authService.generateRefreshJwt();
+        await this.authService.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
   
-      res.cookie('refreshToken', jwtRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),
-      });
-
-      // oauth requires redirect as ui redirected away from site, cannot return user data, 
-      // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly
-      res.redirect(`${process.env.FRONTEND_URL}/oauth/callback`);   
-    } catch (error: unknown) {
-      this.logger.error(`Error during OAuth redirect: ${error}`);
-      // Redirect the user to an error page
-      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
-    };
+        if (!process.env.FRONTEND_URL) {
+          this.logger.log('warn', `FRONTEND_URL is not set in environment variables`);
+          throw new Error('FRONTEND_URL is not set in environment variables');
+        };
+        
+        res.cookie('jwt', jwtAccessToken, {
+          httpOnly: true,                                           // Prevent access from JavaScript
+          secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+          sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+          maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+        });
+    
+        res.cookie('refreshToken', jwtRefreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),
+        });
+  
+        // oauth requires redirect as ui redirected away from site, cannot return user data, 
+        // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly
+        res.redirect(`${process.env.FRONTEND_URL}/oauth/callback`);   
+      } catch (error: unknown) {
+        this.logger.error(`Error during OAuth redirect from handleOAuthRedirect: ${error}`);
+        // Redirect the user to an error page
+        res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+      };
+    }
+    
   };
 
 }

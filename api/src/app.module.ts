@@ -12,6 +12,7 @@ import {
   WinstonModule,
 } from 'nest-winston';
 import * as winston from 'winston';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   // mailgun for email service
@@ -20,28 +21,30 @@ import * as winston from 'winston';
       isGlobal: true,
       envFilePath: determineEnvFilePath()
     }),
-    // Import TypeOrmModule and load PostgreSQL connection settings from the environment variables
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.get<number>('THROTTLE_TIME_TO_LIVE'),
+          limit: config.get<number>('THROTTLE_LIMIT'),
+        },
+      ],
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        // console.log('Database Configuration:');
-        // console.log('POSTGRES_HOST:', configService.get<string>('POSTGRES_HOST'));
-        // console.log('POSTGRES_PORT:', configService.get<number>('POSTGRES_PORT'));
-        // console.log('POSTGRES_USER:', configService.get<string>('POSTGRES_USER'));
-        // console.log('POSTGRES_PASSWORD:', configService.get<string>('POSTGRES_PASSWORD'));
-        // console.log('POSTGRES_DB:', configService.get<string>('POSTGRES_DB'));
+      useFactory: (config: ConfigService) => {
         return {
           type: 'postgres',
-          host: configService.get<string>('POSTGRES_HOST'),
-          port: configService.get<number>('POSTGRES_PORT'),
-          username: configService.get<string>('POSTGRES_USER'),
-          password: configService.get<string>('POSTGRES_PASSWORD'),
-          database: configService.get<string>('POSTGRES_DB'),
+          host: config.get<string>('POSTGRES_HOST'),
+          port: config.get<number>('POSTGRES_PORT'),
+          username: config.get<string>('POSTGRES_USER'),
+          password: config.get<string>('POSTGRES_PASSWORD'),
+          database: config.get<string>('POSTGRES_DB'),
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          autoLoadEntities: true, // Automatically load entities for TypeORM
-          synchronize: true, // Use this in development only (auto-sync database schema)
-
+          autoLoadEntities: true,                             // Automatically load entities for TypeORM
+          synchronize: true,                                  // Use this in development only (auto-sync database schema)
         }
       },
     }),
@@ -71,9 +74,6 @@ export class AppModule {}
 
 function determineEnvFilePath(): string {
   const env = process.env.NODE_ENV || 'development';
-  console.log(env);
-  
-  
   switch (env) {
     case 'development':
       return 'env/.development.local.env';

@@ -17,6 +17,7 @@ import { OauthCallbackComponent } from '../pages/auth/oauth-callback/oauth-callb
 // GUARDED Routes accessible by logged in users only
 import { TodoPageComponent } from '../pages/guarded/todo-page/todo-page.component';
 import { HomePageComponent } from '../pages/guarded/home-page/home-page.component';
+import { ExistingUserComponent } from '../pages/auth/existing-user/existing-user.component';
 
 export const routes: Routes = [
     // PUBLIC Routes accessible by all
@@ -30,6 +31,7 @@ export const routes: Routes = [
     { path: 'register-account', component: RegisterPageComponent },
     { path: 'reset-password', component: ResetPasswordPageComponent },
     { path: 'oauth/callback', component: OauthCallbackComponent },
+    { path: 'auth/existing-user', component: ExistingUserComponent },
     // GUARDED Routes accessible by logged in users only
     { path: 'home', component: HomePageComponent },
     { path: 'todo', component: TodoPageComponent },

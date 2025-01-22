@@ -1,0 +1,16 @@
+<standard-page-wrapper>
+  <main class="h-screen flex flex-col justify-start items-start px-4">
+    <div class="mt-20">
+      The email address {{ email }} has already been registered on this site using 
+      @if (provider) {
+        {{ provider }} OAuth as the login method.
+      } @else {
+        standard email and password login
+      }
+    </div>
+  
+    <div class="mt-8">
+      Please use the existing login method.
+    </div>
+  </main>
+</standard-page-wrapper>

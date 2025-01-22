@@ -16,7 +16,11 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
   }
 
   async validate(
+    // accessToken received in response from google oauth console, do not remove or else argument 
+    // count will be incorrect and you will not receive the necessary profile value.
     accessToken: any,
+    // refreshToken received in response from google oauth console, do not remove or else argument 
+    // count will be incorrect and you will not receive the necessary profile value.    
     refreshToken: any,
     profile: any, 
     done: (err: any, user?: any, info?: any) => void,
