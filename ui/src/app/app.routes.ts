@@ -18,6 +18,7 @@ import { OauthCallbackComponent } from '../pages/auth/oauth-callback/oauth-callb
 import { TodoPageComponent } from '../pages/guarded/todo-page/todo-page.component';
 import { HomePageComponent } from '../pages/guarded/home-page/home-page.component';
 import { ExistingUserComponent } from '../pages/auth/existing-user/existing-user.component';
+import { FailedLoginComponent } from '../pages/auth/failed-login/failed-login.component';
 
 export const routes: Routes = [
     // PUBLIC Routes accessible by all
@@ -32,6 +33,7 @@ export const routes: Routes = [
     { path: 'reset-password', component: ResetPasswordPageComponent },
     { path: 'oauth/callback', component: OauthCallbackComponent },
     { path: 'auth/existing-user', component: ExistingUserComponent },
+    { path: 'auth/failed-login', component: FailedLoginComponent },
     // GUARDED Routes accessible by logged in users only
     { path: 'home', component: HomePageComponent },
     { path: 'todo', component: TodoPageComponent },

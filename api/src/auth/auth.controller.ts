@@ -38,6 +38,12 @@ export class AuthController {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
       });
+
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
       return res.status(200).json({ message: 'Logged out successfully' });
     } catch (error: unknown) {
       this.logger.error(`Error during user logout: ${error}`);
@@ -75,6 +81,29 @@ export class AuthController {
 
   //////////////////////////////////////////////////////////////////////////////////
   //                                                                              //
+  //                           COOKIE RESPONSES                                   //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+  private sendSuccessfulLoginCookies(res: Response, jwtAccessToken: string, jwtRefreshToken: string) {
+    res.cookie('jwt', jwtAccessToken, {
+      httpOnly: true,                                           // Prevent access from JavaScript
+      secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+      sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+      maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+    });
+
+    res.cookie('refreshToken', jwtRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+    });
+  };
+
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
   //                           STANDARD USER CONTROLLERS                          //
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
@@ -89,30 +118,40 @@ export class AuthController {
       // register user and provide newUser record with user id record
       type NewUserResponse =
         | { user: Partial<User>; jwtAccessToken: string; jwtRefreshToken: string }
-        | { message: 'Email Already Registered'; email: string; provider: string };
+        | { message: 'Email Already Registered'; email: string; provider: string }
+        | null;
 
       const newUserResponse: NewUserResponse = await this.authService.registerStandardUser(registerStandardUserDto);
+      console.log('resposne from registerStandardUser in service: ', newUserResponse);
+      
     
-      if ('message' in newUserResponse) {
+      if (newUserResponse === null) {
+        const redirectUrl = `${process.env.FRONTEND_URL}/auth/failed-login/?email=${encodeURIComponent(registerStandardUserDto.email)}`;
+        res.redirect(redirectUrl); 
+      } else if ('message' in newUserResponse) {
+        console.log('standard user register & login response: existing email in other provider redirect');
+        
         const { email, provider } = newUserResponse;
         const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
         res.redirect(redirectUrl);  
       
       } else if ('user' in newUserResponse) {
+        console.log('standard user register & login response: successful register/login');
         const { user, jwtAccessToken, jwtRefreshToken } = newUserResponse;
-        res.cookie('jwt', jwtAccessToken, {
-          httpOnly: true,                                           // Prevent access from JavaScript
-          secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-          sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-          maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-        });
+        this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
+        // res.cookie('jwt', jwtAccessToken, {
+        //   httpOnly: true,                                           // Prevent access from JavaScript
+        //   secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        //   sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        //   maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+        // });
     
-        res.cookie('refreshToken', jwtRefreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
-        });
+        // res.cookie('refreshToken', jwtRefreshToken, {
+        //   httpOnly: true,
+        //   secure: process.env.NODE_ENV === 'production',
+        //   sameSite: 'strict',
+        //   maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+        // });
         
         // Return basic user info for ui
         return user;
@@ -130,24 +169,46 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response, // Enables passing response
   ): Promise<Partial<User>> {
     try {
-      const login: {user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
+      type LoginStandardUserResponse =
+      | { user: Partial<User>; jwtAccessToken: string; jwtRefreshToken: string }
+      | { message: 'Email Already Registered'; email: string; provider: string }
+      | null;
 
-      res.cookie('jwt', login.jwtAccessToken, {
-        httpOnly: true,                                           // Prevent access from JavaScript
-        secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-        sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-        maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-      });
+      const loginResponse: LoginStandardUserResponse = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
+      
+      if (loginResponse === null) {
+        const redirectUrl = `${process.env.FRONTEND_URL}/auth/failed-login/?email=${encodeURIComponent(loginStandardUserDto.email)}`;
+        res.redirect(redirectUrl); 
+      } else if ('message' in loginResponse) {
+        console.log('standard user login response: existing email in other provider redirect');
+        const { email, provider } = loginResponse;
+        const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
+        res.redirect(redirectUrl);  
+      } else if ('user' in loginResponse) {
+        console.log('standard user register & login response: successful register/login');
+        const { user, jwtAccessToken, jwtRefreshToken } = loginResponse;
+        this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
+        return user;
+      };
+      // console.log('standard user login response: existing email in other provider redirect');
+      // this.sendSuccessfulLoginCookies(res, login.jwtAccessToken, login.jwtRefreshToken)
+      // res.cookie('jwt', login.jwtAccessToken, {
+      //   httpOnly: true,                                           // Prevent access from JavaScript
+      //   secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+      //   sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+      //   maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+      // });
 
-      res.cookie('refreshToken', login.jwtRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
-      });
+      // res.cookie('refreshToken', login.jwtRefreshToken, {
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === 'production',
+      //   sameSite: 'strict',
+      //   maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
+      // });
 
       // Return basic user info for ui
-      return login.user;
+      // return login.user;
+
     } catch (error: unknown) {
       this.logger.error(`Error during OAuth redirect from login-standard: ${error}`);
       // Redirect the user to an error page
@@ -208,11 +269,13 @@ export class AuthController {
     
     // if duplicate user attempt do not provide user and redirect to inform user of existing login method
     if (!user) {
+      console.log('oauth user register/login response: existing email in other provider redirect');
       const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(response['email'])}&provider=${encodeURIComponent(response['provider'])}`;
       res.redirect(redirectUrl);  
     } else {
       // return jwt access and refresh tokens and redirect to oauth/callback to fetch appropriate user data
       try {
+        console.log('oauth user register/login response: existing email in other provider redirect');
         const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id);
         const jwtRefreshToken: string = await this.authService.generateRefreshJwt();
         await this.authService.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
@@ -222,19 +285,20 @@ export class AuthController {
           throw new Error('FRONTEND_URL is not set in environment variables');
         };
         
-        res.cookie('jwt', jwtAccessToken, {
-          httpOnly: true,                                           // Prevent access from JavaScript
-          secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-          sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-          maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-        });
+        this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
+        // res.cookie('jwt', jwtAccessToken, {
+        //   httpOnly: true,                                           // Prevent access from JavaScript
+        //   secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
+        //   sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
+        //   maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
+        // });
     
-        res.cookie('refreshToken', jwtRefreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),
-        });
+        // res.cookie('refreshToken', jwtRefreshToken, {
+        //   httpOnly: true,
+        //   secure: process.env.NODE_ENV === 'production',
+        //   sameSite: 'strict',
+        //   maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),
+        // });
   
         // oauth requires redirect as ui redirected away from site, cannot return user data, 
         // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly

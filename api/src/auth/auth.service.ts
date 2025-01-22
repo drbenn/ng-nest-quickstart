@@ -101,26 +101,23 @@ export class AuthService {
 
 
   async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto)
-  : Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} | { message: 'Email Already Registered', email: string , provider: string }> {
+  : Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} | { message: 'Email Already Registered', email: string , provider: string } | null> {
     const { email, password } = registerStandardUserDto;
-
+    console.log(email);
+    
     // Check if the user already exists
-    const existingUser = await this.userRepository.findOne({ 
-      where: {
-        email,
-        oauth_provider: null
-      }});
-    if (!existingUser) {
-      this.logger.log('warn', `Cannot register user. User email already exists: ${existingUser.email}`);
-      return { 
-        message: 'Email Already Registered',
-        email: existingUser[0].email ,
-        provider: existingUser[0].oauth_provider
-      };
-    } else {
-      // Hash the password
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const existingUser = await this.userRepository.findOne({where: { email }});
+    console.log('existing user in register Standard user:');
+    
+    console.log(existingUser);
+    // console.log(existingUser.oauth_provider);
+    // console.log(existingUser.oauth_provider !== null);
+    
+    
+
+    if (existingUser === null) {
+      // create new uuser
+      const hashedPassword = await this.hashPassword(password);
 
       // Create and save the new user
       const newUser = this.userRepository.create({ email, password: hashedPassword });
@@ -134,38 +131,53 @@ export class AuthService {
       this.updateUsersRefreshTokenInDatabase(newUser.id, jwtRefreshToken);
 
       return { user: instanceToPlain(newUser), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
+    } else if (existingUser && existingUser.oauth_provider !== null) {
+      // user email already registered using oauth method where oauth provider has that email on record
+      this.logger.log('warn', `Cannot register user. User email already exists: ${existingUser.email}`);
+      return { 
+        message: 'Email Already Registered',
+        email: existingUser[0].email ,
+        provider: existingUser[0].oauth_provider
+      };
+    } else {
+      // 
+      return null;
     };
   };
 
-  async loginStandardUser(email: string, password: string): Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}> {
-    const user = await this.validateStandardUser(email, password);
+  async loginStandardUser(email: string, password: string)
+  : Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}| { message: 'Email Already Registered', email: string , provider: string } | null> {
+    const hashedPassword = await this.hashPassword(password);
+    // const user = await this.validateStandardUser(email, hashedPassword);
+    const user = await this.userRepository.findOne({ where: { 
+      email
+    }});
 
-    if (!user) throw new UnauthorizedException('Invalid email or password');
-
-    const jwtAccessToken = await this.generateAccessJwt(user.id);
-    const jwtRefreshToken = await this.generateRefreshJwt();
-
-    // update refresh jwt in database for future access
-    this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
-
-    return { user: instanceToPlain(user), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
+    if (user === null) {
+      this.logger.log('warn', `Cannot login user. User email/password combination not found: ${email}`);
+      return null;
+    } else if (user && user.password !== hashedPassword) {
+      return { 
+        message: 'Email Already Registered',
+        email: user.email ,
+        provider: user.oauth_provider
+      };
+    } else {
+      // otherwise return user information with tokens
+      const jwtAccessToken = await this.generateAccessJwt(user.id);
+      const jwtRefreshToken = await this.generateRefreshJwt();
+  
+      // update refresh jwt in database for future access
+      this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
+  
+      return { user: instanceToPlain(user), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
+    };
   };
 
-  async validateStandardUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
-
-    if (!user) {
-      this.logger.log('warn', `Cannot login user. User email not found: ${email}`);
-      return null; // User not found
-    };
-
-    // Compare hashed passwords
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-    if (!isPasswordValid) {
-      return null; // Invalid password
-    }
-    return user; // Authentication successful
+  private async hashPassword(rawPassword: string): Promise<string> {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(rawPassword, saltRounds);
+    return hashedPassword;
   };
 
 
@@ -177,7 +189,7 @@ export class AuthService {
 
   // used by every OAuth Auth Guard Strategy to validate user
   async validateOAuthLogin(profile: Profile, provider: string)
-  : Promise<User | { message: 'Email Already Registered', email: string , provider: string }> {    
+  : Promise< Partial<User> | { message: 'Email Already Registered', email: string , provider: string }> {    
     // Extract user information based on provider
     let email: string =  profile.emails[0].value || '';
     let full_name: string = '';
@@ -231,7 +243,7 @@ export class AuthService {
         await this.userRepository.save(user);
       };
   
-      return user;
+      return instanceToPlain(user);
     };
   };
 

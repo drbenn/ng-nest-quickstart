@@ -34,31 +34,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     
-    console.log(request.user);
-    
-
-    console.log('REQUEST COOKIES IN JWT AUTH GUARD');
-    
-    console.log(request.cookies);
-    
+    console.log('JWT Guard user: ', request.user);
+    console.log('JWT Guard cookies: ', request.cookies);
 
     // First, call the default JWT AuthGuard functionality to validate the access token
     try {
       await super.canActivate(context);
       return true;  // Access token is valid
     } catch (error) {
-      console.log(error);
       const refreshToken = request.cookies['refreshToken'];
       let newAccessToken: string;
       if (error && refreshToken) {
-        console.log('BOOOYAH');
-        console.log(refreshToken);
         const user = await this.authService.findOneUserByRefreshToken(refreshToken);
-        console.log(user);
-        
         newAccessToken = await this.authService.generateAccessJwt(user.id);
-        console.log('i got a new access token: ', newAccessToken);
-        
+
         // Set the new access token in the response cookies (httpOnly)
         request.res.cookie('jwt', newAccessToken, {
           httpOnly: true,                                           // Prevent access from JavaScript
