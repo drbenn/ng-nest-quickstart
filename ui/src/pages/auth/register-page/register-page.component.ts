@@ -46,14 +46,15 @@ export class RegisterPageComponent {
       password: <string>this.form.value.password
     };
     this.standardAuthService.registerStandardUser(createStandardUserDto)
-    .subscribe({
-    next: (user: UserLoginJwtDto) => {
-      this.loginUser(user);
-    },
-    error: (error) => {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
-    },
-  });
+//     .subscribe({
+//     next: (user: UserLoginJwtDto) => {
+//       this.loginUser(user);
+//     },
+//     error: (error) => {
+//       this.messageService.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
+//     },
+//   }
+// );
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {

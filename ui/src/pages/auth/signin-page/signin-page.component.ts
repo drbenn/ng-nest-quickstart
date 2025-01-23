@@ -49,14 +49,15 @@ export class SigninPageComponent {
       email: <string>this.form.value.email,
       password: <string>this.form.value.password
     };
-    this.standardAuthService.loginStandardUser(loginStandardUserDto).subscribe({
-      next:(user: UserLoginJwtDto) => {
-        this.loginUser(user);
-      },
-      error: (error) => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
-      }
-    });
+    this.standardAuthService.loginStandardUser(loginStandardUserDto);
+    // .subscribe({
+    //   next:(user: UserLoginJwtDto) => {
+    //     this.loginUser(user);
+    //   },
+    //   error: (error) => {
+    //     this.messageService.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
+    //   }
+    // });
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {

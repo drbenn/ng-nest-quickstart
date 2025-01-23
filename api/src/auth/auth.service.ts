@@ -9,6 +9,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { instanceToPlain } from 'class-transformer';
 import { Profile } from 'passport';
 import { randomBytes } from 'crypto';
+import { ResponseMessageDto, UserWithTokensDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -101,7 +102,7 @@ export class AuthService {
 
 
   async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto)
-  : Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string} | { message: 'Email Already Registered', email: string , provider: string } | null> {
+  : Promise<UserWithTokensDto | ResponseMessageDto | null> {
     const { email, password } = registerStandardUserDto;
     console.log(email);
     
@@ -134,11 +135,12 @@ export class AuthService {
     } else if (existingUser && existingUser.oauth_provider !== null) {
       // user email already registered using oauth method where oauth provider has that email on record
       this.logger.log('warn', `Cannot register user. User email already exists: ${existingUser.email}`);
-      return { 
-        message: 'Email Already Registered',
-        email: existingUser[0].email ,
-        provider: existingUser[0].oauth_provider
-      };
+      const responseMessage: ResponseMessageDto = { 
+        message: 'email already registered',
+        email: existingUser.email ,
+        provider: existingUser.oauth_provider
+      }
+      return responseMessage;
     } else {
       // 
       return null;
@@ -146,7 +148,7 @@ export class AuthService {
   };
 
   async loginStandardUser(email: string, password: string)
-  : Promise<{user: Partial<User>, jwtAccessToken: string, jwtRefreshToken: string}| { message: 'Email Already Registered', email: string , provider: string } | null> {
+  : Promise<UserWithTokensDto | ResponseMessageDto | null> {
     const hashedPassword = await this.hashPassword(password);
     // const user = await this.validateStandardUser(email, hashedPassword);
     const user = await this.userRepository.findOne({ where: { 
@@ -158,7 +160,7 @@ export class AuthService {
       return null;
     } else if (user && user.password !== hashedPassword) {
       return { 
-        message: 'Email Already Registered',
+        message: 'email already registered',
         email: user.email ,
         provider: user.oauth_provider
       };
@@ -189,7 +191,7 @@ export class AuthService {
 
   // used by every OAuth Auth Guard Strategy to validate user
   async validateOAuthLogin(profile: Profile, provider: string)
-  : Promise< Partial<User> | { message: 'Email Already Registered', email: string , provider: string }> {    
+  : Promise< Partial<User> | ResponseMessageDto> {    
     // Extract user information based on provider
     let email: string =  profile.emails[0].value || '';
     let full_name: string = '';
@@ -202,7 +204,7 @@ export class AuthService {
     
     if (existingUser.length && existingUser[0].oauth_provider !== provider) {
       return { 
-        message: 'Email Already Registered',
+        message: 'email already registered',
         email: existingUser[0].email ,
         provider: existingUser[0].oauth_provider
       };

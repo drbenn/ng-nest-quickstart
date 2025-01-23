@@ -58,3 +58,11 @@ export interface CreateOAuthUserDto {
   full_name?: string | null,
   img_url?: string | null
 }
+
+export interface ResponseMessageDto {
+  message: string;
+  email?: string;
+  provider?: string;
+  isRedirect?: boolean;
+  redirectPath?: string;
+}

@@ -12,6 +12,8 @@ import { AppState } from '../store/app/app.state';
 import { AuthState } from '../store/auth/auth.state';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,7 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       ripple: true,
-      inputStyle: 'outlined', // 'outlined' | 'filled';
+      inputStyle: 'outlined',             // 'outlined' | 'filled';
       theme: {
           preset: MyDarkPreset,
           options: {
@@ -27,6 +29,8 @@ export const appConfig: ApplicationConfig = {
         },
       }
     }),
+    importProvidersFrom(ToastModule),     // Import PrimeNG ToastModule to entire application
+    MessageService,                       // Provide PrimeNG MessageService to entrire application
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideStore([AuthState]),
