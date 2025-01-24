@@ -1,15 +1,17 @@
 import { User } from "src/users/user.entity";
 
-export class ResponseMessageDto {
-  message: string;
+export class AuthResponseMessageDto {
+  message?: string;
+  user?: Partial<User>;
   email?: string;
   provider?: string;
   isRedirect?: boolean;
-  redirectPath?: string;
+  jwtAccessToken?: string;
+  jwtRefreshToken?: string;
 }
 
-export class UserWithTokensDto {
-  user: Partial<User>;
-  jwtAccessToken: string;
-  jwtRefreshToken: string;
-}
+// export class UserWithTokensDto {
+//   user: Partial<User>;
+//   jwtAccessToken: string;
+//   jwtRefreshToken: string;
+// }

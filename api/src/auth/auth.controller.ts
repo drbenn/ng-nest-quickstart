@@ -6,7 +6,7 @@ import { LoginStandardUserDto, RegisterStandardUserDto } from 'src/users/dto/use
 import { User } from 'src/users/user.entity';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { ResponseMessageDto, UserWithTokensDto } from './auth.dto';
+import { AuthResponseMessageDto } from './auth.dto';
 
 export interface OAuthUser {
   id: number;
@@ -114,7 +114,7 @@ export class AuthController {
   async register(
     @Body() registerStandardUserDto: RegisterStandardUserDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<Partial<User> | ResponseMessageDto | any> {
+  ): Promise<Partial<User> | AuthResponseMessageDto | any> {
     try {
       // register user and provide newUser record with user id record
       // type NewUserResponse =
@@ -122,47 +122,34 @@ export class AuthController {
       //   | ResponseMessageDto
       //   | null;
 
-      const newUserResponse: UserWithTokensDto | ResponseMessageDto | null = await this.authService.registerStandardUser(registerStandardUserDto);
+      const newUserResponse: AuthResponseMessageDto | null = await this.authService.registerStandardUser(registerStandardUserDto);
       console.log('resposne from registerStandardUser in service: ', newUserResponse);
       
     
       if (newUserResponse === null) {
-        const responseMessage: ResponseMessageDto = {
+        const responseMessage: AuthResponseMessageDto = {
           message: 'Auth failed. Account with email does not exist',
           isRedirect: true,
           email: registerStandardUserDto.email,
-          redirectPath: `/auth/failed-login/`
+          // redirectPath: `/auth/failed-login/`
         };
         return responseMessage;
       } else if ('message' in newUserResponse) {
         console.log('standard user register & login response: existing email in other provider redirect');
         const { email, provider } = newUserResponse;
-        const responseMessage: ResponseMessageDto = {
+        const responseMessage: AuthResponseMessageDto = {
           message: 'Auth failed. Account with email exists but under oauth login',
           email: email,
           provider: provider,
           isRedirect: true,
-          redirectPath: `/auth/existing-user/`
+          // redirectPath: `/auth/existing-user/`
         };
         return responseMessage;      
       } else if ('user' in newUserResponse) {
         console.log('standard user register & login response: successful register/login');
         const { user, jwtAccessToken, jwtRefreshToken } = newUserResponse;
-        const userReturn = user as UserWithTokensDto;
+        const userReturn = user as AuthResponseMessageDto;
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
-    //     // res.cookie('jwt', jwtAccessToken, {
-    //     //   httpOnly: true,                                           // Prevent access from JavaScript
-    //     //   secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-    //     //   sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-    //     //   maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-    //     // });
-    
-    //     // res.cookie('refreshToken', jwtRefreshToken, {
-    //     //   httpOnly: true,
-    //     //   secure: process.env.NODE_ENV === 'production',
-    //     //   sameSite: 'strict',
-    //     //   maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
-    //     // });
         
         // Return basic user info for ui
         return userReturn;
@@ -181,8 +168,7 @@ export class AuthController {
   ): Promise<Partial<User>> {
     try {
       type LoginStandardUserResponse =
-      | UserWithTokensDto
-      | ResponseMessageDto
+      | AuthResponseMessageDto
       | null;
 
       const loginResponse: LoginStandardUserResponse = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
@@ -201,24 +187,6 @@ export class AuthController {
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
         return user;
       };
-      // console.log('standard user login response: existing email in other provider redirect');
-      // this.sendSuccessfulLoginCookies(res, login.jwtAccessToken, login.jwtRefreshToken)
-      // res.cookie('jwt', login.jwtAccessToken, {
-      //   httpOnly: true,                                           // Prevent access from JavaScript
-      //   secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-      //   sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-      //   maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-      // });
-
-      // res.cookie('refreshToken', login.jwtRefreshToken, {
-      //   httpOnly: true,
-      //   secure: process.env.NODE_ENV === 'production',
-      //   sameSite: 'strict',
-      //   maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),  // Expiration time
-      // });
-
-      // Return basic user info for ui
-      // return login.user;
 
     } catch (error: unknown) {
       this.logger.error(`Error during OAuth redirect from login-standard: ${error}`);
@@ -270,12 +238,23 @@ export class AuthController {
     return this.handleOAuthRedirect(req, res);
   }
 
-  // User has already been authenticated by OAuth and new user added to db or user db information fetched.
-  // Either way, with successful Oauth interchange with provider, req now includes user data of type User from the db.
+  /**
+   * User has already been authenticated by OAuth and new user added to db or user db information fetched.
+   * Either by new oauth login and registering in site db or oauth login with existing site db account, with 
+   * successful Oauth authentication with provider, req now includes user data of type User from the db which
+   * will then be provided to ui for usage along with auth token to pass guards and refresh token to get new
+   * access token when needed.
+   * 
+   * As using Oauth, ui must redirect offsite to access provider. Thus on response to oauth authentication
+   * in server, server must redirect in response. If successful will redirect to oauth/callback. If fail,
+   * will redirect to auth/existing-user path with parameters for 'existing-user' page to display to user
+   * provider where the user has already registered with site with so they can use that provider or standard
+   * email/password login.
+   */
   private async handleOAuthRedirect(req: Request, res: Response): Promise<void> {
     // console.log('handle OATH REDIRECT');
     // console.log(req);
-    const response: Partial<User> | ResponseMessageDto = req['user'];                      // user from database, not oauth user profile
+    const response: Partial<User> | AuthResponseMessageDto = req['user'];  // user from database, not oauth user profile
     let user: Partial<User> | null = response['message'] ? null : response;
     
     // if duplicate user attempt do not provide user and redirect to inform user of existing login method
@@ -297,19 +276,6 @@ export class AuthController {
         };
         
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
-        // res.cookie('jwt', jwtAccessToken, {
-        //   httpOnly: true,                                           // Prevent access from JavaScript
-        //   secure: process.env.NODE_ENV === 'production',            // Ensure it's sent over HTTPS (only works in production with HTTPS)
-        //   sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
-        //   maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
-        // });
-    
-        // res.cookie('refreshToken', jwtRefreshToken, {
-        //   httpOnly: true,
-        //   secure: process.env.NODE_ENV === 'production',
-        //   sameSite: 'strict',
-        //   maxAge: Number(process.env.JWT_REFRESH_TOKEN_EXPIRATION),
-        // });
   
         // oauth requires redirect as ui redirected away from site, cannot return user data, 
         // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly
