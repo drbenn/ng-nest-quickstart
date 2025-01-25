@@ -18,7 +18,6 @@ export class FailedLoginComponent {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       this.email = params.get('email');
-      this.provider = params.get('provider');
     });
   }
 }

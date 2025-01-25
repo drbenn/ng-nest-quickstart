@@ -9,7 +9,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { instanceToPlain } from 'class-transformer';
 import { Profile } from 'passport';
 import { randomBytes } from 'crypto';
-import { AuthResponseMessageDto } from './auth.dto';
+import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -100,50 +100,46 @@ export class AuthService {
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-
+  // when user registers with standard email/ password combination as opposed to using OAuth.
   async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto)
-  : Promise<AuthResponseMessageDto | null> {
+  : Promise<AuthResponseMessageDto> {
     const { email, password } = registerStandardUserDto;
-    console.log(email);
     
-    // Check if the user already exists
-    const existingUser = await this.userRepository.findOne({where: { email }});
-    console.log('existing user in register Standard user:');
-    
-    console.log(existingUser);
-    // console.log(existingUser.oauth_provider);
-    // console.log(existingUser.oauth_provider !== null);
-    
-    
+    // Check if the user already exists via email
+    const existingUser: User | null = await this.userRepository.findOne({where: { email }});
 
     if (existingUser === null) {
-      // create new uuser
-      const hashedPassword = await this.hashPassword(password);
+      // create new user
+      const hashedPassword: string = await this.hashPassword(password);
 
       // Create and save the new user
-      const newUser = this.userRepository.create({ email, password: hashedPassword });
+      const newUser: User = this.userRepository.create({ email, password: hashedPassword });
       await this.userRepository.save(newUser);
 
       // create access and refresh jwts for users first login
-      const jwtAccessToken = await this.generateAccessJwt(newUser.id);
-      const jwtRefreshToken = await this.generateRefreshJwt();
+      const jwtAccessToken: string = await this.generateAccessJwt(newUser.id);
+      const jwtRefreshToken: string = await this.generateRefreshJwt();
 
       // update refresh jwt in database for future access
       this.updateUsersRefreshTokenInDatabase(newUser.id, jwtRefreshToken);
 
-      return { user: instanceToPlain(newUser), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
-    } else if (existingUser && existingUser.oauth_provider !== null) {
-      // user email already registered using oauth method where oauth provider has that email on record
-      this.logger.log('warn', `Cannot register user. User email already exists: ${existingUser.email}`);
-      const responseMessage: AuthResponseMessageDto = { 
-        message: 'email already registered',
+      // provide success AuthResponseMessage from successful registration
+      const successfulRegisterResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_REGISTRATION_SUCCESS,
+        user: instanceToPlain(newUser),
+        jwtAccessToken: jwtAccessToken,
+        jwtRefreshToken: jwtRefreshToken
+      };
+      return successfulRegisterResponseMessage;
+    } else if (existingUser) {
+      // user email already registered through oauth or standard method. Either way, cannot create new account.
+      this.logger.log('warn', `Cannot register user. User email/account already exists in db: ${existingUser.email}`);
+      const failedRegistrationResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_REGISTRATION_FAILED,
         email: existingUser.email ,
         provider: existingUser.oauth_provider
-      }
-      return responseMessage;
-    } else {
-      // 
-      return null;
+      };
+      return failedRegistrationResponseMessage;
     };
   };
 
@@ -157,22 +153,40 @@ export class AuthService {
 
     if (user === null) {
       this.logger.log('warn', `Cannot login user. User email/password combination not found: ${email}`);
-      return null;
+      const noRegisteredUserResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED,
+        email: email
+      };
+      return noRegisteredUserResponseMessage;
+    } else if (user && user.oauth_provider !== null) {
+      const existingOauthRegistrationResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_LOGIN_FAILED_EXISTING,
+        email: email,
+        provider: user.oauth_provider
+      };
+      return existingOauthRegistrationResponseMessage;
     } else if (user && user.password !== hashedPassword) {
-      return { 
-        message: 'email already registered',
+      const failedPasswordResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_LOGIN_FAILED_MISMATCH,
         email: user.email ,
         provider: user.oauth_provider
       };
-    } else {
+      return failedPasswordResponseMessage;
+    } else if (user && user.password === hashedPassword) {
       // otherwise return user information with tokens
       const jwtAccessToken = await this.generateAccessJwt(user.id);
       const jwtRefreshToken = await this.generateRefreshJwt();
   
       // update refresh jwt in database for future access
       this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
-  
-      return { user: instanceToPlain(user), jwtAccessToken: jwtAccessToken, jwtRefreshToken: jwtRefreshToken };
+      
+      const standardLoginSuccessResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_LOGIN_SUCCESS,
+        user: instanceToPlain(user),
+        jwtAccessToken: jwtAccessToken,
+        jwtRefreshToken: jwtRefreshToken
+      };
+      return standardLoginSuccessResponseMessage;
     };
   };
 

@@ -6,7 +6,7 @@ import { LoginStandardUserDto, RegisterStandardUserDto } from 'src/users/dto/use
 import { User } from 'src/users/user.entity';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { AuthResponseMessageDto } from './auth.dto';
+import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
 
 export interface OAuthUser {
   id: number;
@@ -114,50 +114,32 @@ export class AuthController {
   async register(
     @Body() registerStandardUserDto: RegisterStandardUserDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<Partial<User> | AuthResponseMessageDto | any> {
+  ): Promise<AuthResponseMessageDto> {
     try {
-      // register user and provide newUser record with user id record
-      // type NewUserResponse =
-      //   | UserWithTokensDto
-      //   | ResponseMessageDto
-      //   | null;
-
-      const newUserResponse: AuthResponseMessageDto | null = await this.authService.registerStandardUser(registerStandardUserDto);
+      const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);
       console.log('resposne from registerStandardUser in service: ', newUserResponse);
-      
-    
-      if (newUserResponse === null) {
-        const responseMessage: AuthResponseMessageDto = {
-          message: 'Auth failed. Account with email does not exist',
-          isRedirect: true,
-          email: registerStandardUserDto.email,
-          // redirectPath: `/auth/failed-login/`
-        };
-        return responseMessage;
-      } else if ('message' in newUserResponse) {
-        console.log('standard user register & login response: existing email in other provider redirect');
-        const { email, provider } = newUserResponse;
-        const responseMessage: AuthResponseMessageDto = {
-          message: 'Auth failed. Account with email exists but under oauth login',
-          email: email,
-          provider: provider,
-          isRedirect: true,
-          // redirectPath: `/auth/existing-user/`
-        };
-        return responseMessage;      
-      } else if ('user' in newUserResponse) {
-        console.log('standard user register & login response: successful register/login');
-        const { user, jwtAccessToken, jwtRefreshToken } = newUserResponse;
-        const userReturn = user as AuthResponseMessageDto;
+
+      if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
+        const failedRegistrationResponseMessage: AuthResponseMessageDto = newUserResponse;
+        return failedRegistrationResponseMessage;
+      } 
+      else if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS) {
+        const { user, jwtAccessToken, jwtRefreshToken, message } = newUserResponse;
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
         
         // Return basic user info for ui
-        return userReturn;
+        const successfulRegisterResponseMessage: AuthResponseMessageDto = {
+          message: message,
+          user: user
+        };
+        return successfulRegisterResponseMessage;
       };
     } catch (error: unknown) {
       this.logger.error(`Error during standard registration: ${error}`);
-      // Redirect the user to an error page
-      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+      const errorRegisterResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_REGISTRATION_ERROR
+      };
+      return errorRegisterResponseMessage;
     };
   };
 
@@ -165,33 +147,50 @@ export class AuthController {
   async login(
     @Body() loginStandardUserDto: LoginStandardUserDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<Partial<User>> {
+  ): Promise<AuthResponseMessageDto> {
     try {
-      type LoginStandardUserResponse =
-      | AuthResponseMessageDto
-      | null;
-
-      const loginResponse: LoginStandardUserResponse = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
+      const loginResponse: AuthResponseMessageDto = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
       
-      if (loginResponse === null) {
-        const redirectUrl = `${process.env.FRONTEND_URL}/auth/failed-login/?email=${encodeURIComponent(loginStandardUserDto.email)}`;
-        res.redirect(redirectUrl); 
-      } else if ('message' in loginResponse) {
-        console.log('standard user login response: existing email in other provider redirect');
-        const { email, provider } = loginResponse;
-        const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
-        res.redirect(redirectUrl);  
-      } else if ('user' in loginResponse) {
+      if (loginResponse.message === AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED) {
+        const failedEmailNotRegisteredResponseMessage: AuthResponseMessageDto = loginResponse;
+        // const redirectUrl = `${process.env.FRONTEND_URL}/auth/failed-login/?email=${encodeURIComponent(loginStandardUserDto.email)}`;
+        // res.redirect(redirectUrl);
+        return failedEmailNotRegisteredResponseMessage;
+      }
+      else if (loginResponse.message === AuthMessages.STANDARD_LOGIN_FAILED_EXISTING) {
+        // console.log('standard user login response: existing email in other provider redirect');
+        // const { email, provider } = loginResponse;
+        // const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
+        // res.redirect(redirectUrl);  
+        const existingOauthRegistrationResponseMessage: AuthResponseMessageDto = loginResponse;
+        return existingOauthRegistrationResponseMessage;
+      }
+      else if (loginResponse.message === AuthMessages.STANDARD_LOGIN_FAILED_MISMATCH) {
+        // console.log('standard user login response: existing email in other provider redirect');
+        // const { email, provider } = loginResponse;
+        // const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
+        // res.redirect(redirectUrl);  
+        const failedPasswordResponseMessage: AuthResponseMessageDto = loginResponse;
+        return failedPasswordResponseMessage;
+      }
+      else if (loginResponse.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
         console.log('standard user register & login response: successful register/login');
-        const { user, jwtAccessToken, jwtRefreshToken } = loginResponse;
+        const { message, user, jwtAccessToken, jwtRefreshToken } = loginResponse;
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
-        return user;
+        // return user;
+        const standardLoginSuccessResponseMessage: AuthResponseMessageDto = { 
+          message: message,
+          user: user
+        };
+        return standardLoginSuccessResponseMessage;
       };
 
     } catch (error: unknown) {
       this.logger.error(`Error during OAuth redirect from login-standard: ${error}`);
-      // Redirect the user to an error page
-      res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
+      const errorLoginResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_LOGIN_ERROR
+      };
+      return errorLoginResponseMessage;
     };
   };
 

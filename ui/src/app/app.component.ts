@@ -9,6 +9,8 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
 import { dispatch } from '@ngxs/store';
 import { CheckAuthenticatedUser } from '../store/auth/auth.actions';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 
 interface City {
@@ -19,13 +21,15 @@ interface City {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ButtonModule, SelectModule, CommonModule, FormsModule, NavbarComponent, FooterComponent],
+  imports: [RouterOutlet, ButtonModule, SelectModule, CommonModule, FormsModule, NavbarComponent, FooterComponent, ToastModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  providers: [MessageService]
 })
 export class AppComponent implements OnInit {
 private checkAuthenticatedUser = dispatch(CheckAuthenticatedUser);
   
+constructor (private messageService: MessageService) {}
 
   cities: City[] | undefined;
 
@@ -41,6 +45,7 @@ private checkAuthenticatedUser = dispatch(CheckAuthenticatedUser);
         { name: 'Istanbul', code: 'IST' },
         { name: 'Paris', code: 'PRS' }
     ];
+    this.messageService.add({ severity: 'success', summary: 'BOOYAH', detail: 'STARTING APP', life: 6000 });
   }
 
 }

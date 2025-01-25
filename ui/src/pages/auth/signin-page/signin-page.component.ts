@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
 import { ButtonModule } from 'primeng/button';
-import { dispatch, Store } from '@ngxs/store';
-import { LoginUser, LogoutUser } from '../../../store/auth/auth.actions';
 import { DividerModule } from 'primeng/divider';
 import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -11,9 +9,7 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { CheckboxChangeEvent, CheckboxModule } from 'primeng/checkbox';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { StandardAuthService } from '../services/standard-auth.service';
-import { LoginStandardUserDto, UserLoginJwtDto } from '../../../types/userDto.types';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { LoginStandardUserDto } from '../../../types/userDto.types';
 import { OauthAuthService } from '../services/oauth-auth.service';
 
 @Component({
@@ -22,19 +18,16 @@ import { OauthAuthService } from '../services/oauth-auth.service';
   imports: [
     StandardPageWrapperComponent, ButtonModule, DividerModule, InputTextModule,
     FloatLabelModule, CommonModule, FormsModule, ReactiveFormsModule, CheckboxModule,
-    RouterLink, RouterLinkActive, ToastModule],
+    RouterLink, RouterLinkActive],
   templateUrl: './signin-page.component.html',
-  styleUrl: './signin-page.component.scss',
-  providers: [MessageService]
+  styleUrl: './signin-page.component.scss'
 })
 export class SigninPageComponent {
-  private loginUser = dispatch(LoginUser);
   protected facebookSvg: string = '../../../assets/icons/facebook.svg';
 
   constructor(
     private readonly standardAuthService: StandardAuthService,
-    private readonly oauthAuthService: OauthAuthService,
-    private readonly messageService: MessageService
+    private readonly oauthAuthService: OauthAuthService
   ) {}
 
   protected form = new FormGroup({
@@ -50,14 +43,6 @@ export class SigninPageComponent {
       password: <string>this.form.value.password
     };
     this.standardAuthService.loginStandardUser(loginStandardUserDto);
-    // .subscribe({
-    //   next:(user: UserLoginJwtDto) => {
-    //     this.loginUser(user);
-    //   },
-    //   error: (error) => {
-    //     this.messageService.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
-    //   }
-    // });
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {

@@ -7,29 +7,23 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
 import { DividerModule } from 'primeng/divider';
-import { dispatch } from '@ngxs/store';
-import { LoginUser } from '../../../store/auth/auth.actions';
-import { CreateStandardUserDto, UserLoginJwtDto } from '../../../types/userDto.types';
+import { CreateStandardUserDto } from '../../../types/userDto.types';
 import { StandardAuthService } from '../services/standard-auth.service';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'register-page',
   standalone:true,
   imports: [
     StandardPageWrapperComponent, ButtonModule, InputTextModule, DividerModule,
-    FloatLabelModule, CommonModule, FormsModule, ReactiveFormsModule, CheckboxModule, ToastModule],
+    FloatLabelModule, CommonModule, FormsModule, ReactiveFormsModule, CheckboxModule],
   templateUrl: './register-page.component.html',
-  styleUrl: './register-page.component.scss',
-  providers: [MessageService]
+  styleUrl: './register-page.component.scss'
 })
 export class RegisterPageComponent {
-  private loginUser = dispatch(LoginUser);
 
   constructor(
-    private standardAuthService: StandardAuthService,
-    private messageService: MessageService
+    private standardAuthService: StandardAuthService
   ) {}
 
   protected form = new FormGroup({
@@ -46,15 +40,6 @@ export class RegisterPageComponent {
       password: <string>this.form.value.password
     };
     this.standardAuthService.registerStandardUser(createStandardUserDto)
-//     .subscribe({
-//     next: (user: UserLoginJwtDto) => {
-//       this.loginUser(user);
-//     },
-//     error: (error) => {
-//       this.messageService.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
-//     },
-//   }
-// );
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {
