@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS \"users\" (
   last_name VARCHAR(20),
   full_name VARCHAR(40),
   img_url VARCHAR(100),
+  reset_id VARCHAR(100),
   settings JSONB NULL
 );
 

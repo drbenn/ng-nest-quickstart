@@ -117,7 +117,6 @@ export class AuthController {
   ): Promise<AuthResponseMessageDto> {
     try {
       const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);
-      console.log('resposne from registerStandardUser in service: ', newUserResponse);
 
       if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
         const failedRegistrationResponseMessage: AuthResponseMessageDto = newUserResponse;
@@ -153,23 +152,13 @@ export class AuthController {
       
       if (loginResponse.message === AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED) {
         const failedEmailNotRegisteredResponseMessage: AuthResponseMessageDto = loginResponse;
-        // const redirectUrl = `${process.env.FRONTEND_URL}/auth/failed-login/?email=${encodeURIComponent(loginStandardUserDto.email)}`;
-        // res.redirect(redirectUrl);
         return failedEmailNotRegisteredResponseMessage;
       }
       else if (loginResponse.message === AuthMessages.STANDARD_LOGIN_FAILED_EXISTING) {
-        // console.log('standard user login response: existing email in other provider redirect');
-        // const { email, provider } = loginResponse;
-        // const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
-        // res.redirect(redirectUrl);  
         const existingOauthRegistrationResponseMessage: AuthResponseMessageDto = loginResponse;
         return existingOauthRegistrationResponseMessage;
       }
       else if (loginResponse.message === AuthMessages.STANDARD_LOGIN_FAILED_MISMATCH) {
-        // console.log('standard user login response: existing email in other provider redirect');
-        // const { email, provider } = loginResponse;
-        // const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&provider=${encodeURIComponent(provider)}`;
-        // res.redirect(redirectUrl);  
         const failedPasswordResponseMessage: AuthResponseMessageDto = loginResponse;
         return failedPasswordResponseMessage;
       }
@@ -177,6 +166,7 @@ export class AuthController {
         console.log('standard user register & login response: successful register/login');
         const { message, user, jwtAccessToken, jwtRefreshToken } = loginResponse;
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
+
         // return user;
         const standardLoginSuccessResponseMessage: AuthResponseMessageDto = { 
           message: message,
@@ -211,11 +201,17 @@ export class AuthController {
   async resetStandardPassword(
     @Body() resetStandardPasswordDto: ResetStandardPasswordDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<void> {
+  ): Promise<AuthResponseMessageDto> {
     try {
       // accept users new password and update if email and resetId match, then generate new resetId for next time user needs to reset password
+      const resetPasswordResponse: AuthResponseMessageDto = await this.authService.resetStandardUserPassword(resetStandardPasswordDto);
+      return resetPasswordResponse;
     } catch (error: unknown) {
-
+      this.logger.error(`Error resetting standard registration password: ${error}`);
+      const errorResetPasswordResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_REGISTRATION_ERROR
+      };
+      return errorResetPasswordResponseMessage;
     };
   };
 

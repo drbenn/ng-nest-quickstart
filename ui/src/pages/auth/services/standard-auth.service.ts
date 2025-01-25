@@ -91,11 +91,17 @@ export class StandardAuthService {
     );
   };
 
-  public resetStandardUserPassword(resetStandardUserDto: RequestResetStandardUserDto): any {
-    return this.http.post(
-      `${this.baseUrl}/reset-standard-password`,
-      resetStandardUserDto
-    );
+  public resetStandardUserPassword(resetStandardUserDto: RequestResetStandardUserDto): void {
+    this.http.post<AuthResponseMessageDto>(`${this.baseUrl}/reset-standard-password`,resetStandardUserDto)
+      .subscribe({
+        next: (response: AuthResponseMessageDto) => {
+          if ('user' in response) {
+            const user: UserLoginJwtDto = response.user as UserLoginJwtDto;
+            this.loginUser(user);
+          }
+        },
+        error: (error: unknown) => this.handleError(error);
+      })
   };
 
   private handleError(error: HttpErrorResponse | any): Observable<never> {

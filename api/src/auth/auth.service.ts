@@ -1,7 +1,7 @@
 import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RegisterStandardUserDto } from 'src/users/dto/user.dto';
+import { RegisterStandardUserDto, RequestResetStandardPasswordDto, ResetStandardPasswordDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
 import { Logger, Repository, UpdateResult } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -101,19 +101,21 @@ export class AuthService {
   //////////////////////////////////////////////////////////////////////////////////
 
   // when user registers with standard email/ password combination as opposed to using OAuth.
-  async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto)
-  : Promise<AuthResponseMessageDto> {
+  async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto): Promise<AuthResponseMessageDto> {
     const { email, password } = registerStandardUserDto;
     
     // Check if the user already exists via email
     const existingUser: User | null = await this.userRepository.findOne({where: { email }});
 
     if (existingUser === null) {
-      // create new user
+      // hash user generated password for storage in db
       const hashedPassword: string = await this.hashPassword(password);
 
+      // create reset_id for future usage to assist resetting standard user password
+      const reset_id: string = await this.generateResetId();
+
       // Create and save the new user
-      const newUser: User = this.userRepository.create({ email, password: hashedPassword });
+      const newUser: User = this.userRepository.create({ email, password: hashedPassword, reset_id });
       await this.userRepository.save(newUser);
 
       // create access and refresh jwts for users first login
@@ -143,8 +145,7 @@ export class AuthService {
     };
   };
 
-  async loginStandardUser(email: string, password: string)
-  : Promise<AuthResponseMessageDto | null> {
+  async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
     const hashedPassword = await this.hashPassword(password);
     // const user = await this.validateStandardUser(email, hashedPassword);
     const user = await this.userRepository.findOne({ where: { 
@@ -190,10 +191,61 @@ export class AuthService {
     };
   };
 
+
+  async resetStandardUserPassword(resetDto: ResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
+    const { email, newPassword, resetId } = resetDto;
+    
+    // Check if user in db by email and resetId
+    const user: User | null = await this.userRepository.findOne({where: { email, reset_id: resetId }});
+
+    if (!user) {
+      // user not found error
+      const standardResetLoginFailResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_RESET_FAILED,
+      };
+      return standardResetLoginFailResponseMessage;
+    } 
+    else {
+      // update the user with new hashed password and create new reset_id for next use
+
+      // hash user generated password for storage in db
+      const hashedPassword: string = await this.hashPassword(newPassword);
+
+      // create reset_id for future usage to assist resetting standard user password
+      const newResetId: string = await this.generateResetId();
+
+      // update password and reset_id for saving updated record
+      user.password = hashedPassword;
+      user.reset_id = newResetId;
+
+      // save new hashed password and reset_id for user
+      await this.userRepository.save(user);
+
+      const jwtAccessToken = await this.generateAccessJwt(user.id);
+      const jwtRefreshToken = await this.generateRefreshJwt();
+  
+      // update refresh jwt in database for future access
+      this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
+      
+      const standardResetLoginSuccessResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_RESET_SUCCESS,
+        user: instanceToPlain(user),
+        jwtAccessToken: jwtAccessToken,
+        jwtRefreshToken: jwtRefreshToken
+      };
+      return standardResetLoginSuccessResponseMessage;
+    };
+  };
+
+
   private async hashPassword(rawPassword: string): Promise<string> {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(rawPassword, saltRounds);
     return hashedPassword;
+  };
+
+  private async generateResetId(): Promise<string> {
+    return await randomBytes(64).toString('hex');
   };
 
 

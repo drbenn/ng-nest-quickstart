@@ -50,6 +50,10 @@ export class User {
   @Column({ nullable: true })
   img_url: string;
 
+  @Column({ nullable: true })
+  @Exclude()                      // exclude from responses
+  reset_id: string;               // reset id used as additional verification on standard user resetting password
+
   @Column({ type: 'jsonb', nullable: true })
   settings: Record<string, any>;
 
