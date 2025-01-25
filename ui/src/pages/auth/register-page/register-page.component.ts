@@ -9,7 +9,6 @@ import { StandardPageWrapperComponent } from '../../../components/standard-page-
 import { DividerModule } from 'primeng/divider';
 import { CreateStandardUserDto } from '../../../types/userDto.types';
 import { StandardAuthService } from '../services/standard-auth.service';
-import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'register-page',

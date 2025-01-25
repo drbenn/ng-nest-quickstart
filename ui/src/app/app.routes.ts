@@ -13,12 +13,13 @@ import { SigninPageComponent } from '../pages/auth/signin-page/signin-page.compo
 import { RegisterPageComponent } from '../pages/auth/register-page/register-page.component';
 import { ResetPasswordPageComponent } from '../pages/auth/reset-password-page/reset-password-page.component';
 import { OauthCallbackComponent } from '../pages/auth/oauth-callback/oauth-callback.component';
+import { FailedLoginComponent } from '../pages/auth/failed-login/failed-login.component';
+import { RequestPasswordResetPageComponent } from '../pages/auth/request-password-reset-page/request-password-reset-page.component';
 
 // GUARDED Routes accessible by logged in users only
 import { TodoPageComponent } from '../pages/guarded/todo-page/todo-page.component';
 import { HomePageComponent } from '../pages/guarded/home-page/home-page.component';
 import { ExistingUserComponent } from '../pages/auth/existing-user/existing-user.component';
-import { FailedLoginComponent } from '../pages/auth/failed-login/failed-login.component';
 
 export const routes: Routes = [
     // PUBLIC Routes accessible by all
@@ -30,6 +31,7 @@ export const routes: Routes = [
     // AUTH Routes for login/register/callback
     { path: 'sign-in', component: SigninPageComponent },
     { path: 'register-account', component: RegisterPageComponent },
+    { path: 'request-password-reset', component: RequestPasswordResetPageComponent },
     { path: 'reset-password', component: ResetPasswordPageComponent },
     { path: 'oauth/callback', component: OauthCallbackComponent },
     { path: 'auth/existing-user', component: ExistingUserComponent },

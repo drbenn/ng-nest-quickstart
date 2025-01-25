@@ -10,8 +10,8 @@ import { StandardPageWrapperComponent } from '../../../components/standard-page-
   styleUrl: './existing-user.component.scss'
 })
 export class ExistingUserComponent implements OnInit {
-  email: string | null = null;
-  provider: string | null = null;
+  protected email: string | null = null;
+  protected provider: string | null = null;
 
   constructor(private route: ActivatedRoute) {}
 

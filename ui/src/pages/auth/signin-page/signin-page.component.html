@@ -13,7 +13,7 @@
             id="on_label"
             type="email"
             formControlName="email"
-            autocomplete="off" 
+            autocomplete="off"
           />
           <label for="on_label">Email</label>
         </p-floatlabel>
@@ -26,7 +26,6 @@
               formControlName="password"
               autocomplete="off"
               [type]="form.value.isPasswordInView ? 'text' : 'password' "
-  
             />
             <label for="on_label">Password</label>
           </p-floatlabel>
@@ -56,7 +55,7 @@
           </a>
         </div>
         <div class="mt-2">
-          <a routerLink="/reset-password" routerLinkActive="active" ariaCurrentWhenActive="page"
+          <a routerLink="/request-password-reset" routerLinkActive="active" ariaCurrentWhenActive="page"
           class="transition duration-100 ease-in-out hover:text-gray-600 cursor-pointer text-xs font-light"
           >
             Forgot Password?

@@ -35,8 +35,14 @@ export interface LoginStandardUserDto {
   password: string,
 }
 
-export interface ResetStandardUserDto {
+export interface RequestResetStandardUserDto {
   email: string,
+}
+
+export interface ResetStandardPasswordDto {
+  email: string,
+  resetId: string,
+  newPassword: string
 }
 
 export interface UserLoginJwtDto {

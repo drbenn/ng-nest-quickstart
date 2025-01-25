@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AuthMessages, AuthResponseMessageDto, CreateStandardUserDto, LoginStandardUserDto, ResetStandardUserDto, UserLoginJwtDto } from '../../../types/userDto.types';
+import { AuthMessages, AuthResponseMessageDto, CreateStandardUserDto, LoginStandardUserDto, RequestResetStandardUserDto, UserLoginJwtDto } from '../../../types/userDto.types';
 import { environment } from '../../../environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { dispatch } from '@ngxs/store';
@@ -45,9 +45,6 @@ export class StandardAuthService {
     this.http.post<UserLoginJwtDto>(`${this.baseUrl}/login-standard`,loginStandardUserDto, { withCredentials: true })
     .subscribe({
       next: (response: AuthResponseMessageDto | any) => {
-        console.log('login response: ', response);
-
-        // Login successful and login/redirect authenticated user.
         if (response.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
           const user: UserLoginJwtDto = response.user;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
@@ -87,11 +84,18 @@ export class StandardAuthService {
         email: email
   },})};
 
-  public resetStandardUserPassword(resetStandardUserDto: ResetStandardUserDto): Observable<string> {
+  public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserDto): any {
+    this.http.post(
+      `${this.baseUrl}/reset-standard-password-request`,
+      requestResetStandardUserDto
+    );
+  };
+
+  public resetStandardUserPassword(resetStandardUserDto: RequestResetStandardUserDto): any {
     return this.http.post(
-      `${this.baseUrl}/reset-standard`,
+      `${this.baseUrl}/reset-standard-password`,
       resetStandardUserDto
-    ) as Observable<string>;
+    );
   };
 
   private handleError(error: HttpErrorResponse | any): Observable<never> {

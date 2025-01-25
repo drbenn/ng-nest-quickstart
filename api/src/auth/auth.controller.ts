@@ -2,7 +2,7 @@ import { Body, Controller, Get, Inject, Logger, Post, Req, Res, UseGuards } from
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { LoginStandardUserDto, RegisterStandardUserDto } from 'src/users/dto/user.dto';
+import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardPasswordDto, ResetStandardPasswordDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -191,6 +191,31 @@ export class AuthController {
         message: AuthMessages.STANDARD_LOGIN_ERROR
       };
       return errorLoginResponseMessage;
+    };
+  };
+
+
+  @Post('reset-standard-password-request')
+  async resetStandardPasswordRequest(
+    @Body() requestResetStandardPasswordrDto: RequestResetStandardPasswordDto,
+    @Res({ passthrough: true }) res: Response, // Enables passing response
+  ): Promise<void> {
+    try {
+      // send email to user with url params of email and existing resetId ONLY IF STANDARD USER CHECK!!!!
+    } catch (error: unknown) {
+
+    };
+  };
+
+  @Post('reset-standard-password')
+  async resetStandardPassword(
+    @Body() resetStandardPasswordDto: ResetStandardPasswordDto,
+    @Res({ passthrough: true }) res: Response, // Enables passing response
+  ): Promise<void> {
+    try {
+      // accept users new password and update if email and resetId match, then generate new resetId for next time user needs to reset password
+    } catch (error: unknown) {
+
     };
   };
 

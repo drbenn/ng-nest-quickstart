@@ -53,3 +53,19 @@ export class UserLoginJwtDto {
   @IsNotEmpty()
   expiresIn: number | string;
 }
+
+export class RequestResetStandardPasswordDto {
+  @IsNotEmpty()
+  email: string;
+}
+
+export class ResetStandardPasswordDto {
+  @IsNotEmpty()
+  email: string;
+
+  @IsNotEmpty()
+  resetId: string;
+
+  @IsNotEmpty()
+  newPassword: string;
+}
