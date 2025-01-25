@@ -84,11 +84,16 @@ export class StandardAuthService {
         email: email
   },})};
 
-  public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserDto): any {
-    this.http.post(
-      `${this.baseUrl}/reset-standard-password-request`,
-      requestResetStandardUserDto
-    );
+  public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserDto) {
+    this.http.post(`${this.baseUrl}/reset-standard-password-request`,requestResetStandardUserDto)
+      .subscribe({
+        next: (response: any) => {
+          if (response.message === 'success') {
+            return response
+          }
+        },
+        error: (error: unknown) => this.handleError(error)
+      })
   };
 
   public resetStandardUserPassword(resetStandardUserDto: RequestResetStandardUserDto): void {
@@ -100,7 +105,7 @@ export class StandardAuthService {
             this.loginUser(user);
           }
         },
-        error: (error: unknown) => this.handleError(error);
+        error: (error: unknown) => this.handleError(error)
       })
   };
 

@@ -23,9 +23,11 @@ export enum AuthMessages {
   STANDARD_LOGIN_SUCCESS = 'standard login success: user email/password combination successful',
   STANDARD_LOGIN_ERROR = 'standard login error: api error, login workflow error',
 
-
   STANDARD_RESET_FAILED = 'standard password reset failed',
   STANDARD_RESET_SUCCESS = 'standard password reset success',
+
+  STANDARD_PASSWORD_RESET_REQUEST_SUCCESS = 'standard password reset request success: email sent to user for password reset',
+  STANDARD_PASSWORD_RESET_REQUEST_FAILED = 'standard password reset request failed: email not sent to user for password reset',
 }
 
 // export class UserWithTokensDto {
