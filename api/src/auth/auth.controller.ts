@@ -187,13 +187,19 @@ export class AuthController {
 
   @Post('reset-standard-password-request')
   async resetStandardPasswordRequest(
-    @Body() requestResetStandardPasswordrDto: RequestResetStandardPasswordDto,
+    @Body() requestResetStandardPasswordDto: RequestResetStandardPasswordDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<void> {
+  ): Promise<AuthResponseMessageDto> {
     try {
       // send email to user with url params of email and existing resetId ONLY IF STANDARD USER CHECK!!!!
+      const requestResetPasswordResponse: AuthResponseMessageDto = await this.authService.emailStandardUserToResetPassword(requestResetStandardPasswordDto);
+      return requestResetPasswordResponse;
     } catch (error: unknown) {
-
+      this.logger.error(`Error requesting reset of standard registered user password: ${error}`);
+      const errorResetPasswordRequestResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED
+      };
+      return errorResetPasswordRequestResponseMessage;
     };
   };
 
@@ -207,7 +213,7 @@ export class AuthController {
       const resetPasswordResponse: AuthResponseMessageDto = await this.authService.resetStandardUserPassword(resetStandardPasswordDto);
       return resetPasswordResponse;
     } catch (error: unknown) {
-      this.logger.error(`Error resetting standard registration password: ${error}`);
+      this.logger.error(`Error resetting standard registered user password: ${error}`);
       const errorResetPasswordResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_ERROR
       };

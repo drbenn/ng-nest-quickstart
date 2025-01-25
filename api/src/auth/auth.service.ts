@@ -192,6 +192,40 @@ export class AuthService {
   };
 
 
+  async emailStandardUserToResetPassword(requestResetStandardPasswordDto: RequestResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
+    try {
+      const { email } = requestResetStandardPasswordDto;
+      const user: User | null = await this.userRepository.findOne({where: { email }});
+
+      if (!user) {
+        const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
+          message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED
+        };
+        return failedPasswordResetRequestResponseMessage;
+      } else if (user && !user.oauth_provider) {
+        const { reset_id } = user as User;
+
+        const urlForEmail = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&reset_id=${encodeURIComponent(reset_id)}`;
+
+        const emailText: string = `Hello ${email}! Someone has requested a password change, if you did not request to change your password, please disregard. Otherwise continue to 
+        ${urlForEmail} to update your password.
+        `
+
+        const successPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
+          message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS
+        };
+        return successPasswordResetRequestResponseMessage;
+      };
+    } catch (error: unknown) {
+      this.logger.log('warn', `Error sending email to standard user requesting password reset: ${error}`);
+      const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED
+      };
+      return failedPasswordResetRequestResponseMessage;
+    };
+  };
+
+
   async resetStandardUserPassword(resetDto: ResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
     const { email, newPassword, resetId } = resetDto;
     
