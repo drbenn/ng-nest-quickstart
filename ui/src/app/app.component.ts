@@ -11,10 +11,8 @@ import { dispatch, Store } from '@ngxs/store';
 import { CheckAuthenticatedUser } from '../store/auth/auth.actions';
 import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { Toast } from 'primeng/toast';
-import { ToastService } from './services/toast.service';
 import { DisplayToast } from '../store/app/app.actions';
 import { Observable } from 'rxjs';
-import { AppState } from '../store/app/app.state';
 
 
 interface City {
@@ -31,15 +29,13 @@ interface City {
   providers: [MessageService]
 })
 export class AppComponent implements OnInit {
+  private checkAuthenticatedUser = dispatch(CheckAuthenticatedUser);
+  private toast$: Observable<ToastMessageOptions | null>;
 
   constructor (
     private messageService: MessageService,
-    private toastService: ToastService,
     private store: Store
   ) {}
-  private checkAuthenticatedUser = dispatch(CheckAuthenticatedUser);
-  private displayToast = dispatch(DisplayToast);
-  private toast$: Observable<ToastMessageOptions | null>;
 
   cities: City[] | undefined;
 
