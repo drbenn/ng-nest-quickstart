@@ -5,7 +5,6 @@ import {
   createPropertySelectors,
 } from '@ngxs/store';
 import { Add, DisplayToast } from './app.actions';
-import { ToastService } from '../../app/services/toast.service';
 import { ToastMessageOptions } from 'primeng/api';
 
 
@@ -22,13 +21,12 @@ export interface AppStateModel {
   },
 })
 export class AppState {
-  // constructor(private toastService: ToastService) {}
   
-  // @Action(Add)
-  // add(ctx: StateContext<AppStateModel>, action: Add) {
-  //   const state = ctx.getState();
-  //   ctx.patchState({ count: state.count + action.amount });
-  // }
+  @Action(Add)
+  add(ctx: StateContext<AppStateModel>, action: Add) {
+    const state = ctx.getState();
+    ctx.patchState({ count: state.count + action.amount });
+  }
 
   @Action(DisplayToast)
   displayToast( {patchState }: StateContext<any>, { message }: DisplayToast) {

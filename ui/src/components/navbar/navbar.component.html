@@ -123,13 +123,8 @@
 
     <!-- logged in standard user - no image but fullname -->
     @if (authUser !== null && authUser.imgUrl === null && !authUser.fullName) {
-      <div class="flex justify-end items-center mr-1 bg-red-300 cursor-pointer w-[24px] h-[24px] rounded-full" (click)="userMenuPopover.toggle($event)">
-        <img src="../../assets/img/blank-user-avatar.png" alt="" class="w-[24px] h-[24px]">
-        <!-- <p-avatar (click)="userMenuPopover.toggle($event)"
-        class="cursor-pointer"
-        [style]="{height: '24px', width: '24px'}"
-        image="../../assets/img/blank-user-avatar.png" 
-        shape="circle" /> -->
+      <div class="flex justify-end items-center mr-1 cursor-pointer w-[24px] h-[24px] rounded-full" (click)="userMenuPopover.toggle($event)">
+        <img src="img/blank-user-avatar.png" alt="" class="w-[24px] h-[24px]">
       </div>
     }
 
