@@ -12,8 +12,6 @@ import { AppState } from '../store/app/app.state';
 import { AuthState } from '../store/auth/auth.state';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,11 +27,9 @@ export const appConfig: ApplicationConfig = {
         },
       }
     }),
-    importProvidersFrom(ToastModule),     // Import PrimeNG ToastModule to entire application
-    MessageService,                       // Provide PrimeNG MessageService to entrire application
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideStore([AuthState]),
+    provideStore([AuthState, AppState]),
     // devtools always last after NgxsModule
     importProvidersFrom(
       NgxsReduxDevtoolsPluginModule.forRoot({

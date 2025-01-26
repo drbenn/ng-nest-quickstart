@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../pages/auth/services/auth.service';
 import { UserLoginJwtDto } from '../../types/userDto.types';
 
-export interface NesteStateModel {
+export interface NestedStateModel {
   option1: string[],
   option2: number
 }
@@ -27,7 +27,7 @@ export interface AuthStateModel {
    * If you store non-serializable data, it won't appear in the extension.
    */
   privateData: WeakMap<any, any>; // Not visible in Redux DevTools
-  nestedData: NesteStateModel
+  nestedData: NestedStateModel
 }
 
 @State<AuthStateModel>({

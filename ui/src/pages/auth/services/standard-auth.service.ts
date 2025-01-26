@@ -5,18 +5,19 @@ import { environment } from '../../../environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { dispatch } from '@ngxs/store';
 import { LoginUser } from '../../../store/auth/auth.actions';
-import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
+import { DisplayToast } from '../../../store/app/app.actions';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StandardAuthService {
   private readonly baseUrl = environment.apiUrl + '/auth';
+  private displayToast = dispatch(DisplayToast);
+  
   private loginUser = dispatch(LoginUser);
   constructor(
       private http: HttpClient,
-      private messageService: MessageService,
       private router: Router
   ) { }
 
@@ -30,7 +31,7 @@ export class StandardAuthService {
         // Registration successful and login/redirect newly registered user.
         if ('user' in response) {
           const user: UserLoginJwtDto = response.user;
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
+          this.displayToast({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
           this.loginUser(user);
         // Registration failed, email is already registered with site beit standard or oauth.
         } else {
@@ -47,7 +48,7 @@ export class StandardAuthService {
       next: (response: AuthResponseMessageDto | any) => {
         if (response.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
           const user: UserLoginJwtDto = response.user;
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
+          this.displayToast({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
           this.loginUser(user);
         }
         else if (response.message === AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED) {
@@ -117,7 +118,7 @@ export class StandardAuthService {
       // Backend error
       console.error(`Backend returned code ${error.status}, body was:`, error.error);
     };
-    this.messageService.add({ severity: 'error', summary: 'Error', detail: error.error, life: 3000 });
+    this.displayToast({ severity: 'error', summary: 'Error', detail: error.error, life: 3000 });
     // Return an observable with a user-facing error message
     return throwError(() => error.error?.message || 'Something went wrong. Please try again.');
   };
