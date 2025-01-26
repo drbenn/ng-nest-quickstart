@@ -1,7 +1,7 @@
 <standard-page-wrapper>
 
   <main class="border rounded flex flex-col justify-start items-center py-4 px-8">
-    <div class="mb-6">
+    <div class="mb-5">
       <p-divider [align]="'center'" type="solid">
         <span>Basic Login</span>
       </p-divider>
@@ -31,7 +31,7 @@
           </p-floatlabel>
         </div>
 
-        <div class="flex flex-row flex-nowrap justify-start items-start">
+        <div class="flex flex-row flex-nowrap justify-start items-start ml-3">
           <p-checkbox
             binary="true"
             size="small"
@@ -43,21 +43,22 @@
             View Password
           </div>
         </div>
-
-        <div class="mt-4">
+  
+        <div class="mt-2 ml-3">
           <a routerLink="/register-account" routerLinkActive="active" ariaCurrentWhenActive="page"
           class="transition duration-100 ease-in-out hover:text-gray-600 cursor-pointer text-xs font-light"
           >
             No Account? Register
           </a>
         </div>
-        <div class="mt-2">
+        <div class="mt-2 ml-3">
           <a routerLink="/request-password-reset" routerLinkActive="active" ariaCurrentWhenActive="page"
           class="transition duration-100 ease-in-out hover:text-gray-600 cursor-pointer text-xs font-light"
           >
             Forgot Password?
           </a>
         </div>
+
 
         <div class="w-full flex flex-row justify-end mt-6">
           <p-button
