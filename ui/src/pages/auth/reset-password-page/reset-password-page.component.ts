@@ -27,10 +27,10 @@ export class ResetPasswordPageComponent implements OnInit {
   ) {}
 
   protected form = new FormGroup({
-    email: new FormControl({value: '', disabled: true }, [Validators.required, Validators.email]),
+    email: new FormControl({value: '', disabled: true }),
     newPassword: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(26)]),
     retypeNewPassword: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(26)]),
-    resetId: new FormControl('', [Validators.required, Validators.minLength(0), Validators.maxLength(100)]),
+    resetId: new FormControl('', [Validators.required, Validators.minLength(0), Validators.maxLength(200)]),
     isPasswordInView: new FormControl(false)
   });
   
@@ -43,15 +43,22 @@ export class ResetPasswordPageComponent implements OnInit {
 
   protected onSubmitResetPassword(): void {
     const resetStandardPasswordDto: ResetStandardPasswordDto = {
-      email: <string>this.form.value.email,
+      email:  <string>this.form.get('email')?.value,
       newPassword: <string>this.form.value.newPassword,
       resetId: <string>this.form.value.resetId
     };
-    this.standardAuthService.resetStandardUserPassword(resetStandardPasswordDto)
+    this.standardAuthService.resetStandardUserPassword(resetStandardPasswordDto);
   };
 
   protected handlePasswordInView(event: CheckboxChangeEvent): void {
     event.checked ? this.form.get('isPasswordInView')?.setValue(true) : this.form.get('isPasswordInView')?.setValue(false);
+  };
+
+  protected clearPassword() {
+    console.log(this.form.value);
+    console.log(this.form.valid);
+    // this.form.get('newPassword')?.setValue('');
+    // this.form.get('retypeNewPassword')?.setValue('');
   };
 
   protected isFormValid(): boolean {

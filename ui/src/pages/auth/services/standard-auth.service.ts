@@ -85,26 +85,18 @@ export class StandardAuthService {
         email: email
   },})};
 
-  public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserDto) {
-    this.http.post(`${this.baseUrl}/reset-standard-password-request`,requestResetStandardUserDto)
-      .subscribe({
-        next: (response: any) => {
-          if (response.message === 'success') {
-            return response
-          }
-        },
-        error: (error: unknown) => this.handleError(error)
-      })
+  public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserDto): Observable<AuthResponseMessageDto> {
+    return this.http.post(`${this.baseUrl}/reset-standard-password-request`,requestResetStandardUserDto);
   };
 
   public resetStandardUserPassword(resetStandardUserDto: RequestResetStandardUserDto): void {
-    this.http.post<AuthResponseMessageDto>(`${this.baseUrl}/reset-standard-password`,resetStandardUserDto)
+    this.http.post<AuthResponseMessageDto>(`${this.baseUrl}/reset-standard-password`, resetStandardUserDto)
       .subscribe({
         next: (response: AuthResponseMessageDto) => {
-          if ('user' in response) {
+          if (response.message === AuthMessages.STANDARD_RESET_SUCCESS) {
             const user: UserLoginJwtDto = response.user as UserLoginJwtDto;
             this.loginUser(user);
-          }
+          };
         },
         error: (error: unknown) => this.handleError(error)
       })

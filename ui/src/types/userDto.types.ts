@@ -70,6 +70,7 @@ export interface AuthResponseMessageDto {
   user?: Partial<UserLoginJwtDto>,
   email?: string;
   provider?: string;
+  message_two?: string;
 }
 
 export enum AuthMessages {

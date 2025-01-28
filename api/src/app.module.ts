@@ -13,6 +13,7 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { EmailModule } from './email/email.module';
 
 @Module({
   // mailgun for email service
@@ -65,7 +66,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
         ],
       })
     }),
-    UsersModule, AuthModule, TodoModule],
+
+    // additional module imports
+    UsersModule, AuthModule, TodoModule, EmailModule],
   controllers: [AppController],
   providers: [AppService],
 })

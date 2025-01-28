@@ -9,6 +9,7 @@ export class AuthResponseMessageDto {
   // isRedirect?: boolean;
   jwtAccessToken?: string;
   jwtRefreshToken?: string;
+  message_two?: string;
 }
 
 

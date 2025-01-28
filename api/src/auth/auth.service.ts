@@ -10,6 +10,7 @@ import { instanceToPlain } from 'class-transformer';
 import { Profile } from 'passport';
 import { randomBytes } from 'crypto';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,8 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly emailService: EmailService
   ) {}
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -205,14 +207,16 @@ export class AuthService {
       } else if (user && !user.oauth_provider) {
         const { reset_id } = user as User;
 
-        const urlForEmail = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(email)}&reset_id=${encodeURIComponent(reset_id)}`;
-
-        const emailText: string = `Hello ${email}! Someone has requested a password change, if you did not request to change your password, please disregard. Otherwise continue to 
-        ${urlForEmail} to update your password.
-        `
+        console.log('reset id from db to send in email link: ');
+        console.log(reset_id);
+        
+      
+        const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
+        const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
 
         const successPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
-          message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS
+          message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS,
+          message_two: `messageId: ${smtpEmailResponse.messageId}`
         };
         return successPasswordResetRequestResponseMessage;
       };
@@ -232,6 +236,12 @@ export class AuthService {
     // Check if user in db by email and resetId
     const user: User | null = await this.userRepository.findOne({where: { email, reset_id: resetId }});
 
+    console.log('user find by: ', email, '  -  ', resetId);
+    
+    console.log('user found when resetting:');
+    console.log(user);
+    
+    
     if (!user) {
       // user not found error
       const standardResetLoginFailResponseMessage: AuthResponseMessageDto = { 
@@ -252,8 +262,17 @@ export class AuthService {
       user.password = hashedPassword;
       user.reset_id = newResetId;
 
+      console.log('new Password: ', newPassword);
+      console.log('new HashedPassword: ', hashedPassword);
+      console.log('new reset ID: ', newResetId);
+      
+
       // save new hashed password and reset_id for user
-      await this.userRepository.save(user);
+      const updatedUser = await this.userRepository.save(user);
+      console.log('updated user: ');
+      console.log(updatedUser);
+      
+      
 
       const jwtAccessToken = await this.generateAccessJwt(user.id);
       const jwtRefreshToken = await this.generateRefreshJwt();
@@ -263,7 +282,7 @@ export class AuthService {
       
       const standardResetLoginSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_RESET_SUCCESS,
-        user: instanceToPlain(user),
+        user: instanceToPlain(updatedUser),
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -280,6 +299,17 @@ export class AuthService {
 
   private async generateResetId(): Promise<string> {
     return await randomBytes(64).toString('hex');
+  };
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                     STANDARD RESET W EMAIL HELPERS                           //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+  async sendRequestPasswordResetEmail(email: string, resetLink: string): Promise<{ messageId: string }> {
+    const emailResponse: { messageId: string } = await this.emailService.sendResetPasswordLinkEmailSdk(email, resetLink);
+    return emailResponse;
   };
 
 

@@ -210,6 +210,8 @@ export class AuthController {
   ): Promise<AuthResponseMessageDto> {
     try {
       // accept users new password and update if email and resetId match, then generate new resetId for next time user needs to reset password
+      console.log('reset standyard hit');
+      
       const resetPasswordResponse: AuthResponseMessageDto = await this.authService.resetStandardUserPassword(resetStandardPasswordDto);
       return resetPasswordResponse;
     } catch (error: unknown) {
