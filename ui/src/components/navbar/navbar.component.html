@@ -52,7 +52,7 @@
         @for (item of navRoutes.loggedOutNavRoutes; track item.name; let i = $index) {
           <li [class]="i !==0 ? 'ml-8' : '' ">
             <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
-            class="transition duration-100 ease-in-out hover:text-gray-600"
+            class="transition duration-[50ms] ease-in hover:text-gray-600"
             >
               {{ item.name }}
             </a>
@@ -67,7 +67,7 @@
         @for (item of navRoutes.loggedInNavRoutes; track item.name; let i = $index) {
           <li [class]="i !==0 ? 'ml-8' : '' ">
             <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
-            class="transition duration-100 ease-in-out hover:text-gray-600"
+            class="transition duration-[50ms] ease-in hover:text-gray-600"
             >
               {{ item.name }}
             </a>
@@ -91,7 +91,7 @@
       <ul class="font-base text-sm opacity-65 subpixel-antialiased mr-1">
         <li>
           <a routerLink="/sign-in" routerLinkActive="active" ariaCurrentWhenActive="page"
-          class="transition duration-100 ease-in-out hover:text-gray-600"
+          class="transition duration-[50ms] ease-in hover:text-gray-600"
           >
             Sign In
           </a>

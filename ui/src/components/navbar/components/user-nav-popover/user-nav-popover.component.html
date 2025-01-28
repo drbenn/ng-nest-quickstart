@@ -6,12 +6,12 @@
     joined: {{ user?.createdAt | date: 'dd MMM YYYY' }}
   </div>
   <ul class="font-base text-md w">
-    <li class="py-2 pl-2 pr-10 w-full transition duration-100 ease-in-out hover:bg-gray-400 cursor-pointer" (click)="signOut()">
+    <li class="py-2 pl-2 pr-10 w-full transition duration-[50ms] ease-in hover:bg-gray-400 cursor-pointer" (click)="signOut()">
       <a>
         Logout
       </a>
     </li>
-    <li class="py-2 pl-2 pr-10 w-full transition duration-100 ease-in-out hover:bg-gray-400 cursor-pointer">
+    <li class="py-2 pl-2 pr-10 w-full transition duration-[50ms] ease-in hover:bg-gray-400 cursor-pointer">
       <a routerLink="/alt" routerLinkActive="active" ariaCurrentWhenActive="page">
         Option 2
       </a>
