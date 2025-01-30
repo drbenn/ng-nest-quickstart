@@ -149,10 +149,13 @@ export class AuthService {
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
     const hashedPassword = await this.hashPassword(password);
+
     // const user = await this.validateStandardUser(email, hashedPassword);
     const user = await this.userRepository.findOne({ where: { 
       email
     }});
+
+    const isPasswordMatch = await this.verifyPassword(password, user.password);
 
     if (user === null) {
       this.logger.log('warn', `Cannot login user. User email/password combination not found: ${email}`);
@@ -168,14 +171,14 @@ export class AuthService {
         provider: user.oauth_provider
       };
       return existingOauthRegistrationResponseMessage;
-    } else if (user && user.password !== hashedPassword) {
+    } else if (user && !isPasswordMatch) {
       const failedPasswordResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_LOGIN_FAILED_MISMATCH,
         email: user.email ,
         provider: user.oauth_provider
       };
       return failedPasswordResponseMessage;
-    } else if (user && user.password === hashedPassword) {
+    } else if (user && isPasswordMatch) {
       // otherwise return user information with tokens
       const jwtAccessToken = await this.generateAccessJwt(user.id);
       const jwtRefreshToken = await this.generateRefreshJwt();
@@ -207,10 +210,6 @@ export class AuthService {
       } else if (user && !user.oauth_provider) {
         const { reset_id } = user as User;
 
-        console.log('reset id from db to send in email link: ');
-        console.log(reset_id);
-        
-      
         const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
         const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
 
@@ -236,12 +235,6 @@ export class AuthService {
     // Check if user in db by email and resetId
     const user: User | null = await this.userRepository.findOne({where: { email, reset_id: resetId }});
 
-    console.log('user find by: ', email, '  -  ', resetId);
-    
-    console.log('user found when resetting:');
-    console.log(user);
-    
-    
     if (!user) {
       // user not found error
       const standardResetLoginFailResponseMessage: AuthResponseMessageDto = { 
@@ -262,21 +255,12 @@ export class AuthService {
       user.password = hashedPassword;
       user.reset_id = newResetId;
 
-      console.log('new Password: ', newPassword);
-      console.log('new HashedPassword: ', hashedPassword);
-      console.log('new reset ID: ', newResetId);
-      
-
       // save new hashed password and reset_id for user
       const updatedUser = await this.userRepository.save(user);
-      console.log('updated user: ');
-      console.log(updatedUser);
-      
-      
 
       const jwtAccessToken = await this.generateAccessJwt(user.id);
       const jwtRefreshToken = await this.generateRefreshJwt();
-  
+
       // update refresh jwt in database for future access
       this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
       
@@ -295,6 +279,11 @@ export class AuthService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(rawPassword, saltRounds);
     return hashedPassword;
+  };
+
+
+  private async verifyPassword(plainPassword: string, storedHashedPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, storedHashedPassword);
   };
 
   private async generateResetId(): Promise<string> {

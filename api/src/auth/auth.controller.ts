@@ -146,7 +146,11 @@ export class AuthController {
   async login(
     @Body() loginStandardUserDto: LoginStandardUserDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<AuthResponseMessageDto> {
+  ): Promise<AuthResponseMessageDto | any> {
+    const loginResponse: AuthResponseMessageDto = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
+    
+    console.log(loginResponse);
+    
     try {
       const loginResponse: AuthResponseMessageDto = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
       
