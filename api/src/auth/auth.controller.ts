@@ -149,8 +149,6 @@ export class AuthController {
   ): Promise<AuthResponseMessageDto | any> {
     const loginResponse: AuthResponseMessageDto = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
     
-    console.log(loginResponse);
-    
     try {
       const loginResponse: AuthResponseMessageDto = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
       
@@ -167,7 +165,6 @@ export class AuthController {
         return failedPasswordResponseMessage;
       }
       else if (loginResponse.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
-        console.log('standard user register & login response: successful register/login');
         const { message, user, jwtAccessToken, jwtRefreshToken } = loginResponse;
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
 
@@ -214,8 +211,6 @@ export class AuthController {
   ): Promise<AuthResponseMessageDto> {
     try {
       // accept users new password and update if email and resetId match, then generate new resetId for next time user needs to reset password
-      console.log('reset standyard hit');
-      
       const resetPasswordResponse: AuthResponseMessageDto = await this.authService.resetStandardUserPassword(resetStandardPasswordDto);
       return resetPasswordResponse;
     } catch (error: unknown) {
@@ -284,20 +279,16 @@ export class AuthController {
    * email/password login.
    */
   private async handleOAuthRedirect(req: Request, res: Response): Promise<void> {
-    // console.log('handle OATH REDIRECT');
-    // console.log(req);
     const response: Partial<User> | AuthResponseMessageDto = req['user'];  // user from database, not oauth user profile
     let user: Partial<User> | null = response['message'] ? null : response;
     
     // if duplicate user attempt do not provide user and redirect to inform user of existing login method
     if (!user) {
-      console.log('oauth user register/login response: existing email in other provider redirect');
       const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(response['email'])}&provider=${encodeURIComponent(response['provider'])}`;
       res.redirect(redirectUrl);  
     } else {
       // return jwt access and refresh tokens and redirect to oauth/callback to fetch appropriate user data
       try {
-        console.log('oauth user register/login response: existing email in other provider redirect');
         const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id);
         const jwtRefreshToken: string = await this.authService.generateRefreshJwt();
         await this.authService.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
