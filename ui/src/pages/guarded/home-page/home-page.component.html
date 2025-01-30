@@ -1,30 +1,39 @@
 <standard-page-wrapper>
-  <main class="flex flex-row flex-wrap gap-8">
-    @for (item of [1,2,3,4,5,6,7,8,9,10]; track item) {
-      <p-card [style]="{ width: '20rem', overflow: 'hidden' }">
-        <ng-template #header>
-          <!-- <img alt="Card" class="w-full h-[4rem]" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" /> -->
-          <div class="w-full h-[2rem] bg-amber-200">
-            
-          </div>
-        </ng-template>
-        <ng-template #title>
-          <span>
-            Advanced Card 
-          </span>
-        </ng-template>
-        <ng-template #subtitle class="text-sm font-light"> Card subtitle </ng-template>
-        <p class="text-sm font-light">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed consequuntur error repudiandae!
-        </p>
-        <ng-template #footer>
-          <div class="flex mt-1 text-xs font-light">
-            footer
-          </div>
-        </ng-template>
-    </p-card>
-    }
-    @empty {<li>There are no items.</li>}
+  <main class="w-full flex justify-center items-start">
+
+    <section class="flex flex-row flex-wrap justify-center xl:justify-start items-start gap-8">
+      @for (item of [1,2,3,4,5,6,7,8,9,10]; track item) {
+        <div class="p-[2px] rounded-xl hover:bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 transition-all duration-150 ease-in">
+          <p-card [style]="{ width: '24rem', overflow: 'hidden' }">
+            <ng-template #header>
+              <!-- <img alt="Card" class="w-full h-[4rem]" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" /> -->
+              <div class="w-full h-[2rem] bg-violet-400">
+                
+              </div>
+            </ng-template>
+            <ng-template #title>
+              <span class="text-base font-semibold">
+                Advanced Card 
+              </span>
+            </ng-template>
+            <ng-template #subtitle class="text-xs font-light">
+              <span class="text-sm font-light">
+                Card subtitle
+              </span>
+            </ng-template>
+            <p class="text-sm font-light">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            </p>
+            <ng-template #footer>
+              <div class="flex mt-1 text-xs font-light">
+                footer
+              </div>
+            </ng-template>
+        </p-card>
+        </div>
+      }
+      @empty {<li>There are no items.</li>}
+    </section>
 
   </main>
 </standard-page-wrapper>
