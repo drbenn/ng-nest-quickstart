@@ -2,15 +2,19 @@
   <main class="h-screen flex flex-col justify-start items-start px-4">
     <div class="mt-20">
       The email address {{ email }} has already been registered on this site using 
-      @if (provider) {
-        {{ provider }} OAuth as the login method.
+      @if (provider === 'null' || provider === null) {
+        standard email and password login.
       } @else {
-        standard email and password login
+        {{ provider }} OAuth as the login method.
       }
     </div>
-  
+
     <div class="mt-8">
-      Please use the existing login method and <a routerLink="/sign-in" routerLinkActive="active" ariaCurrentWhenActive="page">sign in</a>.
+      Please use the existing login method and 
+      <a routerLink="/sign-in" routerLinkActive="active" ariaCurrentWhenActive="page">sign in</a>. 
+      Or if your have a standard email and password, 
+      <a routerLink="/request-password-reset" routerLinkActive="active" ariaCurrentWhenActive="page">request to reset your password</a>.
     </div>
+
   </main>
 </standard-page-wrapper>
