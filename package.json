@@ -1,1 +1,11 @@
-{}
+{
+  "name": "root",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "win:dev": "cmd /c start.bat"
+  }
+}

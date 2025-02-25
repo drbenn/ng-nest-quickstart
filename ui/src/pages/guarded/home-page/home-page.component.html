@@ -1,10 +1,14 @@
 <standard-page-wrapper>
   <main class="w-full flex justify-center items-start">
-
+    <!-- <div class="relative">
+      <div class="peer h-[5rem] w-[5rem] bg-red-600 absolute z-10"></div>
+      <div class="peer-hover:opacity-100 opacity-0 h-[8rem] w-[8rem] bg-blue-600 absolute z-1 transition-all duration-400 ease-in"></div>
+    </div> -->
     <section class="flex flex-row flex-wrap justify-center xl:justify-start items-start gap-8">
       @for (item of [1,2,3,4,5,6,7,8,9,10]; track item) {
-        <div class="p-[2px] rounded-xl hover:bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 transition-all duration-150 ease-in">
-          <p-card [style]="{ width: '24rem', overflow: 'hidden' }">
+        <div class="flex w-[25rem] h-[24rem]">
+
+          <p-card class="peer relative z-10 h-[13rem] w-[24rem] overflow-hidden p-2">
             <ng-template #header>
               <!-- <img alt="Card" class="w-full h-[4rem]" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" /> -->
               <div class="w-full h-[2rem] bg-violet-400">
@@ -30,7 +34,13 @@
               </div>
             </ng-template>
         </p-card>
+
+          <div class="peer-hover:opacity-100 opacity-0 absolute z-1 h-[13.5rem] w-[24rem] rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 transition-all duration-150 ease-in">
+          </div>
+
         </div>
+          
+
       }
       @empty {<li>There are no items.</li>}
     </section>
