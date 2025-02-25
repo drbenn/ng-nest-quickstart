@@ -53,6 +53,3 @@ export class UsersService {
     }
   };
 }
-
-
-// I have a nestjs api. I intend to offer user login and authorization and route guards. I plan to have the user able to login with a username and password, and also use passport passport-google-oauth20 or also user email and password login with with passport. I also plan to create a jwt based on the user email to send from the server to the ui to store as a secure httpOnly cookie so that the user in ui can access jwt guarded api routes. How would i setup this login setup?
