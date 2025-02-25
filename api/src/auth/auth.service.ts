@@ -30,7 +30,6 @@ export class AuthService {
 
   async findOneUserById(id: string): Promise<Partial<User> | null> {
     const user = await this.userRepository.findOne({ where: { id } });
-
     if (!user) {
       this.logger.log('warn', `Cannot find one user by id. User id not found: ${id}`);
       return null; // User not found
@@ -44,7 +43,6 @@ export class AuthService {
       this.logger.log('warn', `Cannot find one user by email. User id not found: ${email}`);
       return null; // User not found
     };
-
     return instanceToPlain(user); // Authentication successful
   };
 
@@ -54,7 +52,6 @@ export class AuthService {
       this.logger.log('warn', `Cannot find one user by provider. User not found: ${oauth_provider} - ${oauth_provider_user_id}`);
       return null; // User not found
     };
-
     return instanceToPlain(user); // Authentication successful
   };
 
@@ -64,7 +61,6 @@ export class AuthService {
       this.logger.log('warn', `Cannot find one user by refresh_token. User not found: ${refresh_token}`);
       return null; // User not found
     };
-
     return instanceToPlain(user); // Authentication successful
   };
 
@@ -148,13 +144,7 @@ export class AuthService {
   };
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
-    const hashedPassword = await this.hashPassword(password);
-
-    // const user = await this.validateStandardUser(email, hashedPassword);
-    const user = await this.userRepository.findOne({ where: { 
-      email
-    }});
-
+    const user = await this.userRepository.findOne({ where: { email }});
     const isPasswordMatch = await this.verifyPassword(password, user.password);
 
     if (user === null) {
@@ -196,7 +186,6 @@ export class AuthService {
     };
   };
 
-
   async emailStandardUserToResetPassword(requestResetStandardPasswordDto: RequestResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
     try {
       const { email } = requestResetStandardPasswordDto;
@@ -207,9 +196,9 @@ export class AuthService {
           message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED
         };
         return failedPasswordResetRequestResponseMessage;
-      } else if (user && !user.oauth_provider) {
+      } 
+      else if (user && !user.oauth_provider) {
         const { reset_id } = user as User;
-
         const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
         const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
 
@@ -227,7 +216,6 @@ export class AuthService {
       return failedPasswordResetRequestResponseMessage;
     };
   };
-
 
   async resetStandardUserPassword(resetDto: ResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
     const { email, newPassword, resetId } = resetDto;
@@ -274,13 +262,11 @@ export class AuthService {
     };
   };
 
-
   private async hashPassword(rawPassword: string): Promise<string> {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(rawPassword, saltRounds);
     return hashedPassword;
   };
-
 
   private async verifyPassword(plainPassword: string, storedHashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(plainPassword, storedHashedPassword);
@@ -301,7 +287,6 @@ export class AuthService {
     return emailResponse;
   };
 
-
   //////////////////////////////////////////////////////////////////////////////////
   //                                                                              //
   //                            OAUTH USER HELPERS                                //
@@ -309,8 +294,7 @@ export class AuthService {
   //////////////////////////////////////////////////////////////////////////////////
 
   // used by every OAuth Auth Guard Strategy to validate user
-  async validateOAuthLogin(profile: Profile, provider: string)
-  : Promise<AuthResponseMessageDto> {    
+  async validateOAuthLogin(profile: Profile, provider: string): Promise<AuthResponseMessageDto> {    
     // Extract user information based on provider
     let email: string =  profile.emails[0].value || '';
     let full_name: string = '';

@@ -11,15 +11,16 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
       callbackURL: process.env.GITHUB_CALLBACK_URL,
+      // profileFields: ['id', 'emails', 'name', 'photos'],  // Request necessary fields
       scope: ['user:email'],
     });
   }
 
   async validate(
-    // accessToken received in response from google oauth console, do not remove or else argument 
+    // accessToken received in response from github oauth console, do not remove or else argument 
     // count will be incorrect and you will not receive the necessary profile value.
     accessToken: any,
-    // refreshToken received in response from google oauth console, do not remove or else argument 
+    // refreshToken received in response from github oauth console, do not remove or else argument 
     // count will be incorrect and you will not receive the necessary profile value.    
     refreshToken: any,
     profile: any, 

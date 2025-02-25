@@ -8,19 +8,19 @@ import { AuthService } from '../auth.service';
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(private authService: AuthService) {
     super({
-      clientID: process.env.FACEBOOK_CLIENT_ID, // Your Facebook App ID
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET, // Your Facebook App Secret
-      callbackURL: process.env.FACEBOOK_CALLBACK_URL, // Your redirect URI
-      profileFields: ['id', 'emails', 'name', 'photos'], // Request necessary fields
-      scope: ['email'], // Request email permission
+      clientID: process.env.FACEBOOK_CLIENT_ID,           // Your Facebook App ID
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,   // Your Facebook App Secret
+      callbackURL: process.env.FACEBOOK_CALLBACK_URL,     // Your redirect URI
+      profileFields: ['id', 'emails', 'name', 'photos'],  // Request necessary fields
+      scope: ['email'],                                   // Request email permission
     });
   }
 
   async validate(
-    // accessToken received in response from google oauth console, do not remove or else argument 
+    // accessToken received in response from faccebook oauth console, do not remove or else argument 
     // count will be incorrect and you will not receive the necessary profile value.
     accessToken: string,
-    // refreshToken received in response from google oauth console, do not remove or else argument 
+    // refreshToken received in response from faccebook oauth console, do not remove or else argument 
     // count will be incorrect and you will not receive the necessary profile value.    
     refreshToken: string,
     profile: Profile,
@@ -32,5 +32,5 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     } catch (err) {
       done(err, null);
     }
-  }
+  };
 }

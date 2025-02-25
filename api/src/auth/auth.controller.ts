@@ -309,7 +309,6 @@ export class AuthController {
         res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
       };
     };
-    
   };
 
 }

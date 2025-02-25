@@ -24,7 +24,6 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
-    private readonly jwtService: JwtService,
     private readonly authService: AuthService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {
@@ -62,7 +61,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         throw new UnauthorizedException('Refresh token is missing, invalid or expired');
       };
     };
-  }
+  };
 }
 
 @UseGuards(JwtAuthGuard)
@@ -71,5 +70,5 @@ export class ProtectedController {
   @Get()
   getProtectedData() {
     return { message: 'You are authenticated!' };
-  }
+  };
 }

@@ -1,4 +1,3 @@
-import { exists } from "fs";
 import { User } from "src/users/user.entity";
 
 export class AuthResponseMessageDto {
@@ -6,7 +5,6 @@ export class AuthResponseMessageDto {
   user?: Partial<User>;
   email?: string;
   provider?: string;
-  // isRedirect?: boolean;
   jwtAccessToken?: string;
   jwtRefreshToken?: string;
   message_two?: string;
@@ -30,19 +28,3 @@ export enum AuthMessages {
   STANDARD_PASSWORD_RESET_REQUEST_SUCCESS = 'standard password reset request success: email sent to user for password reset',
   STANDARD_PASSWORD_RESET_REQUEST_FAILED = 'standard password reset request failed: email not sent to user for password reset',
 }
-
-// export class UserWithTokensDto {
-//   user: Partial<User>;
-//   jwtAccessToken: string;
-//   jwtRefreshToken: string;
-// }
-
-// Registration
-// Create success
-// create fail email exists
-
-
-// LOGIN''
-// Login success email & password match & user is standard
-// login fail user is standard but email password incorrect
-// login fail user email used by other provider
