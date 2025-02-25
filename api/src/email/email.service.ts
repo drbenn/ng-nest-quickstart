@@ -1,46 +1,14 @@
-// import { MailerService } from '@nestjs-modules/mailer';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
+// nodemailer and nest addon are lower level options if decide to buck aws
+
 @Injectable()
 export class EmailService {
   constructor(
-    // private readonly mailerService: MailerService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
-
-  // async sendResetPasswordLinkEmail(email: string, resetLink: string): Promise<{ messageId: string }> {
-  //   const subject = 'Password Reset Request';
-
-  //   const message = `
-  //     <html>
-  //       <body>
-  //         <p>Hi,</p>
-  //         <p>You requested a password reset. Click the link below to reset your password:</p>
-  //         <p><a href="${resetLink}" target="_blank">Reset Password</a></p>
-  //         <p>If you didn't request this, you can safely ignore this email.</p>
-  //         <br>
-  //         <p>Thanks,<br>Your App Team</p>
-  //       </body>
-  //     </html>
-  //   `;
-  
-  //   try {
-  //     const response = await this.mailerService.sendMail({
-  //       to: email,
-  //       subject,
-  //       html: message,
-  //     });
-  
-  //     // Extract the `MessageId` from the response
-  //     return { messageId: response.messageId };
-  //   } catch (error) {
-  //     console.error('Error sending email', error);
-  //     this.logger.log('warn', `Error sending email in email service to standard user requesting password reset: ${error}`);
-  //     throw new Error('Unable to send email');
-  //   }
-  // }
 
   async sendResetPasswordLinkEmailSdk(recipientEmail: string, resetLink: string): Promise<{ messageId: string }> {    
     try {
