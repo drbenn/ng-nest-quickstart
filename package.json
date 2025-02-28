@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "win:dev": "cmd /c start.bat"
+    "win:dev": "cmd /c start.bat",
+    "win:dev-ssr": "cmd /c start-ssr.bat"
   }
 }
