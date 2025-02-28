@@ -13,6 +13,7 @@ import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { DisplayToast } from '../store/app/app.actions';
 import { Observable } from 'rxjs';
+import { PosthogAnalyticsService } from './services/posthog-analytics.service';
 
 
 interface City {
@@ -34,7 +35,8 @@ export class AppComponent implements OnInit {
 
   constructor (
     private messageService: MessageService,
-    private store: Store
+    private store: Store,
+    private posthogAnalyticsService: PosthogAnalyticsService
   ) {}
 
   cities: City[] | undefined;
@@ -53,6 +55,8 @@ export class AppComponent implements OnInit {
         { name: 'Istanbul', code: 'IST' },
         { name: 'Paris', code: 'PRS' }
     ];
+    this.posthogAnalyticsService.trackFirstVisit(); // Track page views on load
+    this.posthogAnalyticsService.trackPageView(); // Track page views on load
   }
 
   private listenForToasts(): void {

@@ -98,6 +98,9 @@ api/.idea
 *.env
 *.env.*
 
+# angular environments
+ui/src/environments
+
 # temp directory
 .temp
 .tmp

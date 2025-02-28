@@ -7,6 +7,7 @@ import { dispatch } from '@ngxs/store';
 import { LoginUser } from '../../../store/auth/auth.actions';
 import { Router } from '@angular/router';
 import { DisplayToast } from '../../../store/app/app.actions';
+import { PosthogAnalyticsService } from '../../../app/services/posthog-analytics.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +19,8 @@ export class StandardAuthService {
   private loginUser = dispatch(LoginUser);
   constructor(
       private http: HttpClient,
-      private router: Router
+      private router: Router,
+      private posthogAnalyticsService: PosthogAnalyticsService
   ) { }
 
   public registerStandardUser(createStandardUserDto: CreateStandardUserDto): void {
@@ -48,6 +50,7 @@ export class StandardAuthService {
       next: (response: AuthResponseMessageDto | any) => {
         if (response.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
           const user: UserLoginJwtDto = response.user;
+          user.email ? this.posthogAnalyticsService.identifyUser(user.email, { email: user.email }) : '';
           this.displayToast({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
           this.loginUser(user);
         }
