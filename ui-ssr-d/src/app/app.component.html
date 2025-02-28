@@ -7,7 +7,7 @@
 <!-- * * * * * * * to get started with your project! * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
-<style>
+<!-- <style>
   :host {
     --bright-blue: oklch(51.01% 0.274 263.83);
     --electric-violet: oklch(53.18% 0.28 296.97);
@@ -175,9 +175,9 @@
       margin-block: 1.5rem;
     }
   }
-</style>
+</style> -->
 
-<main class="main">
+<!-- <main class="main">
   <div class="content">
     <div class="left-side">
       <svg
@@ -322,7 +322,7 @@
       </div>
     </div>
   </div>
-</main>
+</main> -->
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
@@ -333,4 +333,13 @@
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
 
-<router-outlet />
+<navbar></navbar>
+<button class="btn btn-info btn-sm" (click)="changeTheme('light')">Info</button>
+<button class="btn btn-success" (click)="changeTheme('dark')">Success</button>
+<button class="btn btn-warning" (click)="changeTheme('cupcake')">Warning</button>
+<button class="btn btn-error">Error</button>
+<!-- <p-toast /> -->
+<!-- <div class="min-h-[75vh]">
+  <router-outlet/>
+</div> -->
+<footer></footer>
