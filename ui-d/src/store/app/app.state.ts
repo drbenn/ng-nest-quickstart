@@ -4,7 +4,7 @@ import {
   StateContext,
   createPropertySelectors,
 } from '@ngxs/store';
-import { Add } from './app.actions';
+// import { Add } from './app.actions';
 // import { ToastMessageOptions } from 'primeng/api';
 
 
@@ -30,11 +30,11 @@ export class AppState {
   //   ctx.patchState({ count: state.count + action.amount });
   // }
 
-  @Action(Add)
-  add(ctx: StateContext<AppStateModel>, action: Add) {
-    const state = ctx.getState();
-    ctx.patchState({ count: state.count + action.amount });
-  }
+  // @Action(Add)
+  // add(ctx: StateContext<AppStateModel>, action: Add) {
+  //   const state = ctx.getState();
+  //   ctx.patchState({ count: state.count + action.amount });
+  // }
 
   // @Action(DisplayToast)
   // displayToast( {patchState }: StateContext<any>, { message }: DisplayToast) {
@@ -46,7 +46,7 @@ export class AppState {
 
 const _props = createPropertySelectors<AppStateModel>(AppState);
 
-export const getCount = _props.count;
+// export const getCount = _props.count;
 
 // export const getToast = _props.toast;
-export const getAppTheme = _props.theme;
+// export const getAppTheme = _props.theme;
