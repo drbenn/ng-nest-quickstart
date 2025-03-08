@@ -7,7 +7,6 @@ import {
 import { DaisyToastOptions } from '../../types/app.types';
 import { DisplayToast, UpdateTheme } from './app.actions';
 // import { Add } from './app.actions';
-// import { ToastMessageOptions } from 'primeng/api';
 
 
 export interface AppStateModel {
@@ -48,6 +47,3 @@ export class AppState {
 const _props = createPropertySelectors<AppStateModel>(AppState);
 
 // export const getCount = _props.count;
-
-// export const getToast = _props.toast;
-// export const getAppTheme = _props.theme;
