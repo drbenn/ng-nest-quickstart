@@ -4,8 +4,11 @@
 @if (toasts.length) {
   <div class="toast toast-top toast-end">
   @for (toast of toasts; track toast) {
-      <div class="alert" [ngStyle]="{ 'background': toast.bgColor, 'color': toast.textColor }">
-        <span>{{ toast.message }}</span>
+      <div class="alert block w-[20rem] text-wrap border-none rounded-xs p-4" [ngStyle]="{ 'background': toast.bgColor, 'color': toast.textColor }">
+        @if (toast.title) {
+          <div class="text-xl font-semibold mb-1">{{ toast.title }}</div>
+        }
+        <div class="text-sm">{{ toast.message }}</div>
       </div>
     }
   </div>
