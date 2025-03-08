@@ -3,13 +3,16 @@
   <!-- left side -->
   <section class="w-1/3 md:w-fit flex flex-nowrap flew-row justify-start items-center">
     <!-- site icon & name -->
-    <div class="hidden md:flex">
+    <div class="">
       <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page">
         <div class="flex flex-row flex-nowrap justify-center items-center">
-          <div class="translate-y-1">
+          <div class="translate-y-1 flex md:hidden">
+            <ng-icon [svg]="logoIcon" size="40px"  color="dodgerblue"/>
+          </div>
+          <div class="translate-y-1 hidden md:flex">
             <ng-icon [svg]="logoIcon" size="75px"  color="dodgerblue"/>
           </div>
-          <div class="font-semibold opacity-80 text-2xl ml-3 hidden md:flex subpixel-antialiased">
+          <div class="font-semibold opacity-80  ml-3 text-lg md:text-2xl subpixel-antialiased">
             <div class="">
               {{ siteName }}
             </div>
@@ -162,7 +165,7 @@
           </div>
         </div>
         <div menu-content>
-          <mobile-nav-popover [isUserLoggedIn]="authUser ? true : false"></mobile-nav-popover>
+          <mobile-nav-popover [isUserLoggedIn]="authUser ? true : false" class="w-full"></mobile-nav-popover>
         </div>
       </app-daisy-dropdown-popover>
     </div>
