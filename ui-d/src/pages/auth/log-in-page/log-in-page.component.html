@@ -27,7 +27,7 @@
           </label>
         </div>
 
-        <div class="flex flex-row flex-nowrap justify-start items-start ml-3 w-full">
+        <div class="flex flex-row flex-nowrap justify-between items-start ml-3 w-full">
           <label class="fieldset-label mt-2 -translate-x-1">
             <input 
               type="checkbox"
@@ -40,31 +40,22 @@
               inputId="checkbox" />
               <span class="ml-1 text-sm text-base-content">View Password</span>
           </label>
-          <!-- <p-checkbox
-            binary="true"
-            size="small"
-            id="on_label"
-            formControlName="isPasswordInView"
-            (onChange)="handlePasswordInView($event)"
-            inputId="checkbox" />
-          <div class="ml-2 mt-2 font-light text-xs select-none">
-            View Password
-          </div> -->
+          <div class="mt-2 mx-3">
+            <a routerLink="/register-account" routerLinkActive="active" ariaCurrentWhenActive="page"
+            class="transition duration-[50ms] ease-in hover:text-gray-600 cursor-pointer text-sm font-base">
+              No Account? Register
+            </a>
+          </div>
         </div>
   
-        <div class="mt-2 ml-3">
-          <a routerLink="/register-account" routerLinkActive="active" ariaCurrentWhenActive="page"
-          class="transition duration-[50ms] ease-in hover:text-gray-600 cursor-pointer text-xs font-light"
-          >
-            No Account? Register
-          </a>
-        </div>
-        <div class="mt-2 ml-3">
-          <a routerLink="/request-password-reset" routerLinkActive="active" ariaCurrentWhenActive="page"
-          class="transition duration-[50ms] ease-in hover:text-gray-600 cursor-pointer text-xs font-light"
-          >
-            Forgot Password?
-          </a>
+
+        <div class="mt-2 w-full flex justify-end">
+          <div>
+            <a routerLink="/request-password-reset" routerLinkActive="active" ariaCurrentWhenActive="page"
+            class="transition duration-[50ms] ease-in hover:text-gray-600 cursor-pointer text-sm font-base w-full">
+              Forgot Password?
+            </a>
+          </div>
         </div>
 
 
