@@ -7,6 +7,14 @@ export const navbarRoutes: any = {
     {
       name: 'Contact',
       route: '/contact',
+    },
+    {
+      name: 'Register',
+      route: '/register',
+    },
+    {
+      name: 'Login',
+      route: '/log-in',
     }
   ],
   loggedInNavRoutes: [
