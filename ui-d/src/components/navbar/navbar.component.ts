@@ -2,15 +2,21 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { AuthState, AuthStateModel } from '../../store/auth/auth.state';
-import { Store } from '@ngxs/store';
+import { dispatch, Store } from '@ngxs/store';
 import { environment } from '../../environments/environment';
 import { navbarRoutes } from './navbar-routes';
 
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroSwatchSolid, heroBars3Solid } from '@ng-icons/heroicons/solid';
+import { LogoutUser } from '../../store/auth/auth.actions';
+import { CommonModule, DatePipe } from '@angular/common';
+
 @Component({
   selector: 'navbar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, NgIcon],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss'
+  styleUrl: './navbar.component.scss',
+  providers: [provideIcons({ heroSwatchSolid, heroBars3Solid }), DatePipe],
 })
 export class NavbarComponent {
   private destroy$ = new Subject<void>();
@@ -20,10 +26,15 @@ export class NavbarComponent {
   protected authUser: Partial<AuthStateModel> | null = null;
   protected navRoutes = navbarRoutes;
 
+  protected logoIcon = heroSwatchSolid;
+  protected mobileBarsIcon = heroBars3Solid;
+
 
   ngOnInit(): void {
     // this.setInitDarkMode();
     this.listenForUser();
+    console.log(this.authUser);
+    
   }
 
   ngOnDestroy() {
@@ -49,9 +60,20 @@ export class NavbarComponent {
     });
   };
 
-  // protected toggleDarkMode(): void {
-  //   const element = document.querySelector('html');
-  //   element?.classList.toggle('dark');
-  //   this.isDarkMode = !this.isDarkMode;
-  // };
+  protected toggleDarkMode(): void {
+    // const element = document.querySelector('html');
+    // element?.classList.toggle('dark');
+    // this.isDarkMode = !this.isDarkMode;
+    document.documentElement.setAttribute('data-theme', 'dark');
+  };
+
+
+
+
+  // LOGGED IN USER MENU
+  private logout = dispatch(LogoutUser);
+  protected signOut(): void {
+    this.logout();
+    // this.close.emit();
+  };
 }

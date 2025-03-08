@@ -1,73 +1,201 @@
-<header class='flex border-b py-4 px-4 sm:px-10 bg-white font-sans min-h-[70px] tracking-wide relative z-50'>
-  <div class='flex flex-wrap items-center gap-4 w-full'>
-    <a href="https://readymadeui.com">
-      <h3 class="text-2xl font-semibold">Logo</h3>
+<main class="w-full py-6 lg:py-7 px-2 md:px-6 lg:px-8 flex flex-row flex-nowrap justify-between items-center tracking-wide">
+
+  <!-- left side -->
+  <section class="w-1/3 md:w-fit flex flex-nowrap flew-row justify-start items-center">
+    <!-- site icon & name -->
+    <div class="hidden md:flex">
+      <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page">
+        <div class="flex flex-row flex-nowrap justify-center items-center">
+          <div class="translate-y-1">
+            <ng-icon [svg]="logoIcon" size="75px"  color="dodgerblue"/>
+          </div>
+          <div class="font-semibold opacity-80 text-2xl ml-3 hidden md:flex subpixel-antialiased">
+            <div class="">
+              {{ siteName }}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- mobile only middle icon -->
+  <!-- <section class="flex w-1/3 md:hidden justify-center items-center">
+    <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <div class="flex flex-row flex-nowrap justify-center items-center">
+        <div>
+          <i class="pi pi-qrcode" style="font-size: 1.25rem; color: #c3ff38"></i>
+        </div>
+      </div>
     </a>
+  </section> -->
 
-    <div
-      class='lg:!flex lg:flex-auto lg:ml-12 max-lg:hidden max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50'>
-      <button class='lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white p-3'>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 fill-black" viewBox="0 0 320.591 320.591">
-          <path
-            d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
-            data-original="#000000"></path>
-          <path
-            d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
-            data-original="#000000"></path>
-        </svg>
-      </button>
+  <!-- right side -->
+  <section class="w-1/3 md:w-fit flex flex-nowrap flex-row justify-end items-center">
 
-      <div
-        class="lg:!flex lg:flex-auto max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
-
-        <ul class='lg:flex lg:gap-x-8 max-lg:space-y-2'>
-          <li class='mb-6 hidden max-lg:block'>
-            <a href="javascript:void(0)"><img src="https://readymadeui.com/readymadeui.svg" alt="logo" class='w-36' />
+    <!-- logged out desktop wide nav links -->
+    @if (authUser === null) {
+      <ul class="hidden mr-6 md:flex font-medium text-[15px] opacity-90 subpixel-antialiased">
+        @for (item of navRoutes.loggedOutNavRoutes; track item.name; let i = $index) {
+          <li [class]="i !==0 ? 'ml-8' : '' ">
+            <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+            class="transition duration-[20ms] ease-in hover:text-gray-500"
+            >
+              {{ item.name }}
             </a>
           </li>
-          <li class='max-lg:border-b max-lg:py-3'>
-            <a href='javascript:void(0)'
-              class='hover:text-[#007bff] text-[#007bff] block font-bold text-[15px]'>Home</a>
-          </li>
-          <li class='max-lg:border-b max-lg:py-3'><a href='javascript:void(0)'
-            class='hover:text-[#007bff] text-gray-600 block font-bold text-[15px]'>Shop</a>
-          </li>
-          <li class='max-lg:border-b max-lg:py-3'><a href='javascript:void(0)'
-            class='hover:text-[#007bff] text-gray-600 block font-bold text-[15px]'>Sale</a>
-          </li>
-          <li class='max-lg:border-b max-lg:py-3'><a href='javascript:void(0)'
-            class='hover:text-[#007bff] text-gray-600 block font-bold text-[15px]'>Manage</a>
-          </li>
-        </ul>
+        }
+      </ul>
+    }
 
-        <ul class='lg:flex lg:items-center ml-auto max-lg:block lg:space-x-8 ml-auto'>
-          <li class='max-lg:border-b max-lg:py-3 max-lg:mt-2'>
-            <a href='javascript:void(0)'
-              class='hover:text-[#007bff] text-gray-600 block font-bold text-[15px]'>Pricing</a>
+    <!-- logged in desktop wide nav links -->
+    @if (authUser !== null) {
+      <ul class="hidden mr-6 md:flex font-medium text-[15px] opacity-90 subpixel-antialiased">
+        @for (item of navRoutes.loggedInNavRoutes; track item.name; let i = $index) {
+          <li [class]="i !==0 ? 'ml-8' : '' ">
+            <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+            class="transition duration-[20ms] ease-in hover:text-gray-500"
+            >
+              {{ item.name }}
+            </a>
           </li>
-          <li class='max-lg:border-b max-lg:py-3 max-lg:mt-2'><a href='javascript:void(0)'
-            class='hover:text-[#007bff] text-gray-600 block font-bold text-[15px]'>Learn</a>
-          </li>
-        </ul>
-      </div>
-    </div>
+        }
+      </ul>
+    }
 
-    <div class="border-l border-[#333] h-6 max-lg:hidden"></div>
-
-    <div class='flex items-center ml-auto space-x-6'>
-      <a href='javascript:void(0)' class='hover:text-[#007bff] text-gray-600 block font-bold text-[15px]'>Log
-        in</a>
-      <button
-        class='px-4 py-2.5 text-sm rounded font-bold text-white border-2 border-[#1d294f] bg-[#1d294f] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#1d294f]'>Start
-        free trial</button>
-
-      <button class='lg:hidden'>
-        <svg class="w-7 h-7" fill="#000" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd"
-            d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-            clip-rule="evenodd"></path>
+    <!-- dark mode toggle -->
+    <div (click)="toggleDarkMode()" class="mr-5 h-6 w-6
+    transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-1 cursor-pointer
+    ">
+      <!-- <i [class]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon' "
+      [style]=" isDarkMode ? 'font-size: 0.75rem; color: white' : 'font-size: 0.75rem; color: slategray' "
+      class="-translate-y-1.5 translate-x-0.5">
+      </i> -->
+      <label class="swap swap-rotate -translate-y-2">
+        <!-- this hidden checkbox controls the state -->
+        <input type="checkbox" />
+      
+        <!-- sun icon -->
+        <svg
+          class="swap-on h-4 w-4 fill-current "
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24">
+          <path
+            d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
         </svg>
-      </button>
+      
+        <!-- moon icon -->
+        <svg
+          class="swap-off h-4 w-4 fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24">
+          <path
+            d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+        </svg>
+      </label>
     </div>
-  </div>
-</header>
+
+    <!-- logged out sign in route -->
+    @if (authUser === null) {
+      <ul class="font-medium text-[15px] opacity-90 subpixel-antialiased mr-1">
+        <li>
+          <a routerLink="/log-in" routerLinkActive="active" ariaCurrentWhenActive="page"
+          class="transition duration-[50ms] ease-in hover:text-gray-600"
+          >
+            Log In
+          </a>
+        </li>
+      </ul>
+    }
+
+    <!-- logged in user - avatar image provided -->
+    @if (authUser !== null && authUser.imgUrl) {
+      <div class="flex justify-end items-center mr-1">
+        <details class="dropdown">
+          <summary class="btn m-1 w-8 h-fit rounded-full">
+            <!-- Open Close -->
+            <div class="avatar">
+              <div class="w-8 rounded-full">
+                <img
+                  [src]="authUser.imgUrl"
+                  alt="Authorized User Avatar Image" />
+              </div>
+            </div>
+          </summary>
+          <ul class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+            <li><a>Item 1</a></li>
+            <li><a>Item 2</a></li>
+          </ul>
+        </details>
+        <!-- <p-avatar (click)="userMenuPopover.toggle($event)"
+        class="cursor-pointer"
+        [style]="{height: '24px', width: '24px'}"
+        [image]="authUser.imgUrl" 
+        shape="circle" /> -->
+      </div>
+    }
+
+    <!-- logged in user - no image but fullname -->
+    @if (authUser !== null && authUser.imgUrl === null && authUser.fullName) {
+      <div class="flex justify-end items-center mr-1">
+        <div class="flex justify-center items-center h-[24px] w-[24px] bg-slate-700 rounded-full">
+          <div class="font-bold">
+            {{ authUser.fullName[0] }}
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- logged in standard user - no image but fullname -->
+    @if (authUser !== null && authUser.imgUrl === null && !authUser.fullName) {
+      <div class="flex justify-end items-center mr-1 cursor-pointer w-[24px] h-[24px] rounded-full">
+        <details class="dropdown">
+          <summary class="btn m-1 w-8 h-fit rounded-full">
+            <!-- Open Close -->
+            <div class="avatar">
+              <div class="w-8 rounded-full">
+                <img
+                  src="img/blank-user-avatar.png"
+                  alt="Authorized User Avatar Image" />
+              </div>
+            </div>
+          </summary>
+          <ul class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+            <li><a>Item 1</a></li>
+            <li><a>Item 2</a></li>
+          </ul>
+        </details>
+        <!-- <img src="img/blank-user-avatar.png" alt="" class="w-[24px] h-[24px]"> -->
+      </div>
+    }
+
+    <!-- mobile nav hamburger icon popover trigger -->
+    <!-- (click)="mobileNavMenuPopover.toggle($event)" -->
+    <div class="flex md:hidden
+    transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-2 cursor-pointer">
+      @if (isDarkMode) {
+        <!-- <i class="pi pi-bars" style="font-size: 1rem; color: white"></i> -->
+        <div class="translate-y-1">
+          <ng-icon [svg]="mobileBarsIcon" size="1.5rem"  color="white"/>
+        </div>
+      } 
+      @else {
+        <!-- <i class="pi pi-bars" style="font-size: 1rem; color: slategray"></i> -->
+        <div class="translate-y-1">
+          <ng-icon [svg]="mobileBarsIcon" size="1.5rem"  color="#161616"/>
+        </div>
+      }
+    </div>
+
+  </section>
+
+</main>
+
+<!-- <p-popover #mobileNavMenuPopover>
+  <mobile-nav-popover [isUserLoggedIn]="authUser !== null"></mobile-nav-popover>
+</p-popover>
+
+<p-popover #userMenuPopover>
+  <user-nav-popover (close)="userMenuPopover.hide()" [user]="authUser"></user-nav-popover>
+</p-popover> -->
+
