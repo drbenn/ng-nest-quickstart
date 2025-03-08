@@ -19,6 +19,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent implements OnInit {
   private checkAuthenticatedUser = dispatch(CheckAuthenticatedUser);
+  private theme$!: Observable<string>;
   private toast$!: Observable<DaisyToastOptions | null>;
   protected toasts: DaisyToastOptions[] = [];
 
@@ -29,18 +30,17 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkAuthenticatedUser();
+    this.theme$ = this.store.select((state) => state.appState.theme);
     this.toast$ = this.store.select((state) => state.appState.toast);
+    this.listenForTheme();
     this.listenForToasts();
     this.posthogAnalyticsService.trackFirstVisit(); // Track page views on load
     this.posthogAnalyticsService.trackPageView(); // Track page views on load
   }
   
-  changeTheme(selectedTheme: string): void {
-    console.log('change theme: ', selectedTheme);
-    document.documentElement.setAttribute('data-theme', selectedTheme);
-  }
 
-  private displayToast = dispatch(DisplayToast);
+
+  
 
   pushToast() {
     this.displayToast({
@@ -53,7 +53,17 @@ export class AppComponent implements OnInit {
     })
   }
 
+  private listenForTheme(): void {
+    this.theme$.subscribe((theme: string) => {
+      this.changeTheme(theme)
+    });
+  };
 
+  private changeTheme(selectedTheme: string): void {
+    document.documentElement.setAttribute('data-theme', selectedTheme);
+  }
+
+  private displayToast = dispatch(DisplayToast);
   private listenForToasts(): void {
     this.toast$.subscribe((toast: DaisyToastOptions | null) => {      
       if (toast) {

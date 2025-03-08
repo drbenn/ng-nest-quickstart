@@ -35,7 +35,7 @@
 
     <!-- logged out desktop wide nav links -->
     @if (authUser === null) {
-      <ul class="hidden mr-6 md:flex font-medium text-[15px] opacity-90 subpixel-antialiased">
+      <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-90 subpixel-antialiased">
         @for (item of navRoutes.loggedOutNavRoutes; track item.name; let i = $index) {
           <li [class]="i !==0 ? 'ml-8' : '' ">
             <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
@@ -50,7 +50,7 @@
 
     <!-- logged in desktop wide nav links -->
     @if (authUser !== null) {
-      <ul class="hidden mr-6 md:flex font-medium text-[15px] opacity-90 subpixel-antialiased">
+      <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-90 subpixel-antialiased">
         @for (item of navRoutes.loggedInNavRoutes; track item.name; let i = $index) {
           <li [class]="i !==0 ? 'ml-8' : '' ">
             <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
@@ -64,16 +64,11 @@
     }
 
     <!-- dark mode toggle -->
-    <div (click)="toggleDarkMode()" class="mr-5 h-6 w-6
-    transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-1 cursor-pointer
-    ">
-      <!-- <i [class]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon' "
-      [style]=" isDarkMode ? 'font-size: 0.75rem; color: white' : 'font-size: 0.75rem; color: slategray' "
-      class="-translate-y-1.5 translate-x-0.5">
-      </i> -->
-      <label class="swap swap-rotate -translate-y-2">
+    <div class="mr-[2rem] h-6 w-6 
+    transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-1 cursor-pointer">
+      <label class="swap swap-rotate -translate-y-2" >
         <!-- this hidden checkbox controls the state -->
-        <input type="checkbox" />
+        <input type="checkbox" (click)="selectTheme()"/>
       
         <!-- sun icon -->
         <svg
@@ -97,7 +92,7 @@
 
     <!-- logged out sign in route -->
     @if (authUser === null) {
-      <ul class="font-medium text-[15px] opacity-90 subpixel-antialiased mr-1">
+      <ul class="font-semibold text-[15px] opacity-90 subpixel-antialiased mr-1">
         <li>
           <a routerLink="/log-in" routerLinkActive="active" ariaCurrentWhenActive="page"
           class="transition duration-[50ms] ease-in hover:text-gray-600"
@@ -111,91 +106,65 @@
     <!-- logged in user - avatar image provided -->
     @if (authUser !== null && authUser.imgUrl) {
       <div class="flex justify-end items-center mr-1">
-        <details class="dropdown">
-          <summary class="btn m-1 w-8 h-fit rounded-full">
-            <!-- Open Close -->
-            <div class="avatar">
-              <div class="w-8 rounded-full">
-                <img
-                  [src]="authUser.imgUrl"
-                  alt="Authorized User Avatar Image" />
+        <app-daisy-dropdown-popover
+          position="dropdown-left"
+          summaryClass="btn m-1 w-8 h-fit rounded-full">
+          <div open-button>
+            <div class="translate-y-1">
+              <div class="avatar">
+                <div class="w-8 rounded-full">
+                  <img
+                    [src]="authUser.imgUrl"
+                    alt="Authorized User Avatar Image" />
+                </div>
               </div>
             </div>
-          </summary>
-          <ul class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-            <li><a>Item 1</a></li>
-            <li><a>Item 2</a></li>
-          </ul>
-        </details>
-        <!-- <p-avatar (click)="userMenuPopover.toggle($event)"
-        class="cursor-pointer"
-        [style]="{height: '24px', width: '24px'}"
-        [image]="authUser.imgUrl" 
-        shape="circle" /> -->
-      </div>
-    }
-
-    <!-- logged in user - no image but fullname -->
-    @if (authUser !== null && authUser.imgUrl === null && authUser.fullName) {
-      <div class="flex justify-end items-center mr-1">
-        <div class="flex justify-center items-center h-[24px] w-[24px] bg-slate-700 rounded-full">
-          <div class="font-bold">
-            {{ authUser.fullName[0] }}
           </div>
-        </div>
+          <div menu-content>
+            <user-nav-popover [user]="authUser"></user-nav-popover>
+          </div>
+        </app-daisy-dropdown-popover>
       </div>
     }
 
     <!-- logged in standard user - no image but fullname -->
-    @if (authUser !== null && authUser.imgUrl === null && !authUser.fullName) {
+    @if (authUser !== null && authUser.imgUrl === null) {
       <div class="flex justify-end items-center mr-1 cursor-pointer w-[24px] h-[24px] rounded-full">
-        <details class="dropdown">
-          <summary class="btn m-1 w-8 h-fit rounded-full">
-            <!-- Open Close -->
+        <app-daisy-dropdown-popover
+          position="dropdown-left"
+          summaryClass="btn m-1 w-8 h-fit rounded-full">
+          <div open-button>
             <div class="avatar">
               <div class="w-8 rounded-full">
                 <img
                   src="img/blank-user-avatar.png"
+                  [ngClass]="isDarkMode ? 'invert-80' : '' "
                   alt="Authorized User Avatar Image" />
               </div>
             </div>
-          </summary>
-          <ul class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-            <li><a>Item 1</a></li>
-            <li><a>Item 2</a></li>
-          </ul>
-        </details>
-        <!-- <img src="img/blank-user-avatar.png" alt="" class="w-[24px] h-[24px]"> -->
+          </div>
+          <div menu-content>
+            <user-nav-popover [user]="authUser" class="w-full"></user-nav-popover>
+          </div>
+        </app-daisy-dropdown-popover>
       </div>
     }
 
     <!-- mobile nav hamburger icon popover trigger -->
-    <!-- (click)="mobileNavMenuPopover.toggle($event)" -->
     <div class="flex md:hidden
     transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-2 cursor-pointer">
-      @if (isDarkMode) {
-        <!-- <i class="pi pi-bars" style="font-size: 1rem; color: white"></i> -->
-        <div class="translate-y-1">
-          <ng-icon [svg]="mobileBarsIcon" size="1.5rem"  color="white"/>
+      <app-daisy-dropdown-popover
+        position="dropdown-left"
+        summaryClass="btn m-1 w-8 h-fit rounded-full">
+        <div open-button>
+          <div class="translate-y-1">
+            <ng-icon [svg]="mobileBarsIcon" size="1.5rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+          </div>
         </div>
-      } 
-      @else {
-        <!-- <i class="pi pi-bars" style="font-size: 1rem; color: slategray"></i> -->
-        <div class="translate-y-1">
-          <ng-icon [svg]="mobileBarsIcon" size="1.5rem"  color="#161616"/>
+        <div menu-content>
+          <mobile-nav-popover [isUserLoggedIn]="authUser ? true : false"></mobile-nav-popover>
         </div>
-      }
+      </app-daisy-dropdown-popover>
     </div>
-
   </section>
-
 </main>
-
-<!-- <p-popover #mobileNavMenuPopover>
-  <mobile-nav-popover [isUserLoggedIn]="authUser !== null"></mobile-nav-popover>
-</p-popover>
-
-<p-popover #userMenuPopover>
-  <user-nav-popover (close)="userMenuPopover.hide()" [user]="authUser"></user-nav-popover>
-</p-popover> -->
-

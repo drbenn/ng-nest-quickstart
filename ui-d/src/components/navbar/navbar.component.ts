@@ -10,10 +10,14 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroSwatchSolid, heroBars3Solid } from '@ng-icons/heroicons/solid';
 import { LogoutUser } from '../../store/auth/auth.actions';
 import { CommonModule, DatePipe } from '@angular/common';
+import { UpdateTheme } from '../../store/app/app.actions';
+import { MobileNavPopoverComponent } from './components/mobile-nav-popover/mobile-nav-popover.component';
+import { UserNavPopoverComponent } from './components/user-nav-popover/user-nav-popover.component';
+import { DaisyDropdownPopoverComponent } from './components/daisy-dropdown-popover/daisy-dropdown-popover.component';
 
 @Component({
   selector: 'navbar',
-  imports: [CommonModule, RouterLink, RouterLinkActive, NgIcon],
+  imports: [CommonModule, RouterLink, RouterLinkActive, NgIcon, MobileNavPopoverComponent, UserNavPopoverComponent, DaisyDropdownPopoverComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
   providers: [provideIcons({ heroSwatchSolid, heroBars3Solid }), DatePipe],
@@ -28,10 +32,11 @@ export class NavbarComponent {
 
   protected logoIcon = heroSwatchSolid;
   protected mobileBarsIcon = heroBars3Solid;
+  
+  constructor (private store: Store) {}
 
 
   ngOnInit(): void {
-    // this.setInitDarkMode();
     this.listenForUser();
     console.log(this.authUser);
     
@@ -43,32 +48,25 @@ export class NavbarComponent {
     this.destroy$.complete();
   };
 
-  // private setInitDarkMode(): void {
-  //   if (environment.darkMode) {
-  //     // this.toggleDarkMode();
-  //     this.isDarkMode = true;
-  //   } else {
-  //     this.isDarkMode = false;
-  //   }
-  // };
-
   private listenForUser(): void {
     this.authState$.pipe(takeUntil(this.destroy$)).subscribe((userData: Partial<AuthStateModel>) => {
       console.log(userData);
-      
       userData.id ? this.authUser = userData : this.authUser = null;
     });
   };
 
-  protected toggleDarkMode(): void {
-    // const element = document.querySelector('html');
-    // element?.classList.toggle('dark');
-    // this.isDarkMode = !this.isDarkMode;
-    document.documentElement.setAttribute('data-theme', 'dark');
+  private updateTheme = dispatch(UpdateTheme);
+  activeTheme: string = 'winter';         // default light theme
+  protected selectTheme(): void {
+    if (this.activeTheme === 'winter') {
+      this.activeTheme = 'dim';           // dark theme
+      this.isDarkMode = true;
+    } else {
+      this.activeTheme = 'winter';        // light theme
+      this.isDarkMode = false;
+    };
+    this.updateTheme(this.activeTheme);
   };
-
-
-
 
   // LOGGED IN USER MENU
   private logout = dispatch(LogoutUser);
