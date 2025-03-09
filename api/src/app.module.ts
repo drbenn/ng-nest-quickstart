@@ -77,17 +77,21 @@ export class AppModule {}
 
 function determineEnvFilePath(): string[] {
   // return array with common envs + whatever environment is being ran
-  const envPaths: string[] = ['common.env'];
+  const envPaths: string[] = ['env/.common.env'];
   const env = process.env.NODE_ENV || 'development';
   switch (env) {
     case 'development':
       envPaths.push('env/.development.local.env');
+      break;
     case 'namecheap_production':
       envPaths.push('env/.namecheap.production.env');
+      break;
     case 'docker-production':
       envPaths.push('env/.docker.production.env');
+      break;
     case 'nginx-production':
       envPaths.push('env/.nginx.production.env');
+      break;
     default:
       envPaths.push('env/.development.local.env');
   }
