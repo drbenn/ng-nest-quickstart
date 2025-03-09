@@ -5,9 +5,7 @@ import {
   createPropertySelectors,
 } from '@ngxs/store';
 import { DaisyToastOptions } from '../../types/app.types';
-import { DisplayToast, UpdateTheme } from './app.actions';
-// import { Add } from './app.actions';
-
+import { Add, DisplayToast, UpdateTheme } from './app.actions';
 
 export interface AppStateModel {
   theme: string;
@@ -30,11 +28,11 @@ export class AppState {
     patchState({ theme: theme });
   }
 
-  // @Action(Add)
-  // add(ctx: StateContext<AppStateModel>, action: Add) {
-  //   const state = ctx.getState();
-  //   ctx.patchState({ count: state.count + action.amount });
-  // }
+  @Action(Add)
+  add(ctx: StateContext<AppStateModel>, action: Add) {
+    const state = ctx.getState();
+    ctx.patchState({ count: state.count + action.amount });
+  }
 
   @Action(DisplayToast)
   displayToast( {patchState }: StateContext<any>, { message }: DisplayToast) {
@@ -46,4 +44,4 @@ export class AppState {
 
 const _props = createPropertySelectors<AppStateModel>(AppState);
 
-// export const getCount = _props.count;
+export const getCount = _props.count;

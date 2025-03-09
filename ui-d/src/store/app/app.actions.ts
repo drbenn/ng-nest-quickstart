@@ -1,5 +1,3 @@
-// import { ToastMessageOptions } from "primeng/api";
-
 import { DaisyToastOptions } from "../../types/app.types";
 
 export class UpdateTheme {
@@ -7,10 +5,10 @@ export class UpdateTheme {
   constructor(public theme: string) {}
 }
 
-// export class Add {
-//   static readonly type = 'Add';
-//   constructor(public amount: number) {}
-// }
+export class Add {
+  static readonly type = 'Add';
+  constructor(public amount: number) {}
+}
 
 export class DisplayToast {
   static readonly type = '[App] Display Toast';
