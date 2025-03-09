@@ -1,3 +1,10 @@
 <standard-page-wrapper>
-  <p>page-not-found-page works!</p>
+  <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <h1 className="text-6xl font-bold text-gray-800">404</h1>
+    <p className="text-xl text-gray-600 mt-4">Page Not Found</p>
+    <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page" 
+      class="cursor-pointer hover:text-primary transition duration-[50ms] ease-in">
+        Go to homepage
+      </a>
+  </div>
 </standard-page-wrapper>

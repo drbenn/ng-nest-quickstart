@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'privacy-policy-page',
@@ -8,5 +9,5 @@ import { StandardPageWrapperComponent } from '../../../components/standard-page-
   styleUrl: './privacy-policy-page.component.scss'
 })
 export class PrivacyPolicyPageComponent {
-
+  protected lastUpdatedDate: string = environment.privacyPolicyLastUpdatedDate;
 }

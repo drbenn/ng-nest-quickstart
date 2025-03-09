@@ -1,8 +1,13 @@
 <div class="
   fade-in-150
-  relative max-w-xl lg:max-w-3xl xl:max-w-5xl 2xl:max-w-7xl mx-auto pt-20 pb-28 sm:pt-24 sm:pb-32 lg:pt-32 lg:pb-42
+  relative max-w-xl lg:max-w-3xl xl:max-w-5xl 2xl:max-w-7xl mx-auto px-5 sm:px-0 pt-16 pb-24 sm:pt-24 sm:pb-28 lg:pt-32 lg:pb-32
   flex flex-col justify-start items-center
   transition-opacity ease-in duration-150"
 >
+@if (title) {
+    <div class="mb-8 md:mb-10 text-4xl font-semibold">
+      {{ title }}
+    </div>
+  }
   <ng-content></ng-content>
 </div>

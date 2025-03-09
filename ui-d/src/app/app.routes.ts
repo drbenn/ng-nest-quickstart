@@ -7,6 +7,7 @@ import { PageNotFoundPageComponent } from '../pages/public/page-not-found-page/p
 import { TermsOfUsePageComponent } from '../pages/public/terms-of-use-page/terms-of-use-page.component';
 import { PrivacyPolicyPageComponent } from '../pages/public/privacy-policy-page/privacy-policy-page.component';
 import { CookiePolicyPageComponent } from '../pages/public/cookie-policy-page/cookie-policy-page.component';
+import { AboutUsComponent } from '../pages/public/about-us/about-us.component';
 
 // AUTH Routes for login/register/callback
 import { LogInPageComponent } from '../pages/auth/log-in-page/log-in-page.component';
@@ -24,6 +25,7 @@ import { HomePageComponent } from '../pages/guarded/home-page/home-page.componen
 export const routes: Routes = [
     // PUBLIC Routes accessible by all
     { path: '', component: LandingPageComponent }, // Default route
+    { path: 'about-us', component: AboutUsComponent },
     { path: 'contact', component: ContactPageComponent },
     { path: 'terms-of-use', component: TermsOfUsePageComponent },
     { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
