@@ -7,11 +7,11 @@
     <section class="my-4">
       <div class=" w-full flex flex-row justify-between">
         <div class="flex justify-center">
-          <button class="btn btn-secondary" size="small" (click)="addLorem20()">Add Lorem 20</button>
+          <button class="btn btn-accent" size="small" (click)="addLorem20()">Add Lorem 20</button>
         </div>
         @if (!isUpdateMode) {
           <div class="card flex justify-center">
-            <button class="btn btn-secondary" size="small" (click)="submitTodo()">Submit</button>
+            <button class="btn btn-primary" size="small" (click)="submitTodo()">Submit</button>
           </div>
         }
         @if (isUpdateMode) {
