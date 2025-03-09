@@ -10,7 +10,7 @@ export const navbarRoutes: any = {
     },
     {
       name: 'Register',
-      route: '/register',
+      route: '/register-account',
     },
     {
       name: 'Login',
