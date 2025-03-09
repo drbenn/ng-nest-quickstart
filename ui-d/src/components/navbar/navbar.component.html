@@ -12,7 +12,7 @@
           <div class="translate-y-1 hidden md:flex">
             <ng-icon [svg]="logoIcon" size="75px"  color="dodgerblue"/>
           </div>
-          <div class="font-semibold opacity-80  ml-3 text-lg md:text-2xl subpixel-antialiased">
+          <div class="font-semibold opacity-100  ml-3 text-lg md:text-2xl subpixel-antialiased">
             <div class="">
               {{ siteName }}
             </div>
@@ -39,7 +39,7 @@
     <div class="">
       <!-- logged out desktop wide nav links -->
       @if (authUser === null) {
-        <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-90 subpixel-antialiased">
+        <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-100 subpixel-antialiased">
           @for (item of navRoutes.loggedOutNavRoutes; track item.name; let i = $index) {
             <li [class]="i !==0 ? 'ml-8' : '' ">
               <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
@@ -53,7 +53,7 @@
   
       <!-- logged in desktop wide nav links -->
       @if (authUser !== null) {
-        <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-90 subpixel-antialiased">
+        <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-100 subpixel-antialiased">
           @for (item of navRoutes.loggedInNavRoutes; track item.name; let i = $index) {
             <li [class]="i !==0 ? 'ml-8' : '' ">
               <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
@@ -69,7 +69,7 @@
 
     <!-- logged out sign in route -->
     <!-- @if (authUser === null) {
-      <ul class="font-semibold text-[15px] md:flex opacity-90 subpixel-antialiased mr-6">
+      <ul class="font-semibold text-[15px] md:flex opacity-100 subpixel-antialiased mr-6">
         <li>
           <a routerLink="/register" routerLinkActive="active" ariaCurrentWhenActive="page"
           class="transition duration-[50ms] ease-in hover:text-gray-600 mr-6">
