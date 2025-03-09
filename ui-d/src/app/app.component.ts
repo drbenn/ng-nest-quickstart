@@ -37,10 +37,6 @@ export class AppComponent implements OnInit {
     this.posthogAnalyticsService.trackFirstVisit(); // Track page views on load
     this.posthogAnalyticsService.trackPageView(); // Track page views on load
   }
-  
-
-
-  
 
   pushToast() {
     this.displayToast({

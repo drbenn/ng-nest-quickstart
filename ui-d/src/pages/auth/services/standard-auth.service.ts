@@ -1,21 +1,20 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { dispatch } from '@ngxs/store';
-
 import { Observable, throwError } from 'rxjs';
-// import { DisplayToast } from '../../../app/store/app.actions';
 import { environment } from '../../../environments/environment.development';
 import { PosthogAnalyticsService } from '../../../app/services/posthog-analytics.service';
 import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, LoginStandardUserDto, AuthMessages, RequestResetStandardUserDto } from '../../../types/userDto.types';
 import { LoginUser } from '../../../store/auth/auth.actions';
 import { Router } from '@angular/router';
+import { DisplayToast } from '../../../store/app/app.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StandardAuthService {
   private readonly baseUrl = environment.apiUrl + '/auth';
-  // private displayToast = dispatch(DisplayToast);
+  private displayToast = dispatch(DisplayToast);
   
   private loginUser = dispatch(LoginUser);
   constructor(
@@ -34,7 +33,12 @@ export class StandardAuthService {
         // Registration successful and login/redirect newly registered user.
         if ('user' in response) {
           const user: UserLoginJwtDto = response.user;
-          // this.displayToast({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
+          this.displayToast({ 
+            title: 'Success',
+            message: response.message as unknown as string,
+            bgColor: environment.toastDefaultSuccessColors.bgColor,
+            textColor: environment.toastDefaultSuccessColors.textColor
+          });
           this.loginUser(user);
         // Registration failed, email is already registered with site beit standard or oauth.
         } else {
@@ -52,7 +56,12 @@ export class StandardAuthService {
         if (response.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
           const user: UserLoginJwtDto = response.user;
           user.email ? this.posthogAnalyticsService.identifyUser(user.email, { email: user.email }) : '';
-          // this.displayToast({ severity: 'success', summary: 'Success', detail: response.message, life: 6000 });
+          this.displayToast({ 
+            title: 'Success',
+            message: response.message as unknown as string,
+            bgColor: environment.toastDefaultSuccessColors.bgColor,
+            textColor: environment.toastDefaultSuccessColors.textColor
+          });
           this.loginUser(user);
         }
         else if (response.message === AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED) {
@@ -114,7 +123,12 @@ export class StandardAuthService {
       // Backend error
       console.error(`Backend returned code ${error.status}, body was:`, error.error);
     };
-    // this.displayToast({ severity: 'error', summary: 'Error', detail: error.error, life: 3000 });
+    this.displayToast({ 
+      title: 'Error',
+      message: error.error as unknown as string,
+      bgColor: environment.toastDefaultDangerColors.bgColor,
+      textColor: environment.toastDefaultDangerColors.textColor
+    });
     // Return an observable with a user-facing error message
     return throwError(() => error.error?.message || 'Something went wrong. Please try again.');
   }
