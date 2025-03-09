@@ -6,7 +6,7 @@ import { dispatch } from '@ngxs/store';
 import { DisplayToast } from '../../../store/app/app.actions';
 import { RequestResetStandardUserDto, AuthResponseMessageDto, AuthMessages } from '../../../types/userDto.types';
 import { StandardAuthService } from '../services/standard-auth.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'request-passsword-reset-page',

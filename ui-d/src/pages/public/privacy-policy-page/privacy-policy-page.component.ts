@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'privacy-policy-page',

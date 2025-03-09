@@ -3,9 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { AuthState, AuthStateModel } from '../../store/auth/auth.state';
 import { dispatch, Store } from '@ngxs/store';
-import { environment } from '../../environments/environment';
 import { navbarRoutes } from './navbar-routes';
-
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroSwatchSolid, heroBars3Solid } from '@ng-icons/heroicons/solid';
 import { LogoutUser } from '../../store/auth/auth.actions';

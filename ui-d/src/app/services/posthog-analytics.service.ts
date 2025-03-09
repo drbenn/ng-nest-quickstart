@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import posthog from 'posthog-js';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
