@@ -11,7 +11,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('APP_PORT') || 3000;
   app.use(cookieParser());
-  app.setGlobalPrefix('api-v1');
+  app.setGlobalPrefix(configService.get<string>('URL_GLOBAL_PREFIX'));
   // app.enableCors(),
   app.enableCors({
     origin: [

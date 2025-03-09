@@ -75,16 +75,21 @@ import { EmailModule } from './email/email.module';
 export class AppModule {}
 
 
-function determineEnvFilePath(): string {
+function determineEnvFilePath(): string[] {
+  // return array with common envs + whatever environment is being ran
+  const envPaths: string[] = ['common.env'];
   const env = process.env.NODE_ENV || 'development';
   switch (env) {
     case 'development':
-      return 'env/.development.local.env';
+      envPaths.push('env/.development.local.env');
+    case 'namecheap_production':
+      envPaths.push('env/.namecheap.production.env');
     case 'docker-production':
-      return 'env/.docker.production.env';
+      envPaths.push('env/.docker.production.env');
     case 'nginx-production':
-      return 'env/.nginx.production.env';
+      envPaths.push('env/.nginx.production.env');
     default:
-      return 'env/.development.local.env';
+      envPaths.push('env/.development.local.env');
   }
+  return envPaths;
 }

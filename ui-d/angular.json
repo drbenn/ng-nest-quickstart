@@ -38,6 +38,8 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/ng-nest-qs/",
+              "deployUrl": "/ng-nest-qs/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.development.ts",
@@ -63,6 +65,8 @@
               "extractLicenses": true
             },
             "development": {
+              "baseHref": "/",
+              "deployUrl": "/",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
