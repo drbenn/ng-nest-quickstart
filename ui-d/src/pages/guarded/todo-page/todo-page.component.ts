@@ -66,7 +66,7 @@ export class TodoPageComponent {
     });
   }
 
-  protected deleteTodo(id: string): void {
+  protected deleteTodo(id: number): void {
     this.todoService.deleteTodo(id).subscribe(() => {
       this.todos = this.todos.filter((todo) => todo.id !== id);
     });

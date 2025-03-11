@@ -16,7 +16,7 @@ export class TodoService {
     return this.http.get<TodoDto[]>(this.baseUrl);
   }
 
-  public getTodoById(id: string): Observable<TodoDto> {
+  public getTodoById(id: number): Observable<TodoDto> {
     return this.http.get<TodoDto>(`${this.baseUrl}/${id}`);
   }
 
@@ -24,11 +24,11 @@ export class TodoService {
     return this.http.post<TodoDto>(this.baseUrl, todo);
   }
 
-  public updateTodo(id: string, todo: Partial<TodoDto>): Observable<TodoDto> {
+  public updateTodo(id: number, todo: Partial<TodoDto>): Observable<TodoDto> {
     return this.http.patch<TodoDto>(`${this.baseUrl}/${id}`, todo);
   }
 
-  public deleteTodo(id: string): Observable<void> {
+  public deleteTodo(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }
