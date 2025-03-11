@@ -60,7 +60,7 @@ export class AuthController {
       const restoredUser: Partial<User> = req['user'];
 
       // get fresh token for user restoring session
-      const jwtToken: string = await this.authService.generateAccessJwt(restoredUser.id);
+      const jwtToken: string = await this.authService.generateAccessJwt(restoredUser.id.toString());
 
       // Set the JWT as a httpOnly cookie in response
       res.cookie('jwt', jwtToken, {
@@ -289,7 +289,7 @@ export class AuthController {
     } else {
       // return jwt access and refresh tokens and redirect to oauth/callback to fetch appropriate user data
       try {
-        const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id);
+        const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id.toString());
         const jwtRefreshToken: string = await this.authService.generateRefreshJwt();
         await this.authService.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
   

@@ -45,7 +45,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       let newAccessToken: string;
       if (error && refreshToken) {
         const user = await this.authService.findOneUserByRefreshToken(refreshToken);
-        newAccessToken = await this.authService.generateAccessJwt(user.id);
+        newAccessToken = await this.authService.generateAccessJwt(user.id.toString());
 
         // Set the new access token in the response cookies (httpOnly)
         request.res.cookie('jwt', newAccessToken, {

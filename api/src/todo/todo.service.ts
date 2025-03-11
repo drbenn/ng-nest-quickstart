@@ -20,7 +20,7 @@ export class TodoService {
     }
   }
 
-  findOne(id: string): Promise<Todo> {
+  findOne(id: number): Promise<Todo> {
     try {
       return this.todoRepository.findOne({ where: { id } });
     } catch (error: unknown) {
@@ -37,7 +37,7 @@ export class TodoService {
     }
   }
 
-  async update(id: string, todo: Partial<Todo>): Promise<Todo> {
+  async update(id: number, todo: Partial<Todo>): Promise<Todo> {
     try {
       await this.todoRepository.update(id, todo);
       return this.todoRepository.findOne({ where: { id } });

@@ -28,7 +28,7 @@ export class AuthService {
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-  async findOneUserById(id: string): Promise<Partial<User> | null> {
+  async findOneUserById(id: number): Promise<Partial<User> | null> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       this.logger.log('warn', `Cannot find one user by id. User id not found: ${id}`);
@@ -84,7 +84,7 @@ export class AuthService {
     return hashedJwtRefreshToken;
   };
 
-  async updateUsersRefreshTokenInDatabase(userId: string, refreshToken: string): Promise<UpdateResult> {
+  async updateUsersRefreshTokenInDatabase(userId: number, refreshToken: string): Promise<UpdateResult> {
     try {
       return this.userRepository.update({ id: userId }, { refresh_token: refreshToken });
     } catch (error: unknown) {
@@ -117,7 +117,7 @@ export class AuthService {
       await this.userRepository.save(newUser);
 
       // create access and refresh jwts for users first login
-      const jwtAccessToken: string = await this.generateAccessJwt(newUser.id);
+      const jwtAccessToken: string = await this.generateAccessJwt(newUser.id.toString());
       const jwtRefreshToken: string = await this.generateRefreshJwt();
 
       // update refresh jwt in database for future access
@@ -170,7 +170,7 @@ export class AuthService {
       return failedPasswordResponseMessage;
     } else if (user && isPasswordMatch) {
       // otherwise return user information with tokens
-      const jwtAccessToken = await this.generateAccessJwt(user.id);
+      const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
       const jwtRefreshToken = await this.generateRefreshJwt();
   
       // update refresh jwt in database for future access
@@ -246,7 +246,7 @@ export class AuthService {
       // save new hashed password and reset_id for user
       const updatedUser = await this.userRepository.save(user);
 
-      const jwtAccessToken = await this.generateAccessJwt(user.id);
+      const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
       const jwtRefreshToken = await this.generateRefreshJwt();
 
       // update refresh jwt in database for future access

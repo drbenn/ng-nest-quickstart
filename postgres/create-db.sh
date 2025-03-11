@@ -5,6 +5,10 @@ DB_NAME="quickstart_db"
 DB_USER="postgres"
 DB_PASSWORD="pass" # Replace with your actual password
 
+DB_NAME="danbxdxb_ng_nest_quickstart_db"
+DB_USER="danbxdxb_postgres_dan_rules"
+DB_PASSWORD="jabroni_BALOGNE_22!!33" # Replace with your actual password
+
 # SQL commands
 # Set the password for the session
 export PGPASSWORD=$DB_PASSWORD
@@ -12,13 +16,10 @@ export PGPASSWORD=$DB_PASSWORD
 # Create the database first
 psql -U $DB_USER -c "CREATE DATABASE $DB_NAME;"
 
-# This extension is required to use function uuid_generate_v4()
-psql -U $DB_USER -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
-
 # Run the SQL commands to create tables
 psql -U $DB_USER -d $DB_NAME -c "
 CREATE TABLE IF NOT EXISTS \"users\" (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
   email VARCHAR(50),
   password VARCHAR(100),
@@ -36,7 +37,7 @@ CREATE TABLE IF NOT EXISTS \"users\" (
 );
 
 CREATE TABLE IF NOT EXISTS \"todos\" (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   detail TEXT,
   isCompleted BOOLEAN,
   date_created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

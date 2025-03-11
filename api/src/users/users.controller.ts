@@ -8,7 +8,7 @@ export class UsersController {
 
   @Get(':id')
   findOneUserById(
-    @Param('id') id: string
+    @Param('id') id: number
   ): Promise<User> {
     return this.usersService.findOneUserById(id);
   };

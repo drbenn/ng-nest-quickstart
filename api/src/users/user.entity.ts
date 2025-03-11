@@ -4,8 +4,8 @@ import { Exclude } from 'class-transformer';
 @Entity('users')
 export class User {
 
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   /**
    * When you run your TypeORM migrations or synchronize the schema with your database, the @Index decorator

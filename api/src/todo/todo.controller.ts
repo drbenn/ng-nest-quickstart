@@ -12,7 +12,7 @@ export class TodoController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Todo> {
+  findOne(@Param('id') id: number): Promise<Todo> {
     return this.todoService.findOne(id);
   }
 
@@ -22,7 +22,7 @@ export class TodoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() todo: Partial<Todo>): Promise<Todo> {
+  update(@Param('id') id: number, @Body() todo: Partial<Todo>): Promise<Todo> {
     return this.todoService.update(id, todo);
   }
 

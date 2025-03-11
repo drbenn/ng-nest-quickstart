@@ -13,7 +13,7 @@ export class UsersService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
-  findOneUserById(id: string): Promise<User> {
+  findOneUserById(id: number): Promise<User> {
     try {
       return this.userRepository.findOneBy({ id });
     } catch (error: unknown) {
