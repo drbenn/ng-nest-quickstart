@@ -60,8 +60,8 @@
               ],
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
+              "sourceMap": true,
+              "namedChunks": true,
               "extractLicenses": true
             },
             "development": {
