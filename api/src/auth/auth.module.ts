@@ -13,7 +13,7 @@ import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    // TypeOrmModule.forFeature([User]),
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
