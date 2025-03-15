@@ -3,7 +3,7 @@ import { Action, Selector, State, StateContext } from '@ngxs/store';
 import { SetUser } from './user.actions';
 
 export interface UserStateModel {
-  userId: string;
+  userId: number;
   email: string;
   firstName: string;
   lastName: string;
@@ -17,7 +17,7 @@ export interface UserStateModel {
 @State<UserStateModel>({
   name: 'user',
   defaults: {
-    userId: '',
+    userId: 0,
     email: '',
     firstName: '',
     lastName: '',
