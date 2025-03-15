@@ -74,6 +74,7 @@ export class AuthController {
       // Return basic user info for ui
       return restoredUser;
     } catch (error: unknown) {
+      console.log(req['user']);
       this.logger.error(`Error during OAuth redirect, new access token potentially generated for existing user: ${error}`);
       // Redirect the user to an error page
       res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
@@ -304,7 +305,7 @@ export class AuthController {
         // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly
         res.redirect(`${process.env.FRONTEND_URL}/oauth/callback`);   
       } catch (error: unknown) {
-        this.logger.error(`Error during OAuth redirect from handleOAuthRedirect: ${error}`);
+        this.logger.error(`Error during OAuth redirect from handleOAuthRedirect: ${error}`);        
         // Redirect the user to an error page
         res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
       };

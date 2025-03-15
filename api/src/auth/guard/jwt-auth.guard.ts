@@ -32,6 +32,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    console.log('can activate request: ', request);
     
     console.log('JWT Guard user: ', request.user);
     console.log('JWT Guard cookies: ', request.cookies);
