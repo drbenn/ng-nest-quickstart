@@ -5,16 +5,8 @@
   // @PrimaryGeneratedColumn()
 export interface Todo {
   id: number;
-
-  // @Column()
   detail: string;
-
-  // @Column({ default: false })
-  isCompleted: boolean;
-
-  // @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  is_completed: boolean;
   date_created: Date;
-
-  // @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   date_modified: Date;
 }

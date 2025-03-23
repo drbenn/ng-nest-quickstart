@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+// import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TodoModule } from './todo/todo.module';
 import {
@@ -14,7 +14,7 @@ import {
 import * as winston from 'winston';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { EmailModule } from './email/email.module';
-import { SqlModule } from './sql/sql.module';
+import { SqlAuthModule } from './auth/sql-auth/sql-auth.module';
 
 @Module({
   // mailgun for email service
@@ -24,7 +24,11 @@ import { SqlModule } from './sql/sql.module';
       envFilePath: determineEnvFilePath()
     }),
     ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true
+        })
+      ],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [
         {
@@ -33,23 +37,23 @@ import { SqlModule } from './sql/sql.module';
         },
       ],
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        return {
-          type: 'postgres',
-          host: config.get<string>('POSTGRES_HOST'),
-          port: config.get<number>('POSTGRES_PORT'),
-          username: config.get<string>('POSTGRES_USER'),
-          password: config.get<string>('POSTGRES_PASSWORD'),
-          database: config.get<string>('POSTGRES_DB'),
-          entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          autoLoadEntities: true,                             // Automatically load entities for TypeORM
-          synchronize: true,                                  // Use this in development only (auto-sync database schema)
-        }
-      },
-    }),
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => {
+    //     return {
+    //       type: 'postgres',
+    //       host: config.get<string>('POSTGRES_HOST'),
+    //       port: config.get<number>('POSTGRES_PORT'),
+    //       username: config.get<string>('POSTGRES_USER'),
+    //       password: config.get<string>('POSTGRES_PASSWORD'),
+    //       database: config.get<string>('POSTGRES_DB'),
+    //       entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    //       autoLoadEntities: true,                             // Automatically load entities for TypeORM
+    //       synchronize: true,                                  // Use this in development only (auto-sync database schema)
+    //     }
+    //   },
+    // }),
     WinstonModule.forRootAsync({
       useFactory: () => ({
         transports: [
@@ -69,7 +73,7 @@ import { SqlModule } from './sql/sql.module';
     }),
 
     // additional module imports
-    UsersModule, AuthModule, TodoModule, EmailModule, SqlModule],
+    UsersModule, AuthModule, TodoModule, EmailModule, SqlAuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

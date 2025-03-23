@@ -1,7 +1,7 @@
 export interface TodoDto {
   id: string,
   detail: string,
-  isCompleted: boolean,
+  is_completed: boolean,
   date_created: Date,
   date_modifed: Date,
 }

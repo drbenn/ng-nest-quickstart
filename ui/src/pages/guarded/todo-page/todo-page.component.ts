@@ -64,9 +64,9 @@ export class TodoPageComponent implements OnInit {
   }
 
   private toggleCompletion(todo: TodoDto): void {
-    const updatedTodo = { ...todo, isCompleted: !todo.isCompleted };
+    const updatedTodo = { ...todo, isCompleted: !todo.is_completed };
     this.todoService.updateTodo(todo.id!, updatedTodo).subscribe((updated) => {
-      todo.isCompleted = updated.isCompleted;
+      todo.is_completed = updated.is_completed;
     });
   }
 

@@ -3,10 +3,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardPasswordDto, ResetStandardPasswordDto } from 'src/users/dto/user.dto';
-import { User } from 'src/users/user.entity';
+// import { User } from 'src/users/user.entity';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
+import { User } from 'src/users/user.types';
+import { SqlAuthService } from './sql-auth/sql-auth.service';
+import { LoginTrackingTypes } from './sql-auth/sql-auth.types';
 
 export interface OAuthUser {
   id: number;
@@ -20,6 +23,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly sqlAuthService: SqlAuthService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
@@ -40,7 +44,7 @@ export class AuthController {
         sameSite: 'strict',
       });
 
-      res.clearCookie('refreshToken', {
+      res.clearCookie('refresh_token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
@@ -58,7 +62,6 @@ export class AuthController {
   async restoreUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<User>> {
     try {
       const restoredUser: Partial<User> = req['user'];
-
       // get fresh token for user restoring session
       const jwtToken: string = await this.authService.generateAccessJwt(restoredUser.id.toString());
 
@@ -74,7 +77,6 @@ export class AuthController {
       // Return basic user info for ui
       return restoredUser;
     } catch (error: unknown) {
-      console.log(req['user']);
       this.logger.error(`Error during OAuth redirect, new access token potentially generated for existing user: ${error}`);
       // Redirect the user to an error page
       res.redirect(`${process.env.FRONTEND_URL || '/error'}`);
@@ -95,7 +97,7 @@ export class AuthController {
       maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
     });
 
-    res.cookie('refreshToken', jwtRefreshToken, {
+    res.cookie('refresh_token', jwtRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -114,10 +116,11 @@ export class AuthController {
   @Post('register-standard')
   async register(
     @Body() registerStandardUserDto: RegisterStandardUserDto,
+    @Req() req: Request, // req for capturing and logging ip
     @Res({ passthrough: true }) res: Response, // Enables passing response
   ): Promise<AuthResponseMessageDto> {
     try {
-      const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);
+      const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);   
 
       if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
         const failedRegistrationResponseMessage: AuthResponseMessageDto = newUserResponse;
@@ -146,13 +149,11 @@ export class AuthController {
   @Post('login-standard')
   async login(
     @Body() loginStandardUserDto: LoginStandardUserDto,
+    @Req() req: Request, // req for capturing and logging ip
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<AuthResponseMessageDto | any> {
-    const loginResponse: AuthResponseMessageDto = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
-    
+  ): Promise<AuthResponseMessageDto | any> {   
     try {
       const loginResponse: AuthResponseMessageDto = await this.authService.loginStandardUser(loginStandardUserDto.email, loginStandardUserDto.password);
-      
       if (loginResponse.message === AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED) {
         const failedEmailNotRegisteredResponseMessage: AuthResponseMessageDto = loginResponse;
         return failedEmailNotRegisteredResponseMessage;
@@ -166,6 +167,9 @@ export class AuthController {
         return failedPasswordResponseMessage;
       }
       else if (loginResponse.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
+        // if (loginResponse.user.id && req['ip']) {
+        //   await this.sqlAuthService.insertUserLoginTracking(loginResponse.user.id, req['ip'], LoginTrackingTypes.ACTIVE_NAVIGATION);
+        // }
         const { message, user, jwtAccessToken, jwtRefreshToken } = loginResponse;
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
 
@@ -282,7 +286,7 @@ export class AuthController {
   private async handleOAuthRedirect(req: Request, res: Response): Promise<void> {
     const response: Partial<User> | AuthResponseMessageDto = req['user'];  // user from database, not oauth user profile
     let user: Partial<User> | null = response['message'] ? null : response;
-    
+
     // if duplicate user attempt do not provide user and redirect to inform user of existing login method
     if (!user) {
       const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(response['email'])}&provider=${encodeURIComponent(response['provider'])}`;
@@ -298,7 +302,9 @@ export class AuthController {
           this.logger.log('warn', `FRONTEND_URL is not set in environment variables`);
           throw new Error('FRONTEND_URL is not set in environment variables');
         };
-        
+        // if (user.id && req['ip']) {
+        //   await this.sqlAuthService.insertUserLoginTracking(user.id, req['ip'], LoginTrackingTypes.ACTIVE_NAVIGATION);
+        // }
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
   
         // oauth requires redirect as ui redirected away from site, cannot return user data, 

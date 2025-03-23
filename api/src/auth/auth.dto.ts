@@ -1,4 +1,6 @@
-import { User } from "src/users/user.entity";
+// import { User } from "src/users/user.entity";
+
+import { User } from "src/users/user.types";
 
 export class AuthResponseMessageDto {
   message?: string;

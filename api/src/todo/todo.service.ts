@@ -1,20 +1,23 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Todo } from './todo.entity';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Repository } from 'typeorm';
+// import { Todo } from './todo.entity';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Todo } from './todo.types';
+import { SqlTodoService } from './sql-todo/sql-todo.service';
 
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectRepository(Todo)
-    private readonly todoRepository: Repository<Todo>,
+    // @InjectRepository(Todo)
+    // private readonly todoRepository: Repository<Todo>,
+    private readonly sqlTodoService: SqlTodoService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
   findAll(): Promise<Todo[]> {
     try {
-      return this.todoRepository.find();
+      return this.sqlTodoService.findAllTodos();
     } catch (error: unknown) {
       this.logger.log('error', `Error finding all todos: ${error}`);
     }
@@ -22,7 +25,7 @@ export class TodoService {
 
   findOne(id: number): Promise<Todo> {
     try {
-      return this.todoRepository.findOne({ where: { id } });
+      return this.sqlTodoService.findOneTodo(id);
     } catch (error: unknown) {
       this.logger.log('error', `Error finding one todo: ${error}`);
     }
@@ -30,8 +33,7 @@ export class TodoService {
 
   create(todo: Partial<Todo>): Promise<Todo> {
     try {
-      const newTodo = this.todoRepository.create(todo);
-      return this.todoRepository.save(newTodo);
+      return this.sqlTodoService.createOneTodo(todo);
     } catch (error: unknown) {
       this.logger.log('error', `Error creating one todo: ${error}`);
     }
@@ -39,8 +41,7 @@ export class TodoService {
 
   async update(id: number, todo: Partial<Todo>): Promise<Todo> {
     try {
-      await this.todoRepository.update(id, todo);
-      return this.todoRepository.findOne({ where: { id } });
+      return this.sqlTodoService.updateOneTodo(todo);
     } catch (error: unknown) {
       this.logger.log('error', `Error updating one todo: ${error}`);
     }
@@ -48,7 +49,7 @@ export class TodoService {
 
   async remove(id: number): Promise<void> {
     try {
-      await this.todoRepository.delete(id);
+      await this.sqlTodoService.deleteOneTodo(id);
     } catch (error: unknown) {
       this.logger.log('error', `Error removing one todo: ${error}`);
     }

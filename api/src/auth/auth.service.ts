@@ -1,25 +1,22 @@
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterStandardUserDto, RequestResetStandardPasswordDto, ResetStandardPasswordDto } from 'src/users/dto/user.dto';
-import { User } from 'src/users/user.entity';
-import { Logger, Repository, UpdateResult } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { instanceToPlain } from 'class-transformer';
 import { Profile } from 'passport';
 import { randomBytes } from 'crypto';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
 import { EmailService } from 'src/email/email.service';
+import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
+import { User } from 'src/users/user.types';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly jwtService: JwtService,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly sqlAuthService: SqlAuthService
   ) {}
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -29,39 +26,39 @@ export class AuthService {
   //////////////////////////////////////////////////////////////////////////////////
 
   async findOneUserById(id: number): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.sqlAuthService.findOneUserById(id);
     if (!user) {
       this.logger.log('warn', `Cannot find one user by id. User id not found: ${id}`);
       return null; // User not found
     };
-    return instanceToPlain(user); // Authentication successful
+    return this.excludePropsFromUserType(user); // Authentication successful
   };
 
   async findOneUserByEmail(email: string): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.sqlAuthService.findOneUserByEmail(email);
     if (!user) {
       this.logger.log('warn', `Cannot find one user by email. User id not found: ${email}`);
       return null; // User not found
     };
-    return instanceToPlain(user); // Authentication successful
+    return this.excludePropsFromUserType(user); // Authentication successful
   };
 
   async findOneUserByProvider(oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { oauth_provider, oauth_provider_user_id } });
+    const user = await this.sqlAuthService.findOneUserByProvider(oauth_provider, oauth_provider_user_id);
     if (!user) {
       this.logger.log('warn', `Cannot find one user by provider. User not found: ${oauth_provider} - ${oauth_provider_user_id}`);
       return null; // User not found
     };
-    return instanceToPlain(user); // Authentication successful
+    return this.excludePropsFromUserType(user); // Authentication successful
   };
 
   async findOneUserByRefreshToken(refresh_token: string): Promise<Partial<User> | null> {
-    const user = await this.userRepository.findOne({ where: { refresh_token } });
+    const user = await this.sqlAuthService.findOneUserByRefreshToken(refresh_token);
     if (!user) {
       this.logger.log('warn', `Cannot find one user by refresh_token. User not found: ${refresh_token}`);
       return null; // User not found
     };
-    return instanceToPlain(user); // Authentication successful
+    return this.excludePropsFromUserType(user); // Authentication successful
   };
 
 
@@ -84,9 +81,9 @@ export class AuthService {
     return hashedJwtRefreshToken;
   };
 
-  async updateUsersRefreshTokenInDatabase(userId: number, refreshToken: string): Promise<UpdateResult> {
+  async updateUsersRefreshTokenInDatabase(userId: number, refreshToken: string): Promise<any> {
     try {
-      return this.userRepository.update({ id: userId }, { refresh_token: refreshToken });
+      return this.sqlAuthService.updateUsersRefreshTokenInDatabase(userId, refreshToken);
     } catch (error: unknown) {
       this.logger.log('warn', `Error updating refresh token: ${error}`);
     };
@@ -103,9 +100,9 @@ export class AuthService {
     const { email, password } = registerStandardUserDto;
     
     // Check if the user already exists via email
-    const existingUser: User | null = await this.userRepository.findOne({where: { email }});
+    const existingUser: Partial<User> | null = await this.sqlAuthService.findOneUserByEmail(email);
 
-    if (existingUser === null) {
+    if (!existingUser) {
       // hash user generated password for storage in db
       const hashedPassword: string = await this.hashPassword(password);
 
@@ -113,9 +110,8 @@ export class AuthService {
       const reset_id: string = await this.generateResetId();
 
       // Create and save the new user
-      const newUser: User = this.userRepository.create({ email, password: hashedPassword, reset_id });
-      await this.userRepository.save(newUser);
-
+      const newUser: Partial<User> = await this.sqlAuthService.insertStandardUser(email, hashedPassword, reset_id);
+      
       // create access and refresh jwts for users first login
       const jwtAccessToken: string = await this.generateAccessJwt(newUser.id.toString());
       const jwtRefreshToken: string = await this.generateRefreshJwt();
@@ -126,7 +122,7 @@ export class AuthService {
       // provide success AuthResponseMessage from successful registration
       const successfulRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_SUCCESS,
-        user: instanceToPlain(newUser),
+        user: this.excludePropsFromUserType(newUser),
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -144,7 +140,7 @@ export class AuthService {
   };
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
-    const user = await this.userRepository.findOne({ where: { email }});
+    const user = await this.sqlAuthService.findOneUserByEmail(email);
     const isPasswordMatch = await this.verifyPassword(password, user.password);
 
     if (user === null) {
@@ -178,7 +174,7 @@ export class AuthService {
       
       const standardLoginSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_LOGIN_SUCCESS,
-        user: instanceToPlain(user),
+        user: this.excludePropsFromUserType(user),
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -189,7 +185,7 @@ export class AuthService {
   async emailStandardUserToResetPassword(requestResetStandardPasswordDto: RequestResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
     try {
       const { email } = requestResetStandardPasswordDto;
-      const user: User | null = await this.userRepository.findOne({where: { email }});
+      const user: Partial<User> = await this.sqlAuthService.findOneUserByEmail(email);
 
       if (!user) {
         const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
@@ -221,7 +217,7 @@ export class AuthService {
     const { email, newPassword, resetId } = resetDto;
     
     // Check if user in db by email and resetId
-    const user: User | null = await this.userRepository.findOne({where: { email, reset_id: resetId }});
+    const user: Partial<User> = await this.sqlAuthService.findOneUserByEmailAndResetId(email, resetId);
 
     if (!user) {
       // user not found error
@@ -244,7 +240,7 @@ export class AuthService {
       user.reset_id = newResetId;
 
       // save new hashed password and reset_id for user
-      const updatedUser = await this.userRepository.save(user);
+      const updatedUser = await this.sqlAuthService.updateStandardUserPasswordAndResetId(email, hashedPassword, newResetId);
 
       const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
       const jwtRefreshToken = await this.generateRefreshJwt();
@@ -254,7 +250,7 @@ export class AuthService {
       
       const standardResetLoginSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_RESET_SUCCESS,
-        user: instanceToPlain(updatedUser),
+        user: this.excludePropsFromUserType(updatedUser),
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -303,17 +299,21 @@ export class AuthService {
     let oauth_provider_user_id: string = '';
 
     // Check if email already exists, if so return email and provider/standard for user to know what to login with
-    let existingUser: User[] = await this.userRepository.find({ where: { email } });  
+    let existingUser: Partial<User> = await this.sqlAuthService.findOneUserByEmail(email);
+
+    console.log('ISEXISTING USER:: ', existingUser);
     
-    if (existingUser.length && existingUser[0].oauth_provider !== provider) {
+
+    if (existingUser && existingUser.oauth_provider !== provider) {
       return { 
         message: 'email already registered',
-        email: existingUser[0].email ,
-        provider: existingUser[0].oauth_provider
+        email: existingUser.email ,
+        provider: existingUser.oauth_provider
       };
     } else {
       // Otherwise continue and login and/or create account on first login return appropriate user information
-      let user: User = existingUser[0];
+      let user: Partial<User> | undefined;
+      existingUser ? user = existingUser : user = undefined;
       switch (provider) {
         case 'google':
           email = profile.emails[0].value || null;
@@ -344,12 +344,35 @@ export class AuthService {
   
       if (!user) {
         // Create and save the new user
-        user = this.userRepository.create({ email, full_name, img_url, oauth_provider, oauth_provider_user_id });
-        await this.userRepository.save(user);
+        user = await this.sqlAuthService.insertOauthUser(email, full_name, img_url, oauth_provider, oauth_provider_user_id);
       };
   
-      return instanceToPlain(user);
+      return this.excludePropsFromUserType(user);
     };
   };
 
+
+
+
+
+
+
+
+
+
+
+
+
+  excludePropsFromUserType(user: Partial<User>): Partial<User> {
+    if ('password' in user) {
+      delete user.password;
+    }
+    if ('oauth_provider_user_id' in user) {
+      delete user.oauth_provider_user_id;
+    }
+    if ('reset_id' in user) {
+      delete user.reset_id;
+    }
+    return user;
+  }
 }

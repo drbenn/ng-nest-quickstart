@@ -24,11 +24,7 @@ async function bootstrap() {
 
   // Enable global validation pipe
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
-  
   await app.listen(port ?? 3000);
-
-  
-  
 }
 bootstrap();
 
