@@ -1,7 +1,4 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { Todo } from './todo.entity';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Todo } from './todo.types';
 import { SqlTodoService } from './sql-todo/sql-todo.service';
@@ -9,8 +6,6 @@ import { SqlTodoService } from './sql-todo/sql-todo.service';
 @Injectable()
 export class TodoService {
   constructor(
-    // @InjectRepository(Todo)
-    // private readonly todoRepository: Repository<Todo>,
     private readonly sqlTodoService: SqlTodoService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}

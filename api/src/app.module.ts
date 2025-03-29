@@ -2,9 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
-import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
-// import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TodoModule } from './todo/todo.module';
 import {
@@ -14,11 +12,9 @@ import {
 import * as winston from 'winston';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { EmailModule } from './email/email.module';
-import { SqlAuthModule } from './auth/sql-auth/sql-auth.module';
 import { SqlTodoService } from './todo/sql-todo/sql-todo.service';
 
 @Module({
-  // mailgun for email service
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -38,23 +34,6 @@ import { SqlTodoService } from './todo/sql-todo/sql-todo.service';
         },
       ],
     }),
-    // TypeOrmModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: (config: ConfigService) => {
-    //     return {
-    //       type: 'postgres',
-    //       host: config.get<string>('POSTGRES_HOST'),
-    //       port: config.get<number>('POSTGRES_PORT'),
-    //       username: config.get<string>('POSTGRES_USER'),
-    //       password: config.get<string>('POSTGRES_PASSWORD'),
-    //       database: config.get<string>('POSTGRES_DB'),
-    //       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-    //       autoLoadEntities: true,                             // Automatically load entities for TypeORM
-    //       synchronize: true,                                  // Use this in development only (auto-sync database schema)
-    //     }
-    //   },
-    // }),
     WinstonModule.forRootAsync({
       useFactory: () => ({
         transports: [

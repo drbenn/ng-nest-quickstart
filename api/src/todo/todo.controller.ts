@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-// import { Todo } from './todo.entity';
 import { TodoService } from './todo.service';
 import { Todo } from './todo.types';
 
