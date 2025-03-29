@@ -1,17 +1,17 @@
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
-  email VARCHAR(50),
-  password VARCHAR(100),
-  refresh_token VARCHAR(100),
+  email VARCHAR(100),
+  password VARCHAR(500),
+  refresh_token VARCHAR(500),
   oauth_provider VARCHAR(100),
-  oauth_provider_user_id VARCHAR(100),
+  oauth_provider_user_id VARCHAR(500),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   first_name VARCHAR(20),
   last_name VARCHAR(20),
   full_name VARCHAR(40),
-  img_url VARCHAR(100),
-  reset_id VARCHAR(100),
+  img_url VARCHAR(500),
+  reset_id VARCHAR(500),
   settings JSONB NULL
 );
 
@@ -27,5 +27,6 @@ CREATE TABLE IF NOT EXISTS users_login_history (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   login_at TIMESTAMP DEFAULT NOW(),
-  ip_address INET NOT NULL
+  ip_address INET NOT NULL,
+  type VARCHAR(20)
 );

@@ -12,13 +12,26 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
-    this.pool = new Pool({
-      host: this.configService.get<string>('POSTGRES_HOST'),
-      port: this.configService.get<number>('POSTGRES_PORT'),
-      user: this.configService.get<string>('POSTGRES_USER'),
-      password: this.configService.get<string>('POSTGRES_PASSWORD'),
-      database: this.configService.get<string>('POSTGRES_DB'),
-    });
+      try {
+        this.pool = new Pool({
+          host: this.configService.get<string>('POSTGRES_HOST'),
+          port: this.configService.get<number>('POSTGRES_PORT'),
+          user: this.configService.get<string>('POSTGRES_USER'),
+          password: this.configService.get<string>('POSTGRES_PASSWORD'),
+          database: this.configService.get<string>('POSTGRES_DB'),
+          // max: 20,
+          // min: 4,
+          // idleTimeoutMillis: 30000,
+          // connectionTimeoutMillis: 5000,
+        });
+
+        this.pool.on('error', (err) => {
+          this.logger.error('Postgres todo service pool error', err);
+        });
+
+    } catch (error) {
+      this.logger.error('Error creating PostgreSQL todo service connection pool:', error);
+    }
   }
 
   async onModuleInit() {

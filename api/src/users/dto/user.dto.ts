@@ -26,46 +26,46 @@ export class CreateUserDto {
 }
 
 
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+// import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
 export class RegisterStandardUserDto {
-  @IsEmail()
+  // @IsEmail()
   email: string;
 
-  @IsNotEmpty()
-  @MinLength(6) // Minimum password length
+  // @IsNotEmpty()
+  // @MinLength(6) // Minimum password length
   password: string;
 }
 
 export class LoginStandardUserDto {
-  @IsEmail()
+  // @IsEmail()
   email: string;
 
-  @IsNotEmpty()
-  @MinLength(6) // Minimum password length
+  // @IsNotEmpty()
+  // @MinLength(6) // Minimum password length
   password: string;
 }
 
 export class UserLoginJwtDto {
-  @IsNotEmpty()
+  // @IsNotEmpty()
   accessToken: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   expiresIn: number | string;
 }
 
 export class RequestResetStandardPasswordDto {
-  @IsNotEmpty()
+  // @IsNotEmpty()
   email: string;
 }
 
 export class ResetStandardPasswordDto {
-  @IsNotEmpty()
+  // @IsNotEmpty()
   email: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   resetId: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   newPassword: string;
 }

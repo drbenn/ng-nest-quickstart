@@ -79,6 +79,12 @@ export class StandardAuthService {
         }
         else if (response.message === AuthMessages.STANDARD_LOGIN_ERROR) {
           console.error(response.message);
+          this.displayToast({ 
+            title: 'Error',
+            message: 'Error logging in with email and password. Please check that you have entered your username and password correctly.',
+            bgColor: environment.toastDefaultDangerColors.bgColor,
+            textColor: environment.toastDefaultDangerColors.textColor
+          });
         };
       },
       error: (error: unknown) => this.handleError(error)

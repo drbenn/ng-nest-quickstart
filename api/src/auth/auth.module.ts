@@ -11,6 +11,7 @@ import { GitHubStrategy } from './strategies/github.strategy';
 import { FacebookStrategy } from './strategies/facebook.strategy';
 import { EmailModule } from 'src/email/email.module';
 import { SqlAuthModule } from './sql-auth/sql-auth.module';
+import { TodoModule } from 'src/todo/todo.module';
 
 @Module({
   imports: [
@@ -24,10 +25,10 @@ import { SqlAuthModule } from './sql-auth/sql-auth.module';
         secret: configService.get<string>('JWT_SECRET')
       }),
     }),
-    EmailModule, SqlAuthModule
+    EmailModule, SqlAuthModule, TodoModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy, GitHubStrategy, FacebookStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, GitHubStrategy, FacebookStrategy, TodoModule],
   exports: [AuthService]
 })
 export class AuthModule {}

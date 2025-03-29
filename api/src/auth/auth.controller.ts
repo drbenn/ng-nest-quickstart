@@ -121,7 +121,7 @@ export class AuthController {
   ): Promise<AuthResponseMessageDto> {
     try {
       const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);   
-
+      this.logger.warn(`newUserResponse from register-standard endpoint: ${newUserResponse}`);
       if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
         const failedRegistrationResponseMessage: AuthResponseMessageDto = newUserResponse;
         return failedRegistrationResponseMessage;
@@ -139,6 +139,7 @@ export class AuthController {
       };
     } catch (error: unknown) {
       this.logger.error(`Error during standard registration: ${error}`);
+      this.logger.error(`Error during standard registration registerStandardUserDto: ${JSON.stringify(registerStandardUserDto)}`);
       const errorRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_ERROR
       };
@@ -307,9 +308,12 @@ export class AuthController {
         // }
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
   
+        this.logger.log('warn', `Successful OAuth login with cookies::: redirect_url: ${process.env.FRONTEND_URL}oauth/callback`);
+
+
         // oauth requires redirect as ui redirected away from site, cannot return user data, 
         // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly
-        res.redirect(`${process.env.FRONTEND_URL}/oauth/callback`);   
+        res.redirect(`${process.env.FRONTEND_URL}oauth/callback`);   
       } catch (error: unknown) {
         this.logger.error(`Error during OAuth redirect from handleOAuthRedirect: ${error}`);        
         // Redirect the user to an error page

@@ -65,6 +65,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     } catch (error) {
       console.error(`Error Auth-SQL Service findOneUserByEmail: ${error}`);
       this.logger.log('warn', `Error Auth-SQL Service findOneUserByEmail: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserByEmail EMAIL: ${email}`);
       throw new Error('Error Auth-SQL Service findOneUserByEmail');
     }
   }
@@ -121,6 +122,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     } catch (error) {
       console.error(`Error Auth-SQL Service findOneUserByRefreshToken: ${error}`);
       this.logger.log('warn', `Error Auth-SQL Service findOneUserByRefreshToken: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserByRefreshToken REFRESH_TOKEN: ${refresh_token}`);
       throw new Error('Error Auth-SQL Service findOneUserByRefreshToken');
     }
   }
@@ -161,8 +163,10 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
       const result: Partial<User> = queryResult.rows[0]; 
       return result;
     } catch (error) {
+      
       console.error(`Error Auth-SQL Service insertStandardUser: ${error}`);
       this.logger.log('warn', `Error Auth-SQL Service insertStandardUser: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service insertStandardUser OBJECT: email: ${email}    hashedPassword: ${hashedPassword}       reset_id: ${reset_id}`);
       throw new Error('Error Auth-SQL Service insertStandardUser');
     }
   }

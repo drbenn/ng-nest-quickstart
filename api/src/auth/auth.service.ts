@@ -101,7 +101,7 @@ export class AuthService {
     
     // Check if the user already exists via email
     const existingUser: Partial<User> | null = await this.sqlAuthService.findOneUserByEmail(email);
-
+    this.logger.warn(`existingUser from registerStandardUser: ${existingUser}`);
     if (!existingUser) {
       // hash user generated password for storage in db
       const hashedPassword: string = await this.hashPassword(password);

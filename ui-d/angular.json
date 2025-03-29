@@ -38,8 +38,8 @@
           },
           "configurations": {
             "production": {
-              "baseHref": "/ng-nest-qs/",
-              "deployUrl": "/ng-nest-qs/",
+              "baseHref": "/",
+              "deployUrl": "/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.development.ts",
