@@ -2,7 +2,7 @@ import { Body, Controller, Get, Inject, Logger, Post, Req, Res, UseGuards } from
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardPasswordDto, ResetStandardPasswordDto } from 'src/users/dto/user.dto';
+import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
@@ -10,12 +10,7 @@ import { UserLogin, UserProfile } from 'src/users/user.types';
 import { SqlAuthService } from './sql-auth/sql-auth.service';
 import { LoginTrackingTypes } from './sql-auth/sql-auth.types';
 
-export interface OAuthUser {
-  id: number;
-  email: string;
-  name: string;
-  provider?: string;
-}
+
 
 @Controller('auth')
 export class AuthController {
@@ -196,7 +191,7 @@ export class AuthController {
 
   @Post('reset-standard-password-request')
   async resetStandardPasswordRequest(
-    @Body() requestResetStandardPasswordDto: RequestResetStandardPasswordDto,
+    @Body() requestResetStandardPasswordDto: RequestResetStandardUserPasswordDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
   ): Promise<AuthResponseMessageDto> {
     console.log('reset standard req body: ');
@@ -218,13 +213,20 @@ export class AuthController {
 
   @Post('reset-standard-password')
   async resetStandardPassword(
-    @Body() resetStandardPasswordDto: ResetStandardPasswordDto,
+    @Body() resetStandardUserPasswordDto: ResetStandardUserPasswordDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
   ): Promise<AuthResponseMessageDto> {
     try {
-      // accept users new password and update if email and resetId match, then generate new resetId for next time user needs to reset password
-      const resetPasswordResponse: AuthResponseMessageDto = await this.authService.resetStandardUserPassword(resetStandardPasswordDto);
-      return resetPasswordResponse;
+      // accept users new password and update if email and reset_id match, then generate new reset_id for next time user needs to reset password
+      const resetPasswordResponse: AuthResponseMessageDto = await this.authService.resetStandardUserPassword(resetStandardUserPasswordDto);
+      this.sendSuccessfulLoginCookies(res, resetPasswordResponse.jwtAccessToken, resetPasswordResponse.jwtRefreshToken);
+      
+      // return user;
+      const standardLoginPasswordResetSuccessResponseMessage: AuthResponseMessageDto = { 
+        message: resetPasswordResponse.message,
+        user: resetPasswordResponse.user
+      };
+      return standardLoginPasswordResetSuccessResponseMessage;
     } catch (error: unknown) {
       this.logger.error(`Error resetting standard registered user password: ${error}`);
       const errorResetPasswordResponseMessage: AuthResponseMessageDto = {

@@ -56,8 +56,6 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   }
 
   async findOneUserLoginByEmail(email: string): Promise<Partial<UserLogin> | null> {
-    console.log('hit findOneUserLoginByEmail');
-    
     const queryText = `SELECT * FROM user_logins WHERE email = $1;`;
     const paramsToArray: string[] = [email];
     try {
@@ -154,7 +152,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   }
 
   async updateStandardUserLoginPasswordAndResetId(email: string, hashedPassword: string, reset_id: string): Promise<Partial<UserLogin>> {
-    const queryText = `UPDATE user_logins SET password = $1, reset_id = $2 WHERE email = $3 RETURNING *;`;
+    const queryText = `UPDATE user_logins SET standard_login_password = $1, reset_id = $2 WHERE email = $3 RETURNING *;`;
     const paramsToArray: string[] = [hashedPassword, reset_id, email];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);

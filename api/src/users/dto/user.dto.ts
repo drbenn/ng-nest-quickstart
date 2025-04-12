@@ -40,12 +40,20 @@ export class UserLoginJwtDto {
   expiresIn: number | string;
 }
 
-export class RequestResetStandardPasswordDto {
+export class RequestResetStandardUserPasswordDto {
   email: string;
 }
 
-export class ResetStandardPasswordDto {
+export interface ResetStandardUserPasswordDto {
+  email: string,
+  reset_id: string,
+  new_password: string
+}
+
+
+export interface OAuthUser {
+  id: number;
   email: string;
-  resetId: string;
-  newPassword: string;
+  name: string;
+  provider?: string;
 }

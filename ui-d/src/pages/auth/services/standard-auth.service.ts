@@ -4,7 +4,7 @@ import { dispatch } from '@ngxs/store';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { PosthogAnalyticsService } from '../../../app/services/posthog-analytics.service';
-import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, LoginStandardUserDto, AuthMessages, RequestResetStandardUserDto } from '../../../types/userDto.types';
+import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, LoginStandardUserDto, AuthMessages, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from '../../../types/userDto.types';
 import { LoginUser } from '../../../store/auth/auth.actions';
 import { Router } from '@angular/router';
 import { DisplayToast } from '../../../store/app/app.actions';
@@ -104,14 +104,16 @@ export class StandardAuthService {
         email: email
   },})};
 
-  public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserDto): Observable<AuthResponseMessageDto> {
+  public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserPasswordDto): Observable<AuthResponseMessageDto> {
     return this.http.post(`${this.baseUrl}/reset-standard-password-request`,requestResetStandardUserDto);
   };
 
-  public resetStandardUserPassword(resetStandardUserDto: RequestResetStandardUserDto): void {
-    this.http.post<AuthResponseMessageDto>(`${this.baseUrl}/reset-standard-password`, resetStandardUserDto)
+  public resetStandardUserPassword(resetStandardPasswordDto: ResetStandardUserPasswordDto): void {
+    this.http.post<AuthResponseMessageDto>(`${this.baseUrl}/reset-standard-password`, resetStandardPasswordDto)
       .subscribe({
         next: (response: AuthResponseMessageDto) => {
+          console.log('response from reset Standard User password: ', response);
+          
           if (response.message === AuthMessages.STANDARD_RESET_SUCCESS) {
             const user: UserLoginJwtDto = response.user as UserLoginJwtDto;
             this.loginUser(user);

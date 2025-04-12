@@ -4,7 +4,7 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
 import { dispatch } from '@ngxs/store';
 import { DisplayToast } from '../../../store/app/app.actions';
-import { RequestResetStandardUserDto, AuthResponseMessageDto, AuthMessages } from '../../../types/userDto.types';
+import { RequestResetStandardUserPasswordDto, AuthResponseMessageDto, AuthMessages } from '../../../types/userDto.types';
 import { StandardAuthService } from '../services/standard-auth.service';
 import { environment } from '../../../environments/environment.development';
 
@@ -28,7 +28,7 @@ export class RequestPassswordResetPageComponent {
 
   protected onSubmitResetPassword(): void {
     console.log(this.form.value);
-    const resetStandardUserDto: RequestResetStandardUserDto = {
+    const resetStandardUserDto: RequestResetStandardUserPasswordDto = {
       email: <string>this.form.value.email
     };
     this.standardAuthService.requestResetStandardUserPassword(resetStandardUserDto)

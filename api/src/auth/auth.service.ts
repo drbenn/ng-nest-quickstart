@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RegisterStandardUserDto, RequestResetStandardPasswordDto, ResetStandardPasswordDto } from 'src/users/dto/user.dto';
+import { RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Profile } from 'passport';
@@ -228,7 +228,7 @@ export class AuthService {
     };
   };
 
-  async emailStandardUserToResetPassword(requestResetStandardPasswordDto: RequestResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
+  async emailStandardUserToResetPassword(requestResetStandardPasswordDto: RequestResetStandardUserPasswordDto): Promise<AuthResponseMessageDto> {
     try {
       const { email } = requestResetStandardPasswordDto;
       const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
@@ -262,11 +262,11 @@ export class AuthService {
     };
   };
 
-  async resetStandardUserPassword(resetDto: ResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
-    const { email, newPassword, resetId } = resetDto;
+  async resetStandardUserPassword(resetDto: ResetStandardUserPasswordDto): Promise<AuthResponseMessageDto> {
+    const { email, new_password, reset_id } = resetDto;
     
     // Check if user in db by email and resetId
-    const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmailAndResetId(email, resetId);
+    const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmailAndResetId(email, reset_id);
 
     if (!userLogin) {
       // user not found error
@@ -279,7 +279,7 @@ export class AuthService {
       // update the user_login with new hashed password and create new reset_id for next use
 
       // hash user generated password for storage in db
-      const hashedPassword: string = await this.hashPassword(newPassword);
+      const hashedPassword: string = await this.hashPassword(new_password);
 
       // create reset_id for future usage to assist resetting standard user password
       const newResetId: string = await this.generateResetId();
