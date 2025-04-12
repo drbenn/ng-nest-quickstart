@@ -199,6 +199,10 @@ export class AuthController {
     @Body() requestResetStandardPasswordDto: RequestResetStandardPasswordDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
   ): Promise<AuthResponseMessageDto> {
+    console.log('reset standard req body: ');
+    console.log(requestResetStandardPasswordDto);
+    
+    
     try {
       // send email to user with url params of email and existing resetId ONLY IF STANDARD USER CHECK!!!!
       const requestResetPasswordResponse: AuthResponseMessageDto = await this.authService.emailStandardUserToResetPassword(requestResetStandardPasswordDto);

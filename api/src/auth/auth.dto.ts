@@ -26,5 +26,5 @@ export enum AuthMessages {
   STANDARD_RESET_SUCCESS = 'standard password reset success',
 
   STANDARD_PASSWORD_RESET_REQUEST_SUCCESS = 'standard password reset request success: email sent to user for password reset',
-  STANDARD_PASSWORD_RESET_REQUEST_FAILED = 'standard password reset request failed: email not sent to user for password reset',
+  STANDARD_PASSWORD_RESET_REQUEST_FAILED = 'standard password reset request failed: email as standard email/password login not found. email not sent to user for password reset. user login may exist for oauth login, but user must register standard email/password to reset password.',
 }

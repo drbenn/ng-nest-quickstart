@@ -114,7 +114,7 @@
 
     <!-- <div class="pl-4 bg-pink-500"> -->
       <!-- logged in user - avatar image provided -->
-      @if (authUser !== null && authUser.imgUrl) {
+      <!-- @if (authUser !== null && authUser.imgUrl) {
         <div class="flex justify-end items-center ml-6">
           <app-daisy-dropdown-popover
             position="dropdown-left"
@@ -135,10 +135,10 @@
             </div>
           </app-daisy-dropdown-popover>
         </div>
-      }
+      } -->
   
-      <!-- logged in standard user - no image but fullname -->
-      @if (authUser !== null && authUser.imgUrl === '') {
+      <!-- logged in user profile - no image set in profile -->
+      @if (authUser !== null && authUser.id && authUser.imgUrl === null) {
         <div class="flex justify-end items-center cursor-pointer w-[24px] h-[24px] rounded-full pl-8 ml-6">
           <app-daisy-dropdown-popover
             position="dropdown-left"

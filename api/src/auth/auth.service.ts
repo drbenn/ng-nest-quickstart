@@ -231,7 +231,9 @@ export class AuthService {
   async emailStandardUserToResetPassword(requestResetStandardPasswordDto: RequestResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
     try {
       const { email } = requestResetStandardPasswordDto;
-      const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmail(email);
+      const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
+      console.log('userLogin in emailStandardUserToResetPassword: ', userLogin);
+      
 
       if (!userLogin) {
         const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
@@ -239,11 +241,12 @@ export class AuthService {
         };
         return failedPasswordResetRequestResponseMessage;
       } 
-      else if (userLogin && !userLogin.login_provider) {
+      else if (userLogin) {
         const { reset_id } = userLogin as UserLogin;
         const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
         const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
-
+        console.log('smtpEmailResponse: ', smtpEmailResponse);
+        
         const successPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
           message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS,
           message_two: `messageId: ${smtpEmailResponse.messageId}`
@@ -386,7 +389,6 @@ export class AuthService {
             email: email,
             first_name: first_name,
             last_name: last_name,
-            img_url: img_url,
             refresh_token: jwtRefreshToken
           }
           const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject, jwtRefreshToken);

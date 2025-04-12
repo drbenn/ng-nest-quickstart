@@ -56,6 +56,8 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   }
 
   async findOneUserLoginByEmail(email: string): Promise<Partial<UserLogin> | null> {
+    console.log('hit findOneUserLoginByEmail');
+    
     const queryText = `SELECT * FROM user_logins WHERE email = $1;`;
     const paramsToArray: string[] = [email];
     try {
@@ -134,11 +136,11 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   //////////////////////////////////////////////////////////////////////////////////
 
   async insertStandardUserLogin(profile_id: number, email: string, hashedPassword: string, reset_id: string): Promise<Partial<UserLogin>> {
-    const queryText = `INSERT INTO user_logins (profile_id, email, standard_login_password, reset_id) VALUES ($1, $2, $3, $4) RETURNING *;`;
-    const paramsToArray: (number | string)[] = [profile_id, email, hashedPassword, reset_id];
+    const queryText = `INSERT INTO user_logins (profile_id, email, standard_login_password, reset_id, login_provider) VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
+    const paramsToArray: (number | string)[] = [profile_id, email, hashedPassword, reset_id, UserLoginProvider.email];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log('insert standard user login result: ', queryResult);
+      console.log('insert standard user login result: ', queryResult.rows[0]);
       
       const result: Partial<UserLogin> = queryResult.rows[0]; 
       return result;
@@ -232,15 +234,14 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   }
 
   async insertUserProfile(createUserProfile: CreateUserProfile, refresh_token: string): Promise<Partial<UserProfile>> {
-    const { email, first_name, last_name, img_url } = createUserProfile;
-    const queryText = `INSERT INTO user_profiles (email, first_name, last_name, img_url, refresh_token) 
-    VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
+    const { email, first_name, last_name } = createUserProfile;
+    const queryText = `INSERT INTO user_profiles (email, first_name, last_name, refresh_token) 
+    VALUES ($1, $2, $3, $4) RETURNING *;`;
 
     const paramsToArray: string[] = [
       email,
       first_name ? first_name : '',
       last_name ? last_name : '',
-      img_url ? img_url : '',
       refresh_token ? refresh_token : ''
     ];
 
