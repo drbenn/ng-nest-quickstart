@@ -7,29 +7,39 @@ import { environment } from '../../environments/environment.development';
 })
 export class PosthogAnalyticsService {
   constructor() {
-    posthog.init(environment.posthogApiKey, {
-      api_host: environment.posthogApiHost,
-    });
+    if (environment.posthogApiKey !== 'YOUR_POSTHOG_API_KEY') {
+      posthog.init(environment.posthogApiKey, {
+        api_host: environment.posthogApiHost,
+      });
+    }
   }
 
   public trackEvent(event: string, properties?: Record<string, any>) {
-    posthog.capture(event, properties);
+    if (environment.posthogApiKey !== 'YOUR_POSTHOG_API_KEY') { 
+      posthog.capture(event, properties);
+    }
   }
 
   public identifyUser(userId: string, userInfo?: Record<string, any>) {
-    posthog.identify(userId, userInfo);
+    if (environment.posthogApiKey !== 'YOUR_POSTHOG_API_KEY') { 
+      posthog.identify(userId, userInfo);
+    }
   }
 
   public trackPageView() {
-    posthog.capture('$pageview', { path: window.location.pathname });
+    if (environment.posthogApiKey !== 'YOUR_POSTHOG_API_KEY') { 
+      posthog.capture('$pageview', { path: window.location.pathname });
+    }
   }
 
   public trackFirstVisit() {
-    const isFirstVisit = !localStorage.getItem('hasVisitedBefore');
-
-    if (isFirstVisit) {
-      posthog.capture('first_time_visitor');
-      localStorage.setItem('hasVisitedBefore', 'true');
+    if (environment.posthogApiKey !== 'YOUR_POSTHOG_API_KEY') { 
+      const isFirstVisit = !localStorage.getItem('hasVisitedBefore');
+  
+      if (isFirstVisit) {
+        posthog.capture('first_time_visitor');
+        localStorage.setItem('hasVisitedBefore', 'true');
+      }
     }
   }
 }

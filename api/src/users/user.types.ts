@@ -1,60 +1,56 @@
-// import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Index } from 'typeorm';
-// import { Exclude } from 'class-transformer';
-
-// @Entity('users')
-// export class User {
-
-export interface User {
-  // @PrimaryGeneratedColumn()
+export interface UserLogin {
   id: number;
-
-  /**
-   * When you run your TypeORM migrations or synchronize the schema with your database, the @Index decorator
-   * will automatically create an index on the email column. If you set unique: true in the @Column decorator,
-   * it will enforce the uniqueness constraint at the database level. No adjustments required in the database 
-   * creation bash/sql, typeORM will take care of everything.
-   */
-  // @Column({ nullable: true })
-  // @Index() // This creates an index on the email column
-  email: string;
-
-  // @Column({ nullable: true })
-  // @Exclude()                      // exclude from responses
-  password: string;               // Optional for OAuth users
-
-  // @Column({ nullable: true })
-  // @Index() // This creates an index on the refresh_token column
-  refresh_token: string;
-
-  // @Column({ nullable: true })
-  oauth_provider: string;         // e.g., 'google', 'facebook', 'github'
-
-  // @Column({ nullable: true })
-  // @Exclude()                      // exclude from responses
-  oauth_provider_user_id: string; // Provider-specific ID
-  
-  // @CreateDateColumn()
+  profile_id: number;                 // id of user_profile
+  email?: string;
+  standard_login_password?: string;    // exclude from responses
+  login_provider: string;             // 'email', 'steam', 'google', 'facebook', 'github'
+  provider_user_id?: string;
   created_at: Date;
-
-  // @UpdateDateColumn()
   updated_at: Date;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  img_url?: string;                 
+  reset_id: string;                   // exclude from responses    
+                                      // reset id used as additional verification on standard user resetting password
+}
 
-  // @Column({ nullable: true })
-  first_name: string;
+export interface UserProfile {
+  id: number;
+  email: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  img_url?: string;
+  refresh_token?: string;
+  created_at: Date;
+  updated_at: Date;
+  settings?: Record<string, any>;
+}
 
-  // @Column({ nullable: true })
-  last_name: string;
+export interface UserLoginHistory {
+  id: number;
+  user_id: number;
+  login_at: Date;
+  ip_address: string;
+  type: string;
+}
 
-  // @Column({ nullable: true })
-  full_name: string;
+export enum UserLoginProvider {
+  // yeah im using lowercase, so sue me.
+  email = 'email',
+  google = 'google',
+  github = 'github',
+  facebook = 'facebook',
+  apple = 'apple',
+  steam = 'steam'
+}
 
-  // @Column({ nullable: true })
-  img_url: string;
 
-  // @Column({ nullable: true })
-  // @Exclude()                      // exclude from responses
-  reset_id: string;               // reset id used as additional verification on standard user resetting password
-
-  // @Column({ type: 'jsonb', nullable: true })
-  settings: Record<string, any>;
+export interface CreateUserProfile {
+  email: string,
+  first_name: string,
+  last_name: string,
+  img_url: string,
+  refresh_token: string
 }

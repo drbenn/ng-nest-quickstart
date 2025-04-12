@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
+import { UserLoginProvider, UserProfile } from 'src/users/user.types';
+import { AuthResponseMessageDto } from '../auth.dto';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 
 // https://console.cloud.google.com to setup google Oauth for flobro
@@ -9,7 +12,8 @@ import { AuthService } from '../auth.service';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
@@ -29,7 +33,16 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
-    const user = await this.authService.validateOAuthLogin(profile, 'google');
-    done(null, user);
+    console.log(profile);
+    
+    try {
+      const validatedUserProfile: Partial<UserProfile> | AuthResponseMessageDto  = await this.authService.validateOAuthLogin(profile, UserLoginProvider.google);
+      console.log('validated user profile in google strategy: ', validatedUserProfile);
+      
+      done(null, validatedUserProfile);
+    } catch (err) {
+      this.logger.log('warn', `Error with google guard strategy validate: ${err}`);
+      done(err, null);
+    }
   }
 }

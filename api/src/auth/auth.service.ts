@@ -8,7 +8,7 @@ import { randomBytes } from 'crypto';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
 import { EmailService } from 'src/email/email.service';
 import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
-import { User } from 'src/users/user.types';
+import { UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
 
 @Injectable()
 export class AuthService {
@@ -25,40 +25,55 @@ export class AuthService {
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-  async findOneUserById(id: number): Promise<Partial<User> | null> {
-    const user = await this.sqlAuthService.findOneUserById(id);
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by id. User id not found: ${id}`);
+  async findOneUserLoginById(id: number): Promise<Partial<UserLogin> | null> {
+    const userLogin = await this.sqlAuthService.findOneUserLoginById(id);
+    if (!userLogin) {
+      this.logger.log('warn', `Cannot find one user login by id. User id not found: ${id}`);
       return null; // User not found
     };
-    return this.excludePropsFromUserType(user); // Authentication successful
+    return this.excludePropsFromUserLoginType(userLogin); // Authentication successful
   };
 
-  async findOneUserByEmail(email: string): Promise<Partial<User> | null> {
-    const user = await this.sqlAuthService.findOneUserByEmail(email);
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by email. User id not found: ${email}`);
+  async findOneUserProfileById(id: number): Promise<Partial<UserProfile> | null> {
+    const userProfile = await this.sqlAuthService.findOneUserProfileById(id);
+    if (!userProfile) {
+      this.logger.log('warn', `Cannot find one user profile by id. User profile id not found: ${id}`);
       return null; // User not found
     };
-    return this.excludePropsFromUserType(user); // Authentication successful
+    return userProfile; // Authentication successful
   };
 
-  async findOneUserByProvider(oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<User> | null> {
-    const user = await this.sqlAuthService.findOneUserByProvider(oauth_provider, oauth_provider_user_id);
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by provider. User not found: ${oauth_provider} - ${oauth_provider_user_id}`);
+  async findOneUserLoginByEmail(email: string): Promise<Partial<UserLogin> | null> {
+    const userLogin = await this.sqlAuthService.findOneUserLoginByEmail(email);
+    if (!userLogin) {
+      this.logger.log('warn', `Cannot find one user login by email. User id not found: ${email}`);
       return null; // User not found
     };
-    return this.excludePropsFromUserType(user); // Authentication successful
+    return this.excludePropsFromUserLoginType(userLogin); // Authentication successful
   };
 
-  async findOneUserByRefreshToken(refresh_token: string): Promise<Partial<User> | null> {
-    const user = await this.sqlAuthService.findOneUserByRefreshToken(refresh_token);
-    if (!user) {
-      this.logger.log('warn', `Cannot find one user by refresh_token. User not found: ${refresh_token}`);
+  async findOneUserLoginByProvider(oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<UserLogin> | null> {
+    const userLogin = await this.sqlAuthService.findOneUserLoginByProvider(oauth_provider, oauth_provider_user_id);
+    if (!userLogin) {
+      this.logger.log('warn', `Cannot find one user login by provider. User not found: ${oauth_provider} - ${oauth_provider_user_id}`);
       return null; // User not found
     };
-    return this.excludePropsFromUserType(user); // Authentication successful
+    return this.excludePropsFromUserLoginType(userLogin); // Authentication successful
+  };
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                            USER PROFILE FINDER HELPERS                       //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+  async findOneUserProfileByRefreshToken(refresh_token: string): Promise<Partial<UserLogin> | null> {
+    const user = await this.sqlAuthService.findOneUserProfileByRefreshToken(refresh_token);
+    if (!user) {
+      this.logger.log('warn', `Cannot find one user profile by refresh_token. User not found: ${refresh_token}`);
+      return null; // User not found
+    };
+    return this.excludePropsFromUserLoginType(user); // Authentication successful
   };
 
 
@@ -81,9 +96,9 @@ export class AuthService {
     return hashedJwtRefreshToken;
   };
 
-  async updateUsersRefreshTokenInDatabase(userId: number, refreshToken: string): Promise<any> {
+  async updateUsersRefreshTokenInUserProfile(userProfileId: number, refreshToken: string): Promise<any> {
     try {
-      return this.sqlAuthService.updateUsersRefreshTokenInDatabase(userId, refreshToken);
+      return this.sqlAuthService.updateUsersRefreshTokenInUserProfile(userProfileId, refreshToken);
     } catch (error: unknown) {
       this.logger.log('warn', `Error updating refresh token: ${error}`);
     };
@@ -100,48 +115,74 @@ export class AuthService {
     const { email, password } = registerStandardUserDto;
     
     // Check if the user already exists via email
-    const existingUser: Partial<User> | null = await this.sqlAuthService.findOneUserByEmail(email);
-    this.logger.warn(`existingUser from registerStandardUser: ${existingUser}`);
-    if (!existingUser) {
-      // hash user generated password for storage in db
+    const existingStandardUserLogin: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
+    this.logger.warn(`existingStandardUserLogin from registerStandardUser: ${existingStandardUserLogin}`);
+    if (!existingStandardUserLogin) {
+
+      // check if user profile with email already exists in user_profiles table
+      const existingUserProfile: Partial<UserProfile> | null = await this.sqlAuthService.findOneUserProfileByEmail(email);
+
+      // create access and refresh jwts for users first login 
+      let userProfileForReturn: Partial<UserProfile>;
+      const jwtAccessToken: string = await this.generateAccessJwt(Math.random().toString());
+      const jwtRefreshToken: string = await this.generateRefreshJwt();
+      // if no profile exists, insert new user to user_profiles and return user_profile
+      if (!existingUserProfile) {
+
+        const createProfileObject = {
+          email: email,
+          first_name: '',
+          last_name: '',
+          img_url: '',
+          refresh_token: jwtRefreshToken
+        }
+        const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject, jwtRefreshToken);
+        userProfileForReturn = newUserProfile;
+      }
+      // if profile exists, user is adding standard email login method, insert new login to user_logins and return existing profile from user_profiles
+      else if (existingUserProfile) {
+        // update refresh jwt in user_profiles table for future access for existing profile
+        userProfileForReturn = await this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
+      }
+
+
+      /**
+       *  No matter the status if user_profile exists, must insert new user_login, but also require profile_id from user_profiles, if that already exists or not
+       */
+
+      // hash user generated password for storage in user_logins table
       const hashedPassword: string = await this.hashPassword(password);
 
       // create reset_id for future usage to assist resetting standard user password
       const reset_id: string = await this.generateResetId();
 
-      // Create and save the new user
-      const newUser: Partial<User> = await this.sqlAuthService.insertStandardUser(email, hashedPassword, reset_id);
-      
-      // create access and refresh jwts for users first login
-      const jwtAccessToken: string = await this.generateAccessJwt(newUser.id.toString());
-      const jwtRefreshToken: string = await this.generateRefreshJwt();
+      // Create and save the new user login in user_logins table
+      const newUserLogin: Partial<UserLogin> = await this.sqlAuthService.insertStandardUserLogin(userProfileForReturn.id, email, hashedPassword, reset_id);
 
-      // update refresh jwt in database for future access
-      this.updateUsersRefreshTokenInDatabase(newUser.id, jwtRefreshToken);
 
       // provide success AuthResponseMessage from successful registration
       const successfulRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_SUCCESS,
-        user: this.excludePropsFromUserType(newUser),
+        user: userProfileForReturn,
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
       return successfulRegisterResponseMessage;
-    } else if (existingUser) {
+    } else if (existingStandardUserLogin) {
       // user email already registered through oauth or standard method. Either way, cannot create new account.
-      this.logger.log('warn', `Cannot register user. User email/account already exists in db: ${existingUser.email}`);
+      this.logger.log('warn', `Cannot register user. User email/account already exists in db: ${existingStandardUserLogin.email}`);
       const failedRegistrationResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_REGISTRATION_FAILED,
-        email: existingUser.email ,
-        provider: existingUser.oauth_provider
+        email: existingStandardUserLogin.email ,
+        provider: existingStandardUserLogin.login_provider
       };
       return failedRegistrationResponseMessage;
     };
   };
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
-    const user = await this.sqlAuthService.findOneUserByEmail(email);
-    const isPasswordMatch = await this.verifyPassword(password, user.password);
+    const user: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmail(email);
+    const isPasswordMatch: boolean = await this.verifyPassword(password, user.standard_login_password);
 
     if (user === null) {
       this.logger.log('warn', `Cannot login user. User email/password combination not found: ${email}`);
@@ -150,31 +191,36 @@ export class AuthService {
         email: email
       };
       return noRegisteredUserResponseMessage;
-    } else if (user && user.oauth_provider !== null) {
-      const existingOauthRegistrationResponseMessage: AuthResponseMessageDto = {
-        message: AuthMessages.STANDARD_LOGIN_FAILED_EXISTING,
-        email: email,
-        provider: user.oauth_provider
-      };
-      return existingOauthRegistrationResponseMessage;
+
+    // TODO: cleanup front end redirects from this...now accepting multiple logins that map to single user profile
+    // } else if (user && user.login_provider !== null) {
+    //   const existingOauthRegistrationResponseMessage: AuthResponseMessageDto = {
+    //     message: AuthMessages.STANDARD_LOGIN_FAILED_EXISTING,
+    //     email: email,
+    //     provider: user.login_provider
+    //   };
+    //   return existingOauthRegistrationResponseMessage;
     } else if (user && !isPasswordMatch) {
       const failedPasswordResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_LOGIN_FAILED_MISMATCH,
         email: user.email ,
-        provider: user.oauth_provider
+        provider: user.login_provider
       };
       return failedPasswordResponseMessage;
     } else if (user && isPasswordMatch) {
       // otherwise return user information with tokens
       const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
       const jwtRefreshToken = await this.generateRefreshJwt();
+
+      // fetch user profile with email from user_profiles table
+      const existingUserProfile: Partial<UserProfile> | null = await this.sqlAuthService.findOneUserProfileByEmail(email);
   
       // update refresh jwt in database for future access
-      this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
+      this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
       
       const standardLoginSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_LOGIN_SUCCESS,
-        user: this.excludePropsFromUserType(user),
+        user: existingUserProfile,
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -185,16 +231,16 @@ export class AuthService {
   async emailStandardUserToResetPassword(requestResetStandardPasswordDto: RequestResetStandardPasswordDto): Promise<AuthResponseMessageDto> {
     try {
       const { email } = requestResetStandardPasswordDto;
-      const user: Partial<User> = await this.sqlAuthService.findOneUserByEmail(email);
+      const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmail(email);
 
-      if (!user) {
+      if (!userLogin) {
         const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
           message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED
         };
         return failedPasswordResetRequestResponseMessage;
       } 
-      else if (user && !user.oauth_provider) {
-        const { reset_id } = user as User;
+      else if (userLogin && !userLogin.login_provider) {
+        const { reset_id } = userLogin as UserLogin;
         const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
         const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
 
@@ -217,9 +263,9 @@ export class AuthService {
     const { email, newPassword, resetId } = resetDto;
     
     // Check if user in db by email and resetId
-    const user: Partial<User> = await this.sqlAuthService.findOneUserByEmailAndResetId(email, resetId);
+    const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmailAndResetId(email, resetId);
 
-    if (!user) {
+    if (!userLogin) {
       // user not found error
       const standardResetLoginFailResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_RESET_FAILED,
@@ -227,7 +273,7 @@ export class AuthService {
       return standardResetLoginFailResponseMessage;
     } 
     else {
-      // update the user with new hashed password and create new reset_id for next use
+      // update the user_login with new hashed password and create new reset_id for next use
 
       // hash user generated password for storage in db
       const hashedPassword: string = await this.hashPassword(newPassword);
@@ -236,21 +282,24 @@ export class AuthService {
       const newResetId: string = await this.generateResetId();
 
       // update password and reset_id for saving updated record
-      user.password = hashedPassword;
-      user.reset_id = newResetId;
+      userLogin.standard_login_password = hashedPassword;
+      userLogin.reset_id = newResetId;
 
       // save new hashed password and reset_id for user
-      const updatedUser = await this.sqlAuthService.updateStandardUserPasswordAndResetId(email, hashedPassword, newResetId);
+      const updatedUser = await this.sqlAuthService.updateStandardUserLoginPasswordAndResetId(email, hashedPassword, newResetId);
 
-      const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
+      const jwtAccessToken = await this.generateAccessJwt(userLogin.id.toString());
       const jwtRefreshToken = await this.generateRefreshJwt();
 
+      // fetch user profile with email from user_profiles table
+      const existingUserProfile: Partial<UserProfile> | null = await this.sqlAuthService.findOneUserProfileByEmail(email);
+
       // update refresh jwt in database for future access
-      this.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
+      this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
       
       const standardResetLoginSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_RESET_SUCCESS,
-        user: this.excludePropsFromUserType(updatedUser),
+        user: existingUserProfile,
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -258,16 +307,19 @@ export class AuthService {
     };
   };
 
+  // hashes standard login password for storage in user_logins table
   private async hashPassword(rawPassword: string): Promise<string> {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(rawPassword, saltRounds);
     return hashedPassword;
   };
 
+  // checks standard user password provided hashed equals the stored hashed password in user_logins table
   private async verifyPassword(plainPassword: string, storedHashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(plainPassword, storedHashedPassword);
   };
 
+  // generates reset_id for use in user_logins table for standard login users with provider of email
   private async generateResetId(): Promise<string> {
     return await randomBytes(64).toString('hex');
   };
@@ -290,66 +342,142 @@ export class AuthService {
   //////////////////////////////////////////////////////////////////////////////////
 
   // used by every OAuth Auth Guard Strategy to validate user
-  async validateOAuthLogin(profile: Profile, provider: string): Promise<AuthResponseMessageDto> {    
+  async validateOAuthLogin(profile: Profile, provider: UserLoginProvider): Promise<AuthResponseMessageDto> {
+    let userProfileForReturn: Partial<UserProfile>;
+
+    // Check if user_login with email and provider already exists, if so, user_login can fetch respective user profile
+    let existingUserLogin: Partial<UserLogin> = await this.sqlAuthService
+      .findOneUserLoginByEmailAndProvider(profile.emails[0].value || '', provider);
+
+      console.log('1235: ', profile.emails[0].value, provider);
+      
+      console.log('validate OAuth: existing user LOGIN: ', existingUserLogin);
+
+    // if no existing user login, will need to create new login and potentially new profile
+    if (!existingUserLogin) {
+
+      const { email, first_name, last_name, full_name, img_url, oauth_provider, oauth_provider_user_id} = this
+        .extractUserInformationFromOauthProviderProfile(profile, provider);
+
+      /**
+       * if OAuth login has no email associated MY POLICY is it will not be accepted as an email address 
+       * is required and unique for user profiles
+       *  */ 
+      if (email === '') {
+        this.logger.log('error', `Cannot register OAuth user. ${provider} account data does not have email included. And email is required to create profile in system`);
+        const failedOauthRegistrationResponseMessage: AuthResponseMessageDto = { 
+          message: AuthMessages.STANDARD_REGISTRATION_FAILED,
+          email: 'Misssing but required for system user profile creation' ,
+          provider: oauth_provider
+        };
+        return failedOauthRegistrationResponseMessage;
+      } 
+
+      // Email is provided in Oauth user data and can commence with process
+      else {
+        // const jwtAccessToken: string = await this.generateAccessJwt(Math.random().toString());
+        const jwtRefreshToken: string = await this.generateRefreshJwt();
+        // check if profile already exists
+        const existingUserProfile: Partial<UserProfile> = await this.sqlAuthService.findOneUserProfileByEmail(email);
+
+        // if no profile exists create new profile before creating new login and set as userProfileForReturn
+        if (!existingUserProfile) {
+          const createProfileObject = {
+            email: email,
+            first_name: first_name,
+            last_name: last_name,
+            img_url: img_url,
+            refresh_token: jwtRefreshToken
+          }
+          const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject, jwtRefreshToken);
+          userProfileForReturn = newUserProfile;
+          console.log('validate OAuth: new user profile -- 1: ', newUserProfile);
+        } else if (existingUserLogin) {
+          userProfileForReturn = await this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
+        }
+
+
+        console.log('validate OAuth: existing user profile: ', existingUserProfile);
+        console.log('validate OAuth: userProfileForReturn: ', userProfileForReturn);
+        
+
+        // User now has user_profile, either fetched from existing or newly created, so can now create new user_login with profile_id
+        const newUserLogin: Partial<UserLogin> = await this.sqlAuthService
+          .insertOauthUserLogin(userProfileForReturn.id, email, full_name, oauth_provider, oauth_provider_user_id);
+        console.log('validate OAuth: new User Login: ', newUserLogin);
+      }
+
+    // user_login already exists, thus user_profile already exists, therefore fetch existing user profile
+    } else {
+      userProfileForReturn = await this.sqlAuthService.findOneUserProfileById(existingUserLogin.profile_id);
+    }
+
+    return userProfileForReturn;
+  }
+
+
+  private extractUserInformationFromOauthProviderProfile(profile: Profile, provider: UserLoginProvider): {
+    email: string,
+    first_name: string,
+    last_name: string,
+    full_name: string,
+    img_url: string,
+    oauth_provider: string,
+    oauth_provider_user_id: string
+  } {
     // Extract user information based on provider
-    let email: string =  profile.emails[0].value || '';
+    let email: string = '';
+    let first_name: string = '';
+    let last_name: string = '';
     let full_name: string = '';
     let img_url: string = '';
     let oauth_provider: string = '';
     let oauth_provider_user_id: string = '';
 
-    // Check if email already exists, if so return email and provider/standard for user to know what to login with
-    let existingUser: Partial<User> = await this.sqlAuthService.findOneUserByEmail(email);
-
-    console.log('ISEXISTING USER:: ', existingUser);
-    
-
-    if (existingUser && existingUser.oauth_provider !== provider) {
-      return { 
-        message: 'email already registered',
-        email: existingUser.email ,
-        provider: existingUser.oauth_provider
-      };
-    } else {
-      // Otherwise continue and login and/or create account on first login return appropriate user information
-      let user: Partial<User> | undefined;
-      existingUser ? user = existingUser : user = undefined;
-      switch (provider) {
-        case 'google':
-          email = profile.emails[0].value || null;
-          full_name = profile.displayName || null;
-          img_url = profile.photos[0].value || null;
-          oauth_provider = profile.provider;
-          oauth_provider_user_id = profile.id;
-          break;
-        case 'facebook':
-          email = profile.emails[0].value || null;
-          full_name = `${profile.name.givenName} ${profile.name.familyName}` || null;
-          img_url = profile.photos[0].value || null;
-          oauth_provider = profile.provider;
-          oauth_provider_user_id = profile.id;
-          break;
-        case 'github':
-          email = profile.emails[0].value || null; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
-          full_name = profile.displayName || null;
-          img_url = profile.photos[0].value || null;
-          oauth_provider = profile.provider;
-          oauth_provider_user_id = profile.id
-          break;
-        // case 'apple':
-        // apple oauth login requires a developer account which is $99/year. So just no.
-        default:
-          throw new Error('Unsupported provider');
-      };
-  
-      if (!user) {
-        // Create and save the new user
-        user = await this.sqlAuthService.insertOauthUser(email, full_name, img_url, oauth_provider, oauth_provider_user_id);
-      };
-  
-      return this.excludePropsFromUserType(user);
+    switch (provider) {
+      case 'google':
+        email = profile.emails[0].value || '';
+        first_name: profile.name.givenName || '';
+        last_name: profile.name.familyName || '';
+        full_name = profile.displayName || '';
+        img_url = profile.photos[0].value || '';
+        oauth_provider = profile.provider;
+        oauth_provider_user_id = profile.id;
+        break;
+      case 'facebook':
+        email = profile.emails[0].value || '';
+        first_name: profile.name.givenName || '';
+        last_name: profile.name.familyName || '';
+        full_name = `${profile.name.givenName} ${profile.name.familyName}` || '';
+        img_url = profile.photos[0].value || '';
+        oauth_provider = profile.provider;
+        oauth_provider_user_id = profile.id;
+        break;
+      case 'github':
+        email = profile.emails[0].value || ''; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
+        first_name: profile.name.givenName || '';
+        last_name: profile.name.familyName || '';
+        full_name = profile.displayName || '';
+        img_url = profile.photos[0].value || '';
+        oauth_provider = profile.provider;
+        oauth_provider_user_id = profile.id
+        break;
+      // case 'apple':
+      // apple oauth login requires a developer account which is $99/year. So just no.
+      default:
+        throw new Error('Unsupported provider');
     };
-  };
+
+    return {
+      email: email,
+      first_name: first_name,
+      last_name: last_name,
+      full_name: full_name,
+      img_url: img_url,
+      oauth_provider: oauth_provider,
+      oauth_provider_user_id: oauth_provider_user_id
+    };
+  }
 
 
 
@@ -363,16 +491,16 @@ export class AuthService {
 
 
 
-  excludePropsFromUserType(user: Partial<User>): Partial<User> {
-    if ('password' in user) {
-      delete user.password;
+
+
+
+
+  
+
+  excludePropsFromUserLoginType(userLogin: Partial<UserLogin>): Partial<UserLogin> {
+    if ('standard_login_password' in userLogin) {
+      delete userLogin.standard_login_password;
     }
-    if ('oauth_provider_user_id' in user) {
-      delete user.oauth_provider_user_id;
-    }
-    if ('reset_id' in user) {
-      delete user.reset_id;
-    }
-    return user;
+    return userLogin;
   }
 }

@@ -18,22 +18,35 @@ psql -U $DB_USER -c "CREATE DATABASE $DB_NAME;"
 
 # Run the SQL commands to create tables
 psql -U $DB_USER -d $DB_NAME -c "
-CREATE TABLE IF NOT EXISTS \"users\" (
+CREATE TABLE IF NOT EXISTS \"user_profiles\" (
   id SERIAL PRIMARY KEY,
-
-  email VARCHAR(50),
-  password VARCHAR(300),
-  refresh_token VARCHAR(300),
-  oauth_provider VARCHAR(300),
-  oauth_provider_user_id VARCHAR(300),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  username VARCHAR(100) UNIQUE,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  img_url VARCHAR(255),
+  refresh_token VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  first_name VARCHAR(50),
-  last_name VARCHAR(50),
-  full_name VARCHAR(100),
-  img_url VARCHAR(300),
-  reset_id VARCHAR(300),
   settings JSONB NULL
+);
+
+CREATE TABLE IF NOT EXISTS \"user_logins\" (
+  id SERIAL PRIMARY KEY,
+  profile_id INTEGER REFERENCES user_profiles(id) ON DELETE CASCADE,
+  email VARCHAR(255),
+  standard_login_password VARCHAR(255),
+  refresh_token VARCHAR(255),
+  login_provider VARCHAR(100),
+  provider_user_id VARCHAR(255),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  full_name VARCHAR(200),
+  img_url VARCHAR(255),
+  reset_id VARCHAR(255),
+  UNIQUE(login_provider, provider_user_id)
 );
 
 CREATE TABLE IF NOT EXISTS \"todos\" (
@@ -46,7 +59,7 @@ CREATE TABLE IF NOT EXISTS \"todos\" (
 
 CREATE TABLE IF NOT EXISTS users_login_history (
   id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id INT NOT NULL REFERENCES user_logins(id) ON DELETE CASCADE,
   login_at TIMESTAMP DEFAULT NOW(),
   ip_address INET NOT NULL,
   type VARCHAR(20)

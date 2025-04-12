@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
 import { AuthService } from '../auth.service';
+import { UserLoginProvider, UserProfile } from 'src/users/user.types';
+import { AuthResponseMessageDto } from '../auth.dto';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 // https://github.com/settings/applications/new
 @Injectable()
 export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
+  ) {
     super({
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
@@ -26,7 +32,12 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     profile: any, 
     done: (err: any, user?: any, info?: any) => void,
   ): Promise<any> {
-    const validatedUser = await this.authService.validateOAuthLogin(profile, 'github');
-    done(null, validatedUser);
+    try {
+      const validatedUserProfile: Partial<UserProfile> | AuthResponseMessageDto  = await this.authService.validateOAuthLogin(profile, UserLoginProvider.github);
+      done(null, validatedUserProfile);
+    } catch (err) {
+      this.logger.log('warn', `Error with github guard strategy validate: ${err}`);
+      done(err, null);
+    }
   }
 }

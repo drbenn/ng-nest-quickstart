@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { User } from 'src/users/user.types';
+import { CreateUserProfile, UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
 import { LoginTrackingTypes } from './sql-auth.types';
 
 @Injectable()
@@ -37,113 +37,93 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
 
   //////////////////////////////////////////////////////////////////////////////////
   //                                                                              //
-  //                            USER FINDER HELPERS                               //
+  //                        USER_LOGIN FINDER HELPERS                             //
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-  async findOneUserById(userId: number): Promise<Partial<User> | null> {
-    const queryText = `SELECT * FROM users WHERE id = $1;`;
-    const paramsToArray: number[] = [userId];
+  async findOneUserLoginById(userLoginId: number): Promise<Partial<UserLogin> | null> {
+    const queryText = `SELECT * FROM user_logins WHERE id = $1;`;
+    const paramsToArray: number[] = [userLoginId];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0];
+      const result: Partial<UserLogin> = queryResult.rows[0];
       return result;
     } catch (error) {
-      console.error(`Error Auth-SQL Service findOneUserById: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserById: ${error}`);
-      throw new Error('Error Auth-SQL Service findOneUserById');
+      console.error(`Error Auth-SQL Service findOneUserLoginById: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginById: ${error}`);
+      throw new Error('Error Auth-SQL Service findOneUserLoginById');
     }
   }
 
-  async findOneUserByEmail(email: string): Promise<Partial<User> | null> {
-    const queryText = `SELECT * FROM users WHERE email = $1;`;
+  async findOneUserLoginByEmail(email: string): Promise<Partial<UserLogin> | null> {
+    const queryText = `SELECT * FROM user_logins WHERE email = $1;`;
     const paramsToArray: string[] = [email];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0]; 
+      const result: Partial<UserLogin> = queryResult.rows[0]; 
       return result;
     } catch (error) {
-      console.error(`Error Auth-SQL Service findOneUserByEmail: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserByEmail: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserByEmail EMAIL: ${email}`);
-      throw new Error('Error Auth-SQL Service findOneUserByEmail');
+      console.error(`Error Auth-SQL Service findOneUserLoginByEmail: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginByEmail: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginByEmail EMAIL: ${email}`);
+      throw new Error('Error Auth-SQL Service findOneUserLoginByEmail');
     }
   }
 
-  async findOneUserByEmailAndPassword(email: string, hashedPassword: string): Promise<Partial<User> | null> {
-    const queryText = `SELECT * FROM users WHERE email = $1 AND password = $2;`;
+  async findOneUserLoginByEmailAndProvider(email: string, login_provider: UserLoginProvider): Promise<Partial<UserLogin> | null> {
+    const queryText = `SELECT * FROM user_logins WHERE email = $1 AND login_provider = $2;`;
+    const paramsToArray: string[] = [email, login_provider];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result: Partial<UserLogin> = queryResult.rows[0]; 
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service findOneUserLoginByEmailAndProvider: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginByEmailAndProvider: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginByEmailAndProvider EMAIL: ${email}   PROVIDER: ${login_provider}`);
+      throw new Error('Error Auth-SQL Service findOneUserLoginByEmailAndProvider');
+    }
+  }
+
+  async findOneUserLoginByEmailAndPassword(email: string, hashedPassword: string): Promise<Partial<UserLogin> | null> {
+    const queryText = `SELECT * FROM user_logins WHERE email = $1 AND password = $2;`;
     const paramsToArray: string[] = [email, hashedPassword];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0]; 
+      const result: Partial<UserLogin> = queryResult.rows[0]; 
       return result;
     } catch (error) {
-      console.error(`Error Auth-SQL Service findOneUserByEmailAndPassword: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserByEmailAndPassword: ${error}`);
-      throw new Error('Error Auth-SQL Service findOneUserByEmailAndPassword');
+      console.error(`Error Auth-SQL Service findOneUserLoginByEmailAndPassword: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginByEmailAndPassword: ${error}`);
+      throw new Error('Error Auth-SQL Service findOneUserLoginByEmailAndPassword');
     }
   }
 
-  async findOneUserByEmailAndResetId(email: string, reset_id: string): Promise<Partial<User> | null> {
-    const queryText = `SELECT * FROM users WHERE email = $1 AND reset_id = $2;`;
+  async findOneUserLoginByEmailAndResetId(email: string, reset_id: string): Promise<Partial<UserLogin> | null> {
+    const queryText = `SELECT * FROM user_logins WHERE email = $1 AND reset_id = $2;`;
     const paramsToArray: string[] = [email, reset_id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0]; 
+      const result: Partial<UserLogin> = queryResult.rows[0]; 
       return result;
     } catch (error) {
-      console.error(`Error Auth-SQL Service findOneUserByEmail: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserByEmail: ${error}`);
-      throw new Error('Error Auth-SQL Service findOneUserByEmail');
+      console.error(`Error Auth-SQL Service findOneUserLoginByEmailAndResetId: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginByEmailAndResetId: ${error}`);
+      throw new Error('Error Auth-SQL Service findOneUserLoginByEmailAndResetId');
     }
   }
 
-  async findOneUserByProvider(oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<User> | null> {
-    const queryText = `SELECT * FROM users WHERE oauth_provider = $1 AND oauth_provider_user_id = $2;`;
-    const paramsToArray: string[] = [oauth_provider, oauth_provider_user_id];
+  async findOneUserLoginByProvider(login_provider: string, provider_user_id: string): Promise<Partial<UserLogin> | null> {
+    const queryText = `SELECT * FROM user_logins WHERE login_provider = $1 AND provider_user_id = $2;`;
+    const paramsToArray: string[] = [login_provider, provider_user_id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0]; 
+      const result: Partial<UserLogin> = queryResult.rows[0]; 
       return result;
     } catch (error) {
-      console.error(`Error Auth-SQL Service findOneUserByProvider: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserByProvider: ${error}`);
-      throw new Error('Error Auth-SQL Service findOneUserByProvider');
-    }
-  }
-
-  async findOneUserByRefreshToken(refresh_token: string): Promise<Partial<User> | null> {
-    const queryText = `SELECT * FROM users WHERE refresh_token = $1;`;
-    const paramsToArray: string[] = [refresh_token];
-    try {
-      const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0]; 
-      return result;
-    } catch (error) {
-      console.error(`Error Auth-SQL Service findOneUserByRefreshToken: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserByRefreshToken: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service findOneUserByRefreshToken REFRESH_TOKEN: ${refresh_token}`);
-      throw new Error('Error Auth-SQL Service findOneUserByRefreshToken');
-    }
-  }
-
-  //////////////////////////////////////////////////////////////////////////////////
-  //                                                                              //
-  //                           JWT ACCESS/REFRESH HELPERS                         //
-  //                                                                              //
-  //////////////////////////////////////////////////////////////////////////////////
-
-  async updateUsersRefreshTokenInDatabase(userId: number, refreshToken: string): Promise<Partial<User> | null> {
-    const queryText = `UPDATE users SET refresh_token = $1 WHERE id = $2 RETURNING *;`;
-    const paramsToArray: [string, number] = [refreshToken, userId];
-    try {
-      const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0]; 
-      return result;
-    } catch (error) {
-      console.error(`Error Auth-SQL Service updateUsersRefreshTokenInDatabase: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service updateUsersRefreshTokenInDatabase: ${error}`);
-      throw new Error('Error Auth-SQL Service updateUsersRefreshTokenInDatabase');
+      console.error(`Error Auth-SQL Service findOneUserLoginByProvider: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserLoginByProvider: ${error}`);
+      throw new Error('Error Auth-SQL Service findOneUserLoginByProvider');
     }
   }
 
@@ -153,35 +133,35 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-  async insertStandardUser(email: string, hashedPassword: string, reset_id: string): Promise<Partial<User>> {
-    const queryText = `INSERT INTO users (email, password, reset_id) VALUES ($1, $2, $3) RETURNING *;`;
-    const paramsToArray: string[] = [email, hashedPassword, reset_id];
+  async insertStandardUserLogin(profile_id: number, email: string, hashedPassword: string, reset_id: string): Promise<Partial<UserLogin>> {
+    const queryText = `INSERT INTO user_logins (profile_id, email, standard_login_password, reset_id) VALUES ($1, $2, $3, $4) RETURNING *;`;
+    const paramsToArray: (number | string)[] = [profile_id, email, hashedPassword, reset_id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log('insert standard user result: ', queryResult);
+      console.log('insert standard user login result: ', queryResult);
       
-      const result: Partial<User> = queryResult.rows[0]; 
+      const result: Partial<UserLogin> = queryResult.rows[0]; 
       return result;
     } catch (error) {
       
-      console.error(`Error Auth-SQL Service insertStandardUser: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service insertStandardUser: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service insertStandardUser OBJECT: email: ${email}    hashedPassword: ${hashedPassword}       reset_id: ${reset_id}`);
-      throw new Error('Error Auth-SQL Service insertStandardUser');
+      console.error(`Error Auth-SQL Service insertStandardUserLogin: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service insertStandardUserLogin: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service insertStandardUserLogin OBJECT: email: ${email}    hashedPassword: ${hashedPassword}       reset_id: ${reset_id}`);
+      throw new Error('Error Auth-SQL Service insertStandardUserLogin');
     }
   }
 
-  async updateStandardUserPasswordAndResetId(email: string, hashedPassword: string, reset_id: string): Promise<Partial<User>> {
-    const queryText = `UPDATE users SET password = $1, reset_id = $2 WHERE email = $3 RETURNING *;`;
+  async updateStandardUserLoginPasswordAndResetId(email: string, hashedPassword: string, reset_id: string): Promise<Partial<UserLogin>> {
+    const queryText = `UPDATE user_logins SET password = $1, reset_id = $2 WHERE email = $3 RETURNING *;`;
     const paramsToArray: string[] = [hashedPassword, reset_id, email];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0];
+      const result: Partial<UserLogin> = queryResult.rows[0];
       return result;
     } catch (error) {
-      console.error(`Error Auth-SQL Service updateStandardUserPasswordAndResetId: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service updateStandardUserPasswordAndResetId: ${error}`);
-      throw new Error('Error Auth-SQL Service updateStandardUserPasswordAndResetId');
+      console.error(`Error Auth-SQL Service updateStandardUserLoginPasswordAndResetId: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service updateStandardUserLoginPasswordAndResetId: ${error}`);
+      throw new Error('Error Auth-SQL Service updateStandardUserLoginPasswordAndResetId');
     }
   }
 
@@ -192,20 +172,131 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-  async insertOauthUser(email: string, full_name: string, img_url: string, oauth_provider: string, oauth_provider_user_id: string): Promise<Partial<User>> {
+  async insertOauthUserLogin(
+    profile_id: number,
+    email: string,
+    full_name: string,
+    login_provider: string,
+    provider_user_id: string
+  ): Promise<Partial<UserLogin>> {
     const queryText = `
-      INSERT INTO users (email, full_name, img_url, oauth_provider, oauth_provider_user_id)
+      INSERT INTO user_logins (profile_id, email, full_name, login_provider, provider_user_id)
       VALUES ($1, $2, $3, $4, $5) RETURNING *;
     `;
-    const paramsToArray: string[] = [email, full_name, img_url, oauth_provider, oauth_provider_user_id];
+    const paramsToArray: (number | string)[] = [profile_id, email, full_name, login_provider, provider_user_id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<User> = queryResult.rows[0];
+      const result: Partial<UserLogin> = queryResult.rows[0];
       return result;
     } catch (error) {
-      console.error(`Error Auth-SQL Service insertStandardUser: ${error}`);
-      this.logger.log('warn', `Error Auth-SQL Service insertStandardUser: ${error}`);
-      throw new Error('Error Auth-SQL Service insertStandardUser');
+      console.error(`Error Auth-SQL Service insertOauthUserLogin: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service insertOauthUserLogin: ${error}`);
+      throw new Error('Error Auth-SQL Service insertOauthUserLogin');
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //                                                                              //
+  //                           USER PROFILE HELPERS                               //
+  //                                                                              //
+  //////////////////////////////////////////////////////////////////////////////////
+
+
+  async findOneUserProfileById(userProfileId: number): Promise<Partial<UserProfile> | null> {
+    const queryText = `SELECT * FROM user_profiles WHERE id = $1;`;
+    const paramsToArray: number[] = [userProfileId];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result: Partial<UserProfile> = queryResult.rows[0];
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service findOneUserProfileById: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserProfileById: ${error}`);
+      throw new Error('Error Auth-SQL Service findOneUserProfileById');
+    }
+  }
+
+  async findOneUserProfileByEmail(email: string): Promise<Partial<UserProfile> | null> {
+    const queryText = `SELECT * FROM user_profiles WHERE email = $1;`;
+    const paramsToArray: string[] = [email];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result: Partial<UserProfile> = queryResult.rows[0]; 
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service findOneUserProfileByEmail: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserProfileByEmail: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserProfileByEmail EMAIL: ${email}`);
+      throw new Error('Error Auth-SQL Service findOneUserProfileByEmail');
+    }
+  }
+
+  async insertUserProfile(createUserProfile: CreateUserProfile, refresh_token: string): Promise<Partial<UserProfile>> {
+    const { email, first_name, last_name, img_url } = createUserProfile;
+    const queryText = `INSERT INTO user_profiles (email, first_name, last_name, img_url, refresh_token) 
+    VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
+
+    const paramsToArray: string[] = [
+      email,
+      first_name ? first_name : '',
+      last_name ? last_name : '',
+      img_url ? img_url : '',
+      refresh_token ? refresh_token : ''
+    ];
+
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      console.log('insert user profile result: ', queryResult);
+      const result: Partial<UserProfile> = queryResult.rows[0]; 
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service insertUserProfile: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service insertUserProfile: ${error}`);
+      throw new Error('Error Auth-SQL Service insertUserProfile');
+    }
+  }
+
+  async updateUserProfile(userProfile: UserProfile): Promise<Partial<UserProfile>> {
+    const { email, username, first_name, last_name, img_url } = userProfile;
+    const queryText = `UPDATE user_profiles SET username = $1, first_name = $2,  last_name = $3, img_url = $4 WHERE email = $5 RETURNING *;`;
+    const paramsToArray: string[] = [username, first_name, last_name, img_url, email];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result: Partial<UserProfile> = queryResult.rows[0];
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service updateUserProfile: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service updateUserProfile: ${error}`);
+      throw new Error('Error Auth-SQL Service updateUserProfile');
+    }
+  }
+
+  async findOneUserProfileByRefreshToken(refresh_token: string): Promise<Partial<UserProfile> | null> {
+    const queryText = `SELECT * FROM user_profiles WHERE refresh_token = $1;`;
+    const paramsToArray: string[] = [refresh_token];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result: Partial<UserProfile> = queryResult.rows[0]; 
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service findOneUserProfileByRefreshToken: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserProfileByRefreshToken: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service findOneUserProfileByRefreshToken REFRESH_TOKEN: ${refresh_token}`);
+      throw new Error('Error Auth-SQL Service findOneUserProfileByRefreshToken');
+    }
+  }
+
+  async updateUsersRefreshTokenInUserProfile(userProfileId: number, refreshToken: string): Promise<Partial<UserProfile> | null> {
+    const queryText = `UPDATE user_profiles SET refresh_token = $1 WHERE id = $2 RETURNING *;`;
+    const paramsToArray: [string, number] = [refreshToken, userProfileId];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result: Partial<UserProfile> = queryResult.rows[0]; 
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service updateUsersRefreshTokenInUserProfiles: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service updateUsersRefreshTokenInUserProfiles: ${error}`);
+      throw new Error('Error Auth-SQL Service updateUsersRefreshTokenInUserProfiles');
     }
   }
 

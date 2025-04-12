@@ -11,15 +11,15 @@ async function bootstrap() {
   const port = configService.get<number>('APP_PORT') || 3000;
   app.use(cookieParser());
   app.setGlobalPrefix(configService.get<string>('URL_GLOBAL_PREFIX'));
-  app.enableCors(),
-  // app.enableCors({
-  //   origin: [
-  //     process.env.FRONTEND_URL
-  //   ],
-  //   // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  //   credentials: true,
-  //   // allowedHeaders: 'Content-Type, Authorization',
-  // });
+  // app.enableCors(),
+  app.enableCors({
+    origin: [
+      process.env.FRONTEND_URL
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Authorization',
+  });
   await app.listen(port ?? 3000);
 }
 bootstrap();

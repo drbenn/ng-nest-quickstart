@@ -4,7 +4,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 // import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/user.dto';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { User } from './user.types';
 // import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
 
 @Injectable()

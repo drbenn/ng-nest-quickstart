@@ -3,11 +3,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardPasswordDto, ResetStandardPasswordDto } from 'src/users/dto/user.dto';
-// import { User } from 'src/users/user.entity';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
-import { User } from 'src/users/user.types';
+import { UserLogin, UserProfile } from 'src/users/user.types';
 import { SqlAuthService } from './sql-auth/sql-auth.service';
 import { LoginTrackingTypes } from './sql-auth/sql-auth.types';
 
@@ -59,9 +58,12 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard which if cookie present will retrieve and include user data in req
   @Post('restore-user')
-  async restoreUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<User>> {
+  async restoreUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<UserProfile>> {
+    // console.log('restore user req::::');
+    // console.log(req['user']);
+    
     try {
-      const restoredUser: Partial<User> = req['user'];
+      const restoredUser: Partial<UserProfile> = req['user'];
       // get fresh token for user restoring session
       const jwtToken: string = await this.authService.generateAccessJwt(restoredUser.id.toString());
 
@@ -116,8 +118,8 @@ export class AuthController {
   @Post('register-standard')
   async register(
     @Body() registerStandardUserDto: RegisterStandardUserDto,
-    @Req() req: Request, // req for capturing and logging ip
-    @Res({ passthrough: true }) res: Response, // Enables passing response
+    @Req() req: Request,                          // req for capturing and logging ip
+    @Res({ passthrough: true }) res: Response,    // Enables passing response
   ): Promise<AuthResponseMessageDto> {
     try {
       const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);   
@@ -285,19 +287,19 @@ export class AuthController {
    * email/password login.
    */
   private async handleOAuthRedirect(req: Request, res: Response): Promise<void> {
-    const response: Partial<User> | AuthResponseMessageDto = req['user'];  // user from database, not oauth user profile
-    let user: Partial<User> | null = response['message'] ? null : response;
+    const response: Partial<UserProfile> | AuthResponseMessageDto = req['user'];  // user from database fetched in provider guard, not oauth user profile
+    let userProfile: Partial<UserProfile> | null = response['message'] ? null : response;
 
     // if duplicate user attempt do not provide user and redirect to inform user of existing login method
-    if (!user) {
+    if (!userProfile) {
       const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(response['email'])}&provider=${encodeURIComponent(response['provider'])}`;
       res.redirect(redirectUrl);  
     } else {
       // return jwt access and refresh tokens and redirect to oauth/callback to fetch appropriate user data
       try {
-        const jwtAccessToken: string = await this.authService.generateAccessJwt(user.id.toString());
+        const jwtAccessToken: string = await this.authService.generateAccessJwt(userProfile.id.toString());
         const jwtRefreshToken: string = await this.authService.generateRefreshJwt();
-        await this.authService.updateUsersRefreshTokenInDatabase(user.id, jwtRefreshToken);
+        await this.authService.updateUsersRefreshTokenInUserProfile(userProfile.id, jwtRefreshToken);
   
         if (!process.env.FRONTEND_URL) {
           this.logger.log('warn', `FRONTEND_URL is not set in environment variables`);
@@ -308,12 +310,12 @@ export class AuthController {
         // }
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
   
-        this.logger.log('warn', `Successful OAuth login with cookies::: redirect_url: ${process.env.FRONTEND_URL}oauth/callback`);
+        this.logger.log('warn', `Successful OAuth login with cookies::: redirect_url: ${process.env.FRONTEND_URL}/oauth/callback`);
 
 
         // oauth requires redirect as ui redirected away from site, cannot return user data, 
         // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly
-        res.redirect(`${process.env.FRONTEND_URL}oauth/callback`);   
+        res.redirect(`${process.env.FRONTEND_URL}/oauth/callback`);   
       } catch (error: unknown) {
         this.logger.error(`Error during OAuth redirect from handleOAuthRedirect: ${error}`);        
         // Redirect the user to an error page

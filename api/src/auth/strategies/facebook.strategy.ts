@@ -1,12 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
 import { AuthService } from '../auth.service';
+import { UserLoginProvider } from 'src/users/user.types';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 // https://developers.facebook.com/apps
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
+  ) {
     super({
       clientID: process.env.FACEBOOK_CLIENT_ID,           // Your Facebook App ID
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,   // Your Facebook App Secret
@@ -27,9 +32,10 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     done: (err: any, user?: any, info?: any) => void,
   ): Promise<any> {
     try {
-      const validatedUser = await this.authService.validateOAuthLogin(profile, 'facebook');
-      done(null, validatedUser);
+      const validatedUserProfile = await this.authService.validateOAuthLogin(profile, UserLoginProvider.facebook);
+      done(null, validatedUserProfile);
     } catch (err) {
+      this.logger.log('warn', `Error with facebook guard strategy validate: ${err}`);
       done(err, null);
     }
   };

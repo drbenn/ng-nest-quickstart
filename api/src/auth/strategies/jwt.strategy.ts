@@ -1,17 +1,19 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
-import { User } from 'src/users/user.types';
-// import { User } from 'src/users/user.entity';
+import { UserProfile } from 'src/users/user.types';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService) {
+    private readonly configService: ConfigService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
@@ -28,10 +30,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   };
 
-  async validate(payload: any): Promise<Partial<User> | null> {
-    let userId;
-    'userId' in payload ? userId = payload.userId : userId = payload.sub;
-    const user = await this.authService.findOneUserById(userId);
-    return user;
+  async validate(payload: any): Promise<Partial<UserProfile> | null> {
+    console.log('JWT STRAT Payload: ', payload);
+    if ('userId' in payload) {
+      const user = await this.authService.findOneUserProfileById(payload.userId as number);
+      return user;
+    }
   }
 }

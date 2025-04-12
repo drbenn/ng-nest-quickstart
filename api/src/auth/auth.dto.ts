@@ -1,10 +1,8 @@
-// import { User } from "src/users/user.entity";
-
-import { User } from "src/users/user.types";
+import { UserProfile } from "src/users/user.types";
 
 export class AuthResponseMessageDto {
   message?: string;
-  user?: Partial<User>;
+  user?: Partial<UserProfile>;
   email?: string;
   provider?: string;
   jwtAccessToken?: string;
