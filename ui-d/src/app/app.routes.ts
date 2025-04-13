@@ -22,26 +22,48 @@ import { FailedLoginPageComponent } from './pages/auth/failed-login-page/failed-
 import { HomePageComponent } from './pages/guarded/home-page/home-page.component';
 import { TodoPageComponent } from './pages/guarded/todo-page/todo-page.component';
 
-export const routes: Routes = [
-    // PUBLIC Routes accessible by all
-    { path: '', component: LandingPageComponent }, // Default route
-    { path: 'about-us', component: AboutUsComponent },
-    { path: 'contact', component: ContactPageComponent },
-    { path: 'terms-of-use', component: TermsOfUsePageComponent },
-    { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
-    { path: 'cookie-policy', component: CookiePolicyPageComponent },
-    // AUTH Routes for login/register/callback
-    { path: 'log-in', component: LogInPageComponent },
-    { path: 'register-account', component: RegisterPageComponent },
-    { path: 'request-password-reset', component: RequestPassswordResetPageComponent },
-    { path: 'reset-password', component: ResetPasswordPageComponent },
-    { path: 'oauth/callback', component: OauthCallbackComponent },
-    { path: 'auth/existing-user', component: ExistingUserPageComponent },
-    { path: 'auth/failed-login', component: FailedLoginPageComponent },
-    // GUARDED Routes accessible by logged in users only
-    { path: 'home', component: HomePageComponent },
-    { path: 'todo', component: TodoPageComponent },
+// Guards
+import { authGuard } from './guards/auth.guard';
 
-    // Page not found
-    { path: '**', component: PageNotFoundPageComponent },
+// Resolvers
+import { initialAuthCheckResolver } from './resolvers/initial-auth-check.resolver';
+
+export const routes: Routes = [
+  // PUBLIC Routes accessible by all
+  {
+    path: '',                                           // Default route
+    component: LandingPageComponent,
+    resolve: { initialAuth: initialAuthCheckResolver }, // Run resolver first
+  },
+  { path: 'about-us', component: AboutUsComponent },
+  { path: 'contact', component: ContactPageComponent },
+  { path: 'terms-of-use', component: TermsOfUsePageComponent },
+  { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
+  { path: 'cookie-policy', component: CookiePolicyPageComponent },
+
+  // AUTH Routes for login/register/callback
+  { path: 'log-in', component: LogInPageComponent },
+  { path: 'register-account', component: RegisterPageComponent },
+  { path: 'request-password-reset', component: RequestPassswordResetPageComponent },
+  { path: 'reset-password', component: ResetPasswordPageComponent },
+  { path: 'oauth/callback', component: OauthCallbackComponent },
+  { path: 'auth/existing-user', component: ExistingUserPageComponent },
+  { path: 'auth/failed-login', component: FailedLoginPageComponent },
+
+  // GUARDED Routes accessible by logged in users only
+  { 
+    path: 'home',
+    component: HomePageComponent,
+    resolve: { initialAuth: initialAuthCheckResolver }, // Run resolver first
+    canActivate: [authGuard]
+  },
+  {
+    path: 'todo',
+    component: TodoPageComponent,
+    resolve: { initialAuth: initialAuthCheckResolver }, // Run resolver first
+    canActivate: [authGuard]
+  },
+
+  // Page not found catch all
+  { path: '**', component: PageNotFoundPageComponent },
 ];
