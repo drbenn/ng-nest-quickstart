@@ -118,6 +118,12 @@ export class StandardAuthService {
             const user: UserProfile = response.user as UserProfile;
             this.loginUser(user);
           };
+          this.displayToast({ 
+            title: 'Success',
+            message: response.message as unknown as string,
+            bgColor: environment.toastDefaultSuccessColors.bgColor,
+            textColor: environment.toastDefaultSuccessColors.textColor
+          });
         },
         error: (error: unknown) => this.handleError(error)
       })
