@@ -2,10 +2,10 @@ import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } fr
 import { provideRouter } from '@angular/router';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { routes } from './app.routes';
-import { AuthState } from '../store/auth/auth.state';
-import { AppState } from '../store/app/app.state';
 import { provideStore } from '@ngxs/store';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { AppState } from './store/app/app.state';
+import { AuthState } from './store/auth/auth.state';
 
 export const appConfig: ApplicationConfig = {
   providers: [

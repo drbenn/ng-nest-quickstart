@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from '../components/navbar/navbar.component';
-import { FooterComponent } from '../components/footer/footer.component';
 import { dispatch, Store } from '@ngxs/store';
-import { CheckAuthenticatedUser } from '../store/auth/auth.actions';
 import { PosthogAnalyticsService } from './services/posthog-analytics.service';
 import { Observable } from 'rxjs';
-import { DaisyToastOptions } from '../types/app.types';
+import { DaisyToastOptions } from './types/app.types';
 import { environment } from '../environments/environment.development';
-import { DisplayToast } from '../store/app/app.actions';
 import { CommonModule } from '@angular/common';
+import { FooterComponent } from './components/footer/footer.component';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { DisplayToast } from './store/app/app.actions';
+import { CheckAuthenticatedUser } from './store/auth/auth.actions';
 
 @Component({
   selector: 'app-root',
