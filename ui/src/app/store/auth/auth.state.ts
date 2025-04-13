@@ -60,6 +60,11 @@ export class AuthState {
   ) {}
 
   @Selector()
+  static getUserId(state: AuthStateModel): Partial<number | null> {
+    return state.id;
+  }
+
+  @Selector()
   static getNavUserData(state: AuthStateModel): Partial<AuthStateModel> {
     return {
       id: state.id,

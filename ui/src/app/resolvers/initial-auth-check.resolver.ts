@@ -3,7 +3,18 @@ import { ResolveFn } from '@angular/router';
 export const initialAuthCheckResolver: ResolveFn<boolean> = (route, state) => {
   console.log('initialAuthCheckResolver Hit: route: ', route.routeConfig?.path);
   
-  return true;
+  const activePath: string = route.routeConfig?.path || 'landing';
+  const pathsToExcludeRestoreUser: string[] = ['reset-password'];
+
+
+  // Should this actually return a boolean??????????????????????????????????????????????????????????????
+  // shouldnt it just hit restore-user if its not on 'reset-password'
+  if (pathsToExcludeRestoreUser.includes(activePath)) {
+    return false;
+  } else {
+    // resolver returns true so that you wont fetch restore user....
+    return true;
+  }
 };
 
 

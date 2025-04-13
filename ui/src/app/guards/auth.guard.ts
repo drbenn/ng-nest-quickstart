@@ -16,13 +16,7 @@ export const authGuard: CanActivateFn = (
   // --- Authentication Logic (remains the same) ---
 
   // Example 1: If your AuthService.isAuthenticated() returns a boolean
-
-  // TODO!!!!
-  // const isAuthenticated = authService.isAuthenticated();
-  const isAuthenticated = true;
-
-
-
+  const isAuthenticated = authService.isAuthenticatedUser();
 
 
   if (isAuthenticated) {
@@ -31,7 +25,7 @@ export const authGuard: CanActivateFn = (
     // User is not logged in, redirect to login page
     console.warn(`Functional AuthGuard: Blocked access to ${state.url} - User not authenticated. Redirecting...`);
     // Create a UrlTree to redirect
-    return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+    return router.createUrlTree(['/log-in'], { queryParams: { returnUrl: state.url } });
   }
 
 
