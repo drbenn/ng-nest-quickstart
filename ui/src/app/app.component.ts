@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -36,7 +36,8 @@ export class AppComponent implements OnInit {
   constructor (
     private messageService: MessageService,
     private store: Store,
-    private posthogAnalyticsService: PosthogAnalyticsService
+    private posthogAnalyticsService: PosthogAnalyticsService,
+    private route: ActivatedRoute
   ) {}
 
   cities: City[] | undefined;
@@ -45,6 +46,14 @@ export class AppComponent implements OnInit {
 
   title = 'ui';
   ngOnInit() {
+    console.log('fuck you');
+    
+    this.route.queryParamMap.subscribe((params) => {
+      console.log('app route listiner');
+      console.log(params);
+      
+      
+    });
     this.checkAuthenticatedUser();
     this.toast$ = this.store.select((state) => state.appState.toast);
     this.listenForToasts();

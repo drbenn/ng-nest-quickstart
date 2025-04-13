@@ -1,7 +1,7 @@
-import { UserLoginJwtDto } from '../../types/userDto.types';
+import { UserProfile } from '../../types/userDto.types';
 export class LoginUser {
   static readonly type = '[Auth] Login User';
-  constructor(readonly loginData: UserLoginJwtDto) {}
+  constructor(readonly loginData: UserProfile) {}
 }
 
 export class LogoutUser {

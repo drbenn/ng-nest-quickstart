@@ -4,7 +4,7 @@ import { dispatch } from '@ngxs/store';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { PosthogAnalyticsService } from '../../../app/services/posthog-analytics.service';
-import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, LoginStandardUserDto, AuthMessages, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from '../../../types/userDto.types';
+import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, LoginStandardUserDto, AuthMessages, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, UserProfile } from '../../../types/userDto.types';
 import { LoginUser } from '../../../store/auth/auth.actions';
 import { Router } from '@angular/router';
 import { DisplayToast } from '../../../store/app/app.actions';
@@ -32,7 +32,7 @@ export class StandardAuthService {
 
         // Registration successful and login/redirect newly registered user.
         if ('user' in response) {
-          const user: UserLoginJwtDto = response.user;
+          const user: UserProfile = response.user;
           this.displayToast({ 
             title: 'Success',
             message: response.message as unknown as string,
@@ -54,7 +54,7 @@ export class StandardAuthService {
     .subscribe({
       next: (response: AuthResponseMessageDto | any) => {
         if (response.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
-          const user: UserLoginJwtDto = response.user;
+          const user: UserProfile = response.user;
           user.email ? this.posthogAnalyticsService.identifyUser(user.email, { email: user.email }) : '';
           this.displayToast({ 
             title: 'Success',
@@ -115,7 +115,7 @@ export class StandardAuthService {
           console.log('response from reset Standard User password: ', response);
           
           if (response.message === AuthMessages.STANDARD_RESET_SUCCESS) {
-            const user: UserLoginJwtDto = response.user as UserLoginJwtDto;
+            const user: UserProfile = response.user as UserProfile;
             this.loginUser(user);
           };
         },

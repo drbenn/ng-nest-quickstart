@@ -16,16 +16,17 @@ export interface UserLogin {
 }
 
 export interface UserProfile {
-  id: number;
-  email: string;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  img_url?: string;
-  refresh_token?: string;
-  created_at: Date;
-  updated_at: Date;
-  settings?: Record<string, any>;
+  id: number,
+  email: string,
+  username?: string,
+  first_name?: string,
+  last_name?: string,
+  img_url?: string,
+  refresh_token?: string,
+  created_at: Date,
+  updated_at: Date,
+  settings?: Record<string, any>,
+  roles?: any
 }
 
 export interface UserLoginHistory {

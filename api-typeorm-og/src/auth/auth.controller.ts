@@ -8,13 +8,6 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
 
-export interface OAuthUser {
-  id: number;
-  email: string;
-  name: string;
-  provider?: string;
-}
-
 @Controller('auth')
 export class AuthController {
 

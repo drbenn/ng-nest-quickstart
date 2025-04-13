@@ -2,7 +2,7 @@
   {{ user?.email }}
 </div>
 <div class="my-2 pl-2 text-xs">
-  joined: {{ user?.createdAt | date: 'dd MMM YYYY' }}
+  joined: {{ user?.created_at | date: 'dd MMM YYYY' }}
 </div>
 <ul class="font-base text-md w-full">
   <a routerLinkActive="active" ariaCurrentWhenActive="page" (click)="signOut()">

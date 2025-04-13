@@ -1,5 +1,13 @@
 import { UserProfile } from "src/users/user.types";
 
+
+export interface OAuthUser {
+  id: number;
+  email: string;
+  name: string;
+  provider?: string;
+}
+
 export class AuthResponseMessageDto {
   message?: string;
   user?: Partial<UserProfile>;

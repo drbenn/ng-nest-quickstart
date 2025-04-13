@@ -4,22 +4,22 @@ import { CheckAuthenticatedUser, LoginUser, LogoutUser } from './auth.actions';
 import { patch } from '@ngxs/store/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../../pages/auth/services/auth.service';
-import { UserLoginJwtDto } from '../../types/userDto.types';
+import { UserProfile } from '../../types/userDto.types';
 
 export interface NestedStateModel {
   option1: string[],
   option2: number
 }
 export interface AuthStateModel {
-  id: string | null;
+  id: number | null;
   email: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  fullName: string | null;
-  imgUrl: string | null,
-  oauthProvider: string | null,
-  createdAt: Date | null,
-  updatedAt: Date | null,
+  username: string | null,
+  first_name: string | null,
+  last_name: string | null,
+  full_name: string | null,
+  img_url: string | null,
+  created_at: Date | null,
+  updated_at: Date | null,
   roles: string[] | null;
   settings: any | null;
   /**
@@ -35,13 +35,13 @@ export interface AuthStateModel {
   defaults: {
     id: null,
     email: null,
-    firstName: null,
-    lastName: null,
-    fullName: null,
-    imgUrl: null,
-    oauthProvider: null,
-    createdAt: null,
-    updatedAt: null,
+    username: null,
+    first_name: null,
+    last_name: null,
+    full_name: null,
+    img_url: null,
+    created_at: null,
+    updated_at: null,
     roles: null,
     settings: null,
     privateData: new WeakMap(),
@@ -64,27 +64,28 @@ export class AuthState {
   static getNavUserData(state: AuthStateModel): Partial<AuthStateModel> {
     return {
       id: state.id,
-      fullName: state.fullName,
+      full_name: state.first_name && state.last_name ? `${state.first_name} ${state.last_name}` : null,
       email: state.email,
-      createdAt: state.createdAt,
-      imgUrl: state.imgUrl
+      created_at: state.created_at,
+      img_url: state.img_url
     };
   }
 
   @Action(LoginUser)
   loginUser( { patchState }: StateContext<AuthStateModel>, { loginData }: LoginUser) {
+    console.log('state loginData: ', loginData);
+    
     patchState({
       id: loginData.id,
       email: loginData.email,
-      firstName: loginData.first_name,
-      lastName: loginData.last_name,
-      fullName: loginData.full_name,
-      imgUrl: loginData.img_url,
-      oauthProvider: loginData.oauth_provider,
-      createdAt: loginData.created_at,
-      updatedAt: loginData.updated_at,
-      roles: loginData.roles,
-      settings: loginData.settings
+      first_name: loginData.first_name ? loginData.first_name : null,
+      last_name: loginData.last_name ? loginData.last_name : null,
+      full_name: loginData.first_name && loginData.last_name ? `${loginData.first_name} ${loginData.last_name}` : null,
+      img_url: loginData.img_url ? loginData.img_url : null,
+      created_at: loginData.created_at,
+      updated_at: loginData.updated_at,
+      roles: loginData.roles ? loginData.roles : null,
+      settings: loginData.settings ? loginData.settings : null
     });
 
     this.router.navigate(['home']);
@@ -93,17 +94,16 @@ export class AuthState {
   @Action(LogoutUser)
   logoutUser( { patchState }: StateContext<AuthStateModel>) {
     this.authService.logoutAuthenticatedUser().subscribe({
-      next: (user: UserLoginJwtDto) => {
+      next: (user: UserProfile) => {
         patchState({
           id: null,
           email: null,
-          firstName: null,
-          lastName: null,
-          fullName: null,
-          imgUrl: null,
-          oauthProvider: null,
-          createdAt: null,
-          updatedAt: null,
+          first_name: null,
+          last_name: null,
+          full_name: null,
+          img_url: null,
+          created_at: null,
+          updated_at: null,
           roles: null,
           settings: null
         });
@@ -121,7 +121,7 @@ export class AuthState {
     console.log('checking authenticated user in state hit');
     
     this.authService.getAuthenticatedUser().subscribe({
-      next: (user: UserLoginJwtDto) => {
+      next: (user: UserProfile) => {
         console.log('User is logged in:', user);
         this.store.dispatch(new LoginUser(user));
         this.router.navigate(['home']);

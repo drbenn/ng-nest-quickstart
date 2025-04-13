@@ -138,7 +138,7 @@
       } -->
   
       <!-- logged in user profile - no image set in profile -->
-      @if (authUser !== null && authUser.id && authUser.imgUrl === null) {
+      @if (authUser !== null && authUser.id && authUser.img_url === null) {
         <div class="flex justify-end items-center cursor-pointer w-[24px] h-[24px] rounded-full pl-8 ml-6">
           <app-daisy-dropdown-popover
             position="dropdown-left"
