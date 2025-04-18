@@ -8,7 +8,9 @@ CREATE TABLE user_profiles (
   refresh_token VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  settings JSONB NULL
+  settings JSONB NULL,
+  profile_status VARCHAR(64),
+  roles TEXT[]
 );
 
 CREATE TABLE IF NOT EXISTS user_logins (
@@ -25,7 +27,8 @@ CREATE TABLE IF NOT EXISTS user_logins (
   full_name VARCHAR(200),
   img_url VARCHAR(255),
   reset_id VARCHAR(255),
-  UNIQUE(login_provider, provider_user_id)
+  UNIQUE(login_provider, provider_user_id),
+  login_status VARCHAR(64)
 );
 
 CREATE TABLE IF NOT EXISTS todos (

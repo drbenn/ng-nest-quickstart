@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { CreateUserProfile, UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
+import { CreateUserProfile, LoginStatus, UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
 import { LoginTrackingTypes } from './sql-auth.types';
 
 @Injectable()
@@ -134,8 +134,8 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   //////////////////////////////////////////////////////////////////////////////////
 
   async insertStandardUserLogin(profile_id: number, email: string, hashedPassword: string, reset_id: string): Promise<Partial<UserLogin>> {
-    const queryText = `INSERT INTO user_logins (profile_id, email, standard_login_password, reset_id, login_provider) VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
-    const paramsToArray: (number | string)[] = [profile_id, email, hashedPassword, reset_id, UserLoginProvider.email];
+    const queryText = `INSERT INTO user_logins (profile_id, email, standard_login_password, reset_id, login_provider, login_status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`;
+    const paramsToArray: (number | string)[] = [profile_id, email, hashedPassword, reset_id, UserLoginProvider.email, LoginStatus.UNCONFIRMED_EMAIL];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
       console.log('insert standard user login result: ', queryResult.rows[0]);

@@ -9,7 +9,6 @@ import { CommonModule } from '@angular/common';
 import { FooterComponent } from './components/footer/footer.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { DisplayToast } from './store/app/app.actions';
-import { CheckAuthenticatedUser } from './store/auth/auth.actions';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +17,6 @@ import { CheckAuthenticatedUser } from './store/auth/auth.actions';
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-  private checkAuthenticatedUser = dispatch(CheckAuthenticatedUser);
   private theme$!: Observable<string>;
   private toast$!: Observable<DaisyToastOptions | null>;
   protected toasts: DaisyToastOptions[] = [];
@@ -29,7 +27,6 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.checkAuthenticatedUser();
     this.theme$ = this.store.select((state) => state.appState.theme);
     this.toast$ = this.store.select((state) => state.appState.toast);
     this.listenForTheme();

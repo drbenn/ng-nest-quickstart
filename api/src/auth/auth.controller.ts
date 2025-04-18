@@ -125,7 +125,10 @@ export class AuthController {
       } 
       else if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS) {
         const { user, jwtAccessToken, jwtRefreshToken, message } = newUserResponse;
-        this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
+
+        this.authService.sendConfirmationEmailWithSimpleHash(user.email);
+        // NO LONGER SEND COOKIES...Require email confirmation
+        // this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
         
         // Return basic user info for ui
         const successfulRegisterResponseMessage: AuthResponseMessageDto = {

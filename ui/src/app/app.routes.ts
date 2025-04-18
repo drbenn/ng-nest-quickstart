@@ -26,15 +26,10 @@ import { TodoPageComponent } from './pages/guarded/todo-page/todo-page.component
 import { authGuard } from './guards/auth.guard';
 
 // Resolvers
-import { initialAuthCheckResolver } from './resolvers/initial-auth-check.resolver';
 
 export const routes: Routes = [
   // PUBLIC Routes accessible by all
-  {
-    path: '',                                           // Default route
-    component: LandingPageComponent,
-    // resolve: { initialAuth: initialAuthCheckResolver }, // Run resolver first
-  },
+  { path: '', component: LandingPageComponent },         // Default route
   { path: 'about-us', component: AboutUsComponent },
   { path: 'contact', component: ContactPageComponent },
   { path: 'terms-of-use', component: TermsOfUsePageComponent },
@@ -45,11 +40,7 @@ export const routes: Routes = [
   { path: 'log-in', component: LogInPageComponent },
   { path: 'register-account', component: RegisterPageComponent },
   { path: 'request-password-reset', component: RequestPassswordResetPageComponent },
-  { 
-    path: 'reset-password',
-    component: ResetPasswordPageComponent,
-    resolve: { initialAuth: initialAuthCheckResolver } // Run resolver first
-  }, 
+  { path: 'reset-password', component: ResetPasswordPageComponent }, 
   { path: 'oauth/callback', component: OauthCallbackComponent },
   { path: 'auth/existing-user', component: ExistingUserPageComponent },
   { path: 'auth/failed-login', component: FailedLoginPageComponent },
@@ -58,13 +49,11 @@ export const routes: Routes = [
   { 
     path: 'home',
     component: HomePageComponent,
-    resolve: { initialAuth: initialAuthCheckResolver }, // Run resolver first
     canActivate: [authGuard]
   },
   {
     path: 'todo',
     component: TodoPageComponent,
-    resolve: { initialAuth: initialAuthCheckResolver }, // Run resolver first
     canActivate: [authGuard]
   },
 

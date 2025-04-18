@@ -9,6 +9,7 @@ import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
 import { EmailService } from 'src/email/email.service';
 import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
 import { UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
+import { SimpleStringHasherService } from './services/simple-string-hasher/simple-string-hasher.service';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,8 @@ export class AuthService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
-    private readonly sqlAuthService: SqlAuthService
+    private readonly sqlAuthService: SqlAuthService,
+    private readonly simpleStringHasherService: SimpleStringHasherService
   ) {}
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +158,7 @@ export class AuthService {
       // create reset_id for future usage to assist resetting standard user password
       const reset_id: string = await this.generateResetId();
 
-      // Create and save the new user login in user_logins table
+      // Create and save the new user login in user_logins table with LoginStatus.UNCONFIRMED_EMAIL
       const newUserLogin: Partial<UserLogin> = await this.sqlAuthService.insertStandardUserLogin(userProfileForReturn.id, email, hashedPassword, reset_id);
 
 
@@ -179,6 +181,11 @@ export class AuthService {
       return failedRegistrationResponseMessage;
     };
   };
+
+  async sendConfirmationEmailWithSimpleHash(email: string): Promise<AuthResponseMessageDto> {
+    const hashForConfirmationEmail: string = this.simpleStringHasherService.generateHash(email);
+    this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, hashForConfirmationEmail);
+  }
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
     const user: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmail(email);
@@ -329,12 +336,17 @@ export class AuthService {
 
   //////////////////////////////////////////////////////////////////////////////////
   //                                                                              //
-  //                     STANDARD RESET W EMAIL HELPERS                           //
+  //                     STANDARD USER W EMAIL HELPERS                            //
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
   async sendRequestPasswordResetEmail(email: string, resetLink: string): Promise<{ messageId: string }> {
     const emailResponse: { messageId: string } = await this.emailService.sendResetPasswordLinkEmailSdk(email, resetLink);
+    return emailResponse;
+  };
+
+  async sendConfirmationEmailForStandardLogin(email: string, resetLink: string): Promise<{ messageId: string }> {
+    const emailResponse: { messageId: string } = await this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, resetLink);
     return emailResponse;
   };
 
