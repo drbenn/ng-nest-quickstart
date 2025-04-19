@@ -165,6 +165,20 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  async updateStandardUserLoginStatusToActive(email: string): Promise<Partial<UserLogin>> {
+    const queryText = `UPDATE user_logins SET login_status = $1 WHERE email = $2 AND login_provider = $3 RETURNING *;`;
+    const paramsToArray: string[] = [LoginStatus.ACTIVE, email, UserLoginProvider.email];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result: Partial<UserLogin> = queryResult.rows[0];
+      return result;
+    } catch (error) {
+      console.error(`Error Auth-SQL Service updateStandardUserLoginStatusToActive: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service updateStandardUserLoginStatusToActive: ${error}`);
+      throw new Error('Error Auth-SQL Service updateStandardUserLoginStatusToActive');
+    }
+  }
+
 
   //////////////////////////////////////////////////////////////////////////////////
   //                                                                              //
@@ -231,10 +245,17 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async insertUserProfile(createUserProfile: CreateUserProfile, refresh_token: string): Promise<Partial<UserProfile>> {
+  async insertUserProfile(createUserProfile: CreateUserProfile, refresh_token?: string): Promise<Partial<UserProfile>> {
     const { email, first_name, last_name } = createUserProfile;
-    const queryText = `INSERT INTO user_profiles (email, first_name, last_name, refresh_token) 
-    VALUES ($1, $2, $3, $4) RETURNING *;`;
+    let queryText: string;
+
+    if (!refresh_token) {
+      queryText = `INSERT INTO user_profiles (email, first_name, last_name) 
+      VALUES ($1, $2, $3) RETURNING *;`;
+    } else if (refresh_token) {
+      queryText = `INSERT INTO user_profiles (email, first_name, last_name, refresh_token) 
+      VALUES ($1, $2, $3, $4) RETURNING *;`;
+    }
 
     const paramsToArray: string[] = [
       email,

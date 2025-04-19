@@ -53,7 +53,7 @@ export interface CreateUserProfile {
   email: string,
   first_name: string,
   last_name: string,
-  refresh_token: string
+  refresh_token?: string
 }
 
 export enum UserRole {

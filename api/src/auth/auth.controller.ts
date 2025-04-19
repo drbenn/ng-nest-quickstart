@@ -2,7 +2,7 @@ import { Body, Controller, Get, Inject, Logger, Post, Req, Res, UseGuards } from
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
+import { ConfirmStandardUserEmailDto, LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
@@ -126,16 +126,24 @@ export class AuthController {
       else if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS) {
         const { user, jwtAccessToken, jwtRefreshToken, message } = newUserResponse;
 
-        this.authService.sendConfirmationEmailWithSimpleHash(user.email);
+        const sendConfirmEmailResponse: AuthResponseMessageDto = await this.authService.sendConfirmationEmailWithSimpleHash(user.email);
+        return sendConfirmEmailResponse;
+
+
+
         // NO LONGER SEND COOKIES...Require email confirmation
         // this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
         
         // Return basic user info for ui
-        const successfulRegisterResponseMessage: AuthResponseMessageDto = {
-          message: message,
-          user: user
-        };
-        return successfulRegisterResponseMessage;
+        // const successfulRegisterResponseMessage: AuthResponseMessageDto = {
+        //   message: message,
+        //   user: user
+        // };
+        // return successfulRegisterResponseMessage;
+
+
+
+
       };
     } catch (error: unknown) {
       this.logger.error(`Error during standard registration: ${error}`);
@@ -146,6 +154,35 @@ export class AuthController {
       return errorRegisterResponseMessage;
     };
   };
+
+  @Post('confirm-standard')
+  async confirm(
+    @Body() confirmStandardUserEmailDto: ConfirmStandardUserEmailDto,
+    @Req() req: Request,                          // req for capturing and logging ip
+    @Res({ passthrough: true }) res: Response,    // Enables passing response
+  ): Promise<AuthResponseMessageDto> {
+    try {
+      const confirmResponse: AuthResponseMessageDto = await this.authService.confirmStandardUserEmailAndReturnUserProfile(confirmStandardUserEmailDto);
+
+      const { message, user, jwtAccessToken, jwtRefreshToken, message_two } = confirmResponse;
+      this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
+      // return user profile in response
+      const successConfirmEmailResponseMessage: AuthResponseMessageDto = {
+        message: message,
+        user: user
+      };
+
+      if (message_two) {
+        successConfirmEmailResponseMessage['message_two'] = message_two;
+      }
+      return successConfirmEmailResponseMessage;
+    } catch (err: unknown) {
+      const errorConfirmEmailResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_FAILED
+      };
+      return errorConfirmEmailResponseMessage;
+    }
+  }
 
   @Post('login-standard')
   async login(

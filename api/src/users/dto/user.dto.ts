@@ -3,6 +3,11 @@ export class RegisterStandardUserDto {
   password: string;
 }
 
+export class ConfirmStandardUserEmailDto {
+  email: string;
+  hash: string;
+}
+
 export class LoginStandardUserDto {
   email: string;
   password: string;

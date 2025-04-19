@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
+import { ConfirmStandardUserEmailDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Profile } from 'passport';
@@ -125,9 +125,9 @@ export class AuthService {
       const existingUserProfile: Partial<UserProfile> | null = await this.sqlAuthService.findOneUserProfileByEmail(email);
 
       // create access and refresh jwts for users first login 
-      let userProfileForReturn: Partial<UserProfile>;
-      const jwtAccessToken: string = await this.generateAccessJwt(Math.random().toString());
-      const jwtRefreshToken: string = await this.generateRefreshJwt();
+      let userProfile: Partial<UserProfile>;
+      // const jwtAccessToken: string = await this.generateAccessJwt(Math.random().toString());
+      // const jwtRefreshToken: string = await this.generateRefreshJwt();
       // if no profile exists, insert new user to user_profiles and return user_profile
       if (!existingUserProfile) {
 
@@ -136,15 +136,16 @@ export class AuthService {
           first_name: '',
           last_name: '',
           img_url: '',
-          refresh_token: jwtRefreshToken
+          // refresh_token: jwtRefreshToken
         }
-        const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject, jwtRefreshToken);
-        userProfileForReturn = newUserProfile;
+        const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject);
+        userProfile = newUserProfile;
       }
       // if profile exists, user is adding standard email login method, insert new login to user_logins and return existing profile from user_profiles
       else if (existingUserProfile) {
         // update refresh jwt in user_profiles table for future access for existing profile
-        userProfileForReturn = await this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
+        // userProfileForReturn = await this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
+        userProfile = existingUserProfile;
       }
 
 
@@ -159,15 +160,15 @@ export class AuthService {
       const reset_id: string = await this.generateResetId();
 
       // Create and save the new user login in user_logins table with LoginStatus.UNCONFIRMED_EMAIL
-      const newUserLogin: Partial<UserLogin> = await this.sqlAuthService.insertStandardUserLogin(userProfileForReturn.id, email, hashedPassword, reset_id);
+      const newUserLogin: Partial<UserLogin> = await this.sqlAuthService.insertStandardUserLogin(userProfile.id, email, hashedPassword, reset_id);
 
 
       // provide success AuthResponseMessage from successful registration
       const successfulRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_SUCCESS,
-        user: userProfileForReturn,
-        jwtAccessToken: jwtAccessToken,
-        jwtRefreshToken: jwtRefreshToken
+        // user: userProfileForReturn,
+        // jwtAccessToken: jwtAccessToken,
+        // jwtRefreshToken: jwtRefreshToken
       };
       return successfulRegisterResponseMessage;
     } else if (existingStandardUserLogin) {
@@ -184,7 +185,59 @@ export class AuthService {
 
   async sendConfirmationEmailWithSimpleHash(email: string): Promise<AuthResponseMessageDto> {
     const hashForConfirmationEmail: string = this.simpleStringHasherService.generateHash(email);
-    this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, hashForConfirmationEmail);
+
+    try {
+      const smtpEmailResponse: { messageId: string } =  await this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, hashForConfirmationEmail);
+      const confirmEmailResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_CONFIRM_EMAIL_SENT_SUCCESS,
+        message_two: `messageId: ${smtpEmailResponse.messageId}`
+      };
+      return confirmEmailResponseMessage;
+    } catch (err:unknown) {
+      const confirmEmailResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_CONFIRM_EMAIL_SENT_FAILED,
+        message_two: `error: ${err}`
+      };
+      return confirmEmailResponseMessage;
+    }
+  }
+
+  async confirmStandardUserEmailAndReturnUserProfile(confirmStandardUserEmailDto: ConfirmStandardUserEmailDto): Promise<AuthResponseMessageDto> {
+    const { email, hash } = confirmStandardUserEmailDto;
+    const emailHashedToCompare: string = this.simpleStringHasherService.generateHash(email);
+
+    if (emailHashedToCompare !== hash) {
+      const confirmEmailErrorResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_FAILED_NO_MATCH
+      };
+      return confirmEmailErrorResponseMessage;
+    }
+
+    try {
+      // hash matches thus set user login to active, which will return updated UserLogin
+      const updatedUserLogin: Partial<UserLogin> = await this.sqlAuthService.updateStandardUserLoginStatusToActive(email);
+  
+      // fetch user profile for return
+      const user: Partial<UserProfile> = await this.sqlAuthService.findOneUserProfileById(updatedUserLogin.profile_id);
+
+      // generate tokens for initial login
+      const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
+      const jwtRefreshToken = await this.generateRefreshJwt();
+
+      const confirmEmailSuccessResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_SUCCESS,
+        user: user,
+        jwtAccessToken: jwtAccessToken,
+        jwtRefreshToken: jwtRefreshToken
+      };
+      return confirmEmailSuccessResponseMessage;
+    } catch (err: unknown) {
+      const confirmEmailErrorResponseMessage: AuthResponseMessageDto = { 
+        message: AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_FAILED,
+        message_two: `error: ${err}`
+      };
+      return confirmEmailErrorResponseMessage;
+    }
   }
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
@@ -251,15 +304,26 @@ export class AuthService {
       else if (userLogin) {
         const { reset_id } = userLogin as UserLogin;
         const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
-        const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
-        console.log('smtpEmailResponse: ', smtpEmailResponse);
         
-        const successPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
-          message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS,
-          message_two: `messageId: ${smtpEmailResponse.messageId}`
-        };
-        return successPasswordResetRequestResponseMessage;
+        try {
+          const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
+          console.log('smtpEmailResponse: ', smtpEmailResponse);
+          
+          const successPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
+            message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS,
+            message_two: `messageId: ${smtpEmailResponse.messageId}`
+          };
+          return successPasswordResetRequestResponseMessage;
+        } catch (err: unknown) {
+          const successPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
+            message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS,
+            message_two: `error: ${err}`
+          };
+          return successPasswordResetRequestResponseMessage;
+        }
       };
+
+
     } catch (error: unknown) {
       this.logger.log('warn', `Error sending email to standard user requesting password reset: ${error}`);
       const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
@@ -340,15 +404,15 @@ export class AuthService {
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-  async sendRequestPasswordResetEmail(email: string, resetLink: string): Promise<{ messageId: string }> {
-    const emailResponse: { messageId: string } = await this.emailService.sendResetPasswordLinkEmailSdk(email, resetLink);
-    return emailResponse;
-  };
+  // async sendRequestPasswordResetEmail(email: string, resetLink: string): Promise<{ messageId: string }> {
+  //   const emailResponse: { messageId: string } = await this.emailService.sendResetPasswordLinkEmailSdk(email, resetLink);
+  //   return emailResponse;
+  // };
 
-  async sendConfirmationEmailForStandardLogin(email: string, resetLink: string): Promise<{ messageId: string }> {
-    const emailResponse: { messageId: string } = await this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, resetLink);
-    return emailResponse;
-  };
+  // async sendConfirmationEmailForStandardLogin(email: string, resetLink: string): Promise<{ messageId: string }> {
+  //   const emailResponse: { messageId: string } = await this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, resetLink);
+  //   return emailResponse;
+  // };
 
   //////////////////////////////////////////////////////////////////////////////////
   //                                                                              //
