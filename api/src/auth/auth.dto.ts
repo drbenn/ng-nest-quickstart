@@ -25,6 +25,7 @@ export enum AuthMessages {
   STANDARD_REGISTRATION_ERROR = 'standard registration error: api error, no user created or existing email found',
 
   STANDARD_LOGIN_FAILED_NOT_REGISTERED = 'standard login failed: cannot login user. user email not registered',
+  STANDARD_LOGIN_FAILED_NOT_CONFIRMED = 'standard login failed: cannot login user. user email registered, but not confirmed. Login to email associated with login and reply to confirmation email.',
   STANDARD_LOGIN_FAILED_EXISTING = 'standard login failed: cannot login user. user email already registered through oauth provider',
   STANDARD_LOGIN_FAILED_MISMATCH = 'standard login failed: cannot login user. user email/password combination failed',
   STANDARD_LOGIN_SUCCESS = 'standard login success: user email/password combination successful. User must now confirm account through link sent to provided email.',

@@ -8,7 +8,7 @@ import { randomBytes } from 'crypto';
 import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
 import { EmailService } from 'src/email/email.service';
 import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
-import { UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
+import { LoginStatus, UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
 import { SimpleStringHasherService } from './services/simple-string-hasher/simple-string-hasher.service';
 
 @Injectable()
@@ -260,6 +260,14 @@ export class AuthService {
     //     provider: user.login_provider
     //   };
     //   return existingOauthRegistrationResponseMessage;
+    } else if (user && user.login_status === LoginStatus.UNCONFIRMED_EMAIL) {
+      this.logger.log('warn', `Cannot login user. User email/password combination found, but user has not confirmed login by email response: ${email}`);
+      const noConfirmedUserLoginResponseMessage: AuthResponseMessageDto = {
+        message: AuthMessages.STANDARD_LOGIN_FAILED_NOT_CONFIRMED,
+        email: email
+      };
+      return noConfirmedUserLoginResponseMessage;
+
     } else if (user && !isPasswordMatch) {
       const failedPasswordResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_LOGIN_FAILED_MISMATCH,
