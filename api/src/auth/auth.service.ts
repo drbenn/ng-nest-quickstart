@@ -308,7 +308,13 @@ export class AuthService {
           message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED
         };
         return failedPasswordResetRequestResponseMessage;
-      } 
+      }
+      else if (userLogin && userLogin.login_status === LoginStatus.UNCONFIRMED_EMAIL) {
+        const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
+          message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED_NO_CONFIRMATION
+        };
+        return failedPasswordResetRequestResponseMessage;
+      }
       else if (userLogin) {
         const { reset_id } = userLogin as UserLogin;
         const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
