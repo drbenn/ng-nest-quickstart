@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import { DisplayToast } from '../../../store/app/app.actions';
 import { environment } from '../../../../environments/environment.development';
 import { PosthogAnalyticsService } from '../../../services/posthog-analytics.service';
-import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, UserProfile, LoginStandardUserDto, AuthMessages, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from '../../../types/userDto.types';
+import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, UserProfile, LoginStandardUserDto, AuthMessages, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, ConfirmStandardUserEmailDto } from '@common-types';
 
 @Injectable({
   providedIn: 'root'
@@ -30,20 +30,40 @@ export class StandardAuthService {
       next: (response: AuthResponseMessageDto | any) => {
         console.log('registration response: ', response);
 
-        // Registration successful and login/redirect newly registered user.
-        if ('user' in response) {
-          const user: UserProfile = response.user;
-          this.displayToast({ 
-            title: 'Success',
-            message: response.message as unknown as string,
-            bgColor: environment.toastDefaultSuccessColors.bgColor,
-            textColor: environment.toastDefaultSuccessColors.textColor
-          });
-          this.loginUser(user);
-        // Registration failed, email is already registered with site beit standard or oauth.
-        } else {
+        if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_SENT_SUCCESS) {
+          this.navigateToRegistrationSuccessPending(response.email);
+        } else if (response.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
           this.navigateToAuthExistingUser(response.email, response.provider);
-        };
+        } else if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_SENT_FAILED) {
+          this.displayToast({ 
+            title: 'Registration Error',
+            message: response.message as unknown as string,
+            bgColor: environment.toastDefaultDangerColors.bgColor,
+            textColor: environment.toastDefaultDangerColors.textColor
+          });
+        } else {
+          this.displayToast({ 
+            title: 'Registration Error',
+            message: response.message as unknown as string,
+            bgColor: environment.toastDefaultDangerColors.bgColor,
+            textColor: environment.toastDefaultDangerColors.textColor
+          });
+        }
+
+        // Registration successful and login/redirect newly registered user.
+        // if ('user' in response) {
+        //   const user: UserProfile = response.user;
+        //   this.displayToast({ 
+        //     title: 'Success',
+        //     message: response.message as unknown as string,
+        //     bgColor: environment.toastDefaultSuccessColors.bgColor,
+        //     textColor: environment.toastDefaultSuccessColors.textColor
+        //   });
+        //   this.loginUser(user);
+        // // Registration failed, email is already registered with site beit standard or oauth.
+        // } else {
+        //   this.navigateToAuthExistingUser(response.email, response.provider);
+        // };
       },
       error: (error: unknown) => this.handleError(error)
     })
@@ -91,6 +111,12 @@ export class StandardAuthService {
     });
   };
 
+  private navigateToRegistrationSuccessPending(email: string): void {
+    this.router.navigate(['auth/registration-success-pending'], {
+      queryParams: {
+        email: email
+  },})};
+
   private navigateToAuthExistingUser(email: string, provider: string): void {
     this.router.navigate(['auth/existing-user'], {
       queryParams: {
@@ -103,6 +129,10 @@ export class StandardAuthService {
       queryParams: {
         email: email
   },})};
+
+  public confirmStandardUserEmail(confirmStandardUserEmailDto: ConfirmStandardUserEmailDto): Observable<AuthResponseMessageDto> {
+    return this.http.post(`${this.baseUrl}/confirm-standard-email`,confirmStandardUserEmailDto);
+  };
 
   public requestResetStandardUserPassword(requestResetStandardUserDto: RequestResetStandardUserPasswordDto): Observable<AuthResponseMessageDto> {
     return this.http.post(`${this.baseUrl}/reset-standard-password-request`,requestResetStandardUserDto);
@@ -129,7 +159,7 @@ export class StandardAuthService {
       })
   };
 
-  private handleError(error: HttpErrorResponse | any): Observable<never> {
+  public handleError(error: HttpErrorResponse | any): Observable<never> {
     if (error.error instanceof ErrorEvent) {
       // Client-side or network error
       console.error('Client-side error:', error.error.message);

@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } 
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
 import { StandardAuthService } from '../services/standard-auth.service';
 import { OauthAuthService } from '../services/oauth-auth.service';
-import { CreateStandardUserDto } from '../../../types/userDto.types';
+import { CreateStandardUserDto } from '@common-types';
 
 @Component({
   selector: 'register-page',

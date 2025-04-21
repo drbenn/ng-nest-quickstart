@@ -2,13 +2,11 @@ import { Body, Controller, Get, Inject, Logger, Post, Req, Res, UseGuards } from
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { ConfirmStandardUserEmailDto, LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
+import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
-import { UserLogin, UserProfile } from 'src/users/user.types';
+import { AuthMessages, AuthResponseMessageDto, UserLogin, UserProfile, LoginTrackingTypes, ConfirmStandardUserEmailDto } from '@common-types';
 import { SqlAuthService } from './sql-auth/sql-auth.service';
-import { LoginTrackingTypes } from './sql-auth/sql-auth.types';
 
 
 
@@ -118,14 +116,26 @@ export class AuthController {
   ): Promise<AuthResponseMessageDto> {
     try {
       const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);   
+      console.log('YOLO');
+      
+      
+      console.log(newUserResponse);
+      console.log('YOLO-22222');
+      console.log('newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED:', newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED);
+      console.log(newUserResponse.message);
+      console.log('newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS: ', newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS);
+      
+      
       this.logger.warn(`newUserResponse from register-standard endpoint: ${newUserResponse}`);
+      
       if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
         const failedRegistrationResponseMessage: AuthResponseMessageDto = newUserResponse;
         return failedRegistrationResponseMessage;
       } 
       else if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS) {
         const { user, jwtAccessToken, jwtRefreshToken, message } = newUserResponse;
-
+        console.log('b4 sending email');
+        
         const sendConfirmEmailResponse: AuthResponseMessageDto = await this.authService.sendConfirmationEmailWithSimpleHash(user.email);
         return sendConfirmEmailResponse;
 
@@ -155,7 +165,7 @@ export class AuthController {
     };
   };
 
-  @Post('confirm-standard')
+  @Post('confirm-standard-email')
   async confirm(
     @Body() confirmStandardUserEmailDto: ConfirmStandardUserEmailDto,
     @Req() req: Request,                          // req for capturing and logging ip

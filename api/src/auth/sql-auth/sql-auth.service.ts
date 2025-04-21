@@ -2,8 +2,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { CreateUserProfile, LoginStatus, UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
-import { LoginTrackingTypes } from './sql-auth.types';
+import { CreateUserProfile, LoginStatus, UserLogin, UserLoginProvider, UserProfile } from '@common-types';
 
 @Injectable()
 export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
@@ -245,17 +244,19 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async insertUserProfile(createUserProfile: CreateUserProfile, refresh_token?: string): Promise<Partial<UserProfile>> {
-    const { email, first_name, last_name } = createUserProfile;
-    let queryText: string;
+  async insertUserProfile(createUserProfile: CreateUserProfile): Promise<Partial<UserProfile>> {
+    const { email, first_name, last_name, refresh_token } = createUserProfile;
+    // let queryText: string;
+    console.log('refresh_tokKen:: ', refresh_token);
+    
+    // if (!refresh_token) {
+    //   queryText = `INSERT INTO user_profiles (email, first_name, last_name) 
+    //   VALUES ($1, $2, $3) RETURNING *;`;
+    // } else if (refresh_token) {
 
-    if (!refresh_token) {
-      queryText = `INSERT INTO user_profiles (email, first_name, last_name) 
-      VALUES ($1, $2, $3) RETURNING *;`;
-    } else if (refresh_token) {
-      queryText = `INSERT INTO user_profiles (email, first_name, last_name, refresh_token) 
-      VALUES ($1, $2, $3, $4) RETURNING *;`;
-    }
+    // }
+    const queryText: string = `INSERT INTO user_profiles (email, first_name, last_name, refresh_token) 
+    VALUES ($1, $2, $3, $4) RETURNING *;`;
 
     const paramsToArray: string[] = [
       email,
@@ -263,6 +264,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
       last_name ? last_name : '',
       refresh_token ? refresh_token : ''
     ];
+
 
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);

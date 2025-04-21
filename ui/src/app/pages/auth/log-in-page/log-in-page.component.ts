@@ -3,7 +3,7 @@ import { StandardAuthService } from '../services/standard-auth.service';
 import { OauthAuthService } from '../services/oauth-auth.service';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { LoginStandardUserDto } from '../../../types/userDto.types';
+import { LoginStandardUserDto } from '@common-types';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
 

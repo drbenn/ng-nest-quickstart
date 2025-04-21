@@ -1,0 +1,16 @@
+<standard-page-wrapper>
+  <main class="flex flex-col justify-start items-center p-8 w-[20rem] md:w-[25rem]">
+    <span class="loading loading-spinner loading-xl text-primary"></span>
+    <p class="mt-4">
+    @if (errorMessage === '') {
+        confirming email...
+    } 
+    @else if (errorMessage !== '') {
+      Error: {{ errorMessage }}
+      <br>
+      {{ errorMessage2 ? errorMessage2 : ''}}
+    }
+    </p>
+  </main>
+
+</standard-page-wrapper>

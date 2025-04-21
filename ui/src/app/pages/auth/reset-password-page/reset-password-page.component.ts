@@ -4,7 +4,7 @@ import { StandardAuthService } from '../services/standard-auth.service';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
-import { ResetStandardUserPasswordDto } from '../../../types/userDto.types';
+import { ResetStandardUserPasswordDto } from '@common-types';
 
 @Component({
   selector: 'reset-password-page',

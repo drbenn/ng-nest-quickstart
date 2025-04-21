@@ -3,7 +3,7 @@ import { TodoService } from './services/todo.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StandardPageWrapperComponent } from '../../../components/standard-page-wrapper/standard-page-wrapper.component';
-import { TodoDto, CreateTodoDto } from '../../../types/todoDto.types';
+import { TodoDto, CreateTodoDto } from '@common-types';
 
 @Component({
   selector: 'todo-page',
@@ -60,9 +60,9 @@ export class TodoPageComponent {
   }
 
   private toggleCompletion(todo: TodoDto): void {
-    const updatedTodo = { ...todo, isCompleted: !todo.isCompleted };
+    const updatedTodo = { ...todo, isCompleted: !todo.is_completed };
     this.todoService.updateTodo(todo.id!, updatedTodo).subscribe((updated) => {
-      todo.isCompleted = updated.isCompleted;
+      todo.is_completed = updated.is_completed;
     });
   }
 

@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS \"user_logins\" (
   full_name VARCHAR(200),
   img_url VARCHAR(255),
   reset_id VARCHAR(255),
-  UNIQUE(login_provider, provider_user_id)
+  UNIQUE(login_provider, provider_user_id),
   login_status VARCHAR(64)
 );
 
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS \"todos\" (
   date_modified TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS users_login_history (
+CREATE TABLE IF NOT EXISTS \"users_login_history\" (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES user_logins(id) ON DELETE CASCADE,
   login_at TIMESTAMP DEFAULT NOW(),

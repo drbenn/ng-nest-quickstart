@@ -2,7 +2,7 @@
   <main class="h-screen flex flex-col justify-start items-start px-4">
     <div class="mt-20">
       The email address {{ email }} has already been registered on this site using 
-      @if (provider === 'null' || provider === null) {
+      @if (provider === 'email') {
         standard email and password login.
       } @else {
         {{ provider }} OAuth as the login method.

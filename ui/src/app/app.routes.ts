@@ -12,6 +12,8 @@ import { CookiePolicyPageComponent } from './pages/public/cookie-policy-page/coo
 // AUTH Routes for login/register/callback
 import { LogInPageComponent } from './pages/auth/log-in-page/log-in-page.component';
 import { RegisterPageComponent } from './pages/auth/register-page/register-page.component';
+import { RegistrationSuccessPendingComponent } from './pages/auth/registration-success-pending/registration-success-pending.component';
+import { ConfirmEmailComponent } from './pages/auth/confirm-email/confirm-email.component';
 import { RequestPassswordResetPageComponent } from './pages/auth/request-password-reset-page/request-password-reset-page.component';
 import { ResetPasswordPageComponent } from './pages/auth/reset-password-page/reset-password-page.component';
 import { OauthCallbackComponent } from './pages/auth/oauth-callback/oauth-callback.component';
@@ -39,9 +41,12 @@ export const routes: Routes = [
   // AUTH Routes for login/register/callback
   { path: 'log-in', component: LogInPageComponent },
   { path: 'register-account', component: RegisterPageComponent },
+  { path: 'confirm-email', component: ConfirmEmailComponent },
   { path: 'request-password-reset', component: RequestPassswordResetPageComponent },
   { path: 'reset-password', component: ResetPasswordPageComponent }, 
   { path: 'oauth/callback', component: OauthCallbackComponent },
+  
+  { path: 'auth/registration-success-pending', component: RegistrationSuccessPendingComponent},
   { path: 'auth/existing-user', component: ExistingUserPageComponent },
   { path: 'auth/failed-login', component: FailedLoginPageComponent },
 

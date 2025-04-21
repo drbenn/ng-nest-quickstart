@@ -4,7 +4,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": [],
+    "paths": {
+      "@common-types": ["../api/src/common-types/index"],
+      "@common-types/*": ["../api/src/common-types/*"]
+    }
   },
   "files": [
     "src/main.ts"

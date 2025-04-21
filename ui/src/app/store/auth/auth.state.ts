@@ -3,7 +3,7 @@ import { Action, Selector, State, StateContext, Store } from '@ngxs/store';
 import { CheckAuthenticatedUser, LoginUser, LogoutUser } from './auth.actions';
 import { Router } from '@angular/router';
 import { AuthService } from '../../pages/auth/services/auth.service';
-import { UserProfile } from '../../types/userDto.types';
+import { UserProfile } from '@common-types';
 
 export interface NestedStateModel {
   option1: string[],

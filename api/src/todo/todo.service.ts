@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Todo } from './todo.types';
+import { TodoDto } from '@common-types';
 import { SqlTodoService } from './sql-todo/sql-todo.service';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class TodoService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
-  findAll(): Promise<Todo[]> {
+  findAll(): Promise<TodoDto[]> {
     try {
       return this.sqlTodoService.findAllTodos();
     } catch (error: unknown) {
@@ -18,7 +18,7 @@ export class TodoService {
     }
   }
 
-  findOne(id: number): Promise<Todo> {
+  findOne(id: number): Promise<TodoDto> {
     try {
       return this.sqlTodoService.findOneTodo(id);
     } catch (error: unknown) {
@@ -26,7 +26,7 @@ export class TodoService {
     }
   }
 
-  create(todo: Partial<Todo>): Promise<Todo> {
+  create(todo: Partial<TodoDto>): Promise<TodoDto> {
     try {
       return this.sqlTodoService.createOneTodo(todo);
     } catch (error: unknown) {
@@ -34,7 +34,7 @@ export class TodoService {
     }
   }
 
-  async update(id: number, todo: Partial<Todo>): Promise<Todo> {
+  async update(id: number, todo: Partial<TodoDto>): Promise<TodoDto> {
     try {
       return this.sqlTodoService.updateOneTodo(todo);
     } catch (error: unknown) {

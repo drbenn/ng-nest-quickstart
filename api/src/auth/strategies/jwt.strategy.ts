@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
-import { UserProfile } from 'src/users/user.types';
+import { UserProfile } from '@common-types';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()

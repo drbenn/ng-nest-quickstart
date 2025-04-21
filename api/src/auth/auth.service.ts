@@ -5,10 +5,9 @@ import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Profile } from 'passport';
 import { randomBytes } from 'crypto';
-import { AuthMessages, AuthResponseMessageDto } from './auth.dto';
+import { AuthMessages, AuthResponseMessageDto, LoginStatus, UserLogin, UserLoginProvider, UserProfile, CreateUserProfile } from '@common-types';
 import { EmailService } from 'src/email/email.service';
 import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
-import { LoginStatus, UserLogin, UserLoginProvider, UserProfile } from 'src/users/user.types';
 import { SimpleStringHasherService } from './services/simple-string-hasher/simple-string-hasher.service';
 
 @Injectable()
@@ -131,11 +130,10 @@ export class AuthService {
       // if no profile exists, insert new user to user_profiles and return user_profile
       if (!existingUserProfile) {
 
-        const createProfileObject = {
+        const createProfileObject: CreateUserProfile = {
           email: email,
           first_name: '',
           last_name: '',
-          img_url: '',
           // refresh_token: jwtRefreshToken
         }
         const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject);
@@ -163,10 +161,14 @@ export class AuthService {
       const newUserLogin: Partial<UserLogin> = await this.sqlAuthService.insertStandardUserLogin(userProfile.id, email, hashedPassword, reset_id);
 
 
+      console.log("NEWEE USER LOGIN:: ", newUserLogin);
+      
+
       // provide success AuthResponseMessage from successful registration
       const successfulRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_SUCCESS,
-        // user: userProfileForReturn,
+        user: userProfile,
+        email: email
         // jwtAccessToken: jwtAccessToken,
         // jwtRefreshToken: jwtRefreshToken
       };
@@ -185,9 +187,10 @@ export class AuthService {
 
   async sendConfirmationEmailWithSimpleHash(email: string): Promise<AuthResponseMessageDto> {
     const hashForConfirmationEmail: string = this.simpleStringHasherService.generateHash(email);
+    const urlForEmail = `${process.env.FRONTEND_URL}/confirm-email/?email=${encodeURIComponent(email)}&confirm_id=${hashForConfirmationEmail}`;  // reset_id is already URL safe format so do no use encodeURIComponent
 
     try {
-      const smtpEmailResponse: { messageId: string } =  await this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, hashForConfirmationEmail);
+      const smtpEmailResponse: { messageId: string } =  await this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, urlForEmail);
       const confirmEmailResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_CONFIRM_EMAIL_SENT_SUCCESS,
         message_two: `messageId: ${smtpEmailResponse.messageId}`
@@ -475,13 +478,13 @@ export class AuthService {
 
         // if no profile exists create new profile before creating new login and set as userProfileForReturn
         if (!existingUserProfile) {
-          const createProfileObject = {
+          const createProfileObject: CreateUserProfile = {
             email: email,
             first_name: first_name,
             last_name: last_name,
             refresh_token: jwtRefreshToken
           }
-          const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject, jwtRefreshToken);
+          const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject);
           userProfileForReturn = newUserProfile;
           console.log('validate OAuth: new user profile -- 1: ', newUserProfile);
         } else if (existingUserLogin) {

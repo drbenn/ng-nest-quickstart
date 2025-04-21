@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
 import { AuthService } from '../auth.service';
-import { UserLoginProvider } from 'src/users/user.types';
+import { UserLoginProvider } from '@common-types';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 // https://developers.facebook.com/apps

@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Pool } from 'pg';
-import { Todo } from '../todo.types';
+import { TodoDto } from '@common-types';
 
 @Injectable()
 export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
@@ -44,13 +44,13 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
   }
 
 
-  async findAllTodos(): Promise<Todo[]> {
+  async findAllTodos(): Promise<TodoDto[]> {
     const queryText = `SELECT * FROM todos;`;
     try {
       const queryResult = await this.pool.query(queryText);
       // console.log(queryResult);
       
-      const result: Todo[] = queryResult.rows;
+      const result: TodoDto[] = queryResult.rows;
       console.log(result);
       
       return result;
@@ -61,13 +61,13 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async findOneTodo(id: number): Promise<Todo> {
+  async findOneTodo(id: number): Promise<TodoDto> {
     const queryText = `SELECT * FROM todos WHERE id = $1;`;
     const paramsToArray: [number] = [id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
       console.log(queryResult);
-      const result: Todo = queryResult.rows[0];
+      const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
       console.error(`Error Todos-SQL Service findOneTodo: ${error}`);
@@ -76,7 +76,7 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async createOneTodo(todo: Partial<Todo>): Promise<Todo> {
+  async createOneTodo(todo: Partial<TodoDto>): Promise<TodoDto> {
     const queryText = `
       INSERT INTO todos (detail, is_completed)
       VALUES ($1, $2)
@@ -86,7 +86,7 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
       console.log(queryResult);
-      const result: Todo = queryResult.rows[0];
+      const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
       console.error(`Error Todos-SQL Service createOneTodo: ${error}`);
@@ -95,14 +95,14 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async updateOneTodo(todo: Partial<Todo>): Promise<Todo> {
+  async updateOneTodo(todo: Partial<TodoDto>): Promise<TodoDto> {
     const queryText = `UPDATE todos SET detail = $1, is_completed = $2, date_modified = NOW() WHERE id = $3 RETURNING *;`;
     const is_completed: boolean = todo.is_completed ? todo.is_completed : false;
     const paramsToArray: [string, boolean, number] = [todo.detail, is_completed, todo.id ];    
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
       console.log(queryResult);
-      const result: Todo = queryResult.rows[0];
+      const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
       console.error(`Error Todos-SQL Service updateOneTodo: ${error}`);
@@ -111,13 +111,13 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async deleteOneTodo(id: number): Promise<Todo> {
+  async deleteOneTodo(id: number): Promise<TodoDto> {
     const queryText = `DELETE FROM todos WHERE id = $1 RETURNING *;`;
     const paramsToArray: [number] = [id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
       console.log(queryResult);
-      const result: Todo = queryResult.rows[0];
+      const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
       console.error(`Error Todos-SQL Service deleteOneTodo: ${error}`);

@@ -1,28 +1,28 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { TodoService } from './todo.service';
-import { Todo } from './todo.types';
+import { TodoDto } from '@common-types';
 
 @Controller('todo')
 export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   @Get()
-  findAll(): Promise<Todo[]> {
+  findAll(): Promise<TodoDto[]> {
     return this.todoService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<Todo> {
+  findOne(@Param('id') id: number): Promise<TodoDto> {
     return this.todoService.findOne(id);
   }
 
   @Post()
-  create(@Body() todo: Partial<Todo>): Promise<Todo> {
+  create(@Body() todo: Partial<TodoDto>): Promise<TodoDto> {
     return this.todoService.create(todo);
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() todo: Partial<Todo>): Promise<Todo> {
+  update(@Param('id') id: number, @Body() todo: Partial<TodoDto>): Promise<TodoDto> {
     return this.todoService.update(id, todo);
   }
 

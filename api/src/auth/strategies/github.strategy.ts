@@ -2,8 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
 import { AuthService } from '../auth.service';
-import { UserLoginProvider, UserProfile } from 'src/users/user.types';
-import { AuthResponseMessageDto } from '../auth.dto';
+import { AuthResponseMessageDto, UserLoginProvider, UserProfile } from '@common-types';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 // https://github.com/settings/applications/new

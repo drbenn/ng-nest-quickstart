@@ -32,7 +32,11 @@ export class AppInitializationService {
    * on specified routes.
    */
   private restoreUserByPath(pathName: string): void {
-    const pathsNotToAttemptRestoreUser: string[] = ['/reset-password', '/reset-password/', 'reset-password'];
+    const pathsNotToAttemptRestoreUser: string[] = [
+      '/reset-password', '/reset-password/', 'reset-password',
+      '/confirm-email', '/confirm-email/', 'confirm-email',
+      '/registration-success-pending', '/registration-success-pending/', 'registration-success-pending'
+    ];
     if (pathsNotToAttemptRestoreUser.includes(pathName)) {
       // console.error('We will not attempt to restore user on pathname::: ', pathName);
       return;

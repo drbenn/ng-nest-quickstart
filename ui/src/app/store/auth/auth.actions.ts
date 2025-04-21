@@ -1,4 +1,4 @@
-import { UserProfile } from "../../types/userDto.types";
+import { UserProfile } from "@common-types";
 
 export class LoginUser {
   static readonly type = '[Auth] Login User';
