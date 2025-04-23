@@ -452,9 +452,11 @@ export class AuthService {
     // if no existing user login, will need to create new login and potentially new profile
     if (!existingUserLogin) {
 
-      const { email, first_name, last_name, full_name, img_url, oauth_provider, oauth_provider_user_id} = this
+      const { email, first_name, last_name, full_name, oauth_provider, oauth_provider_user_id} = this
         .extractUserInformationFromOauthProviderProfile(profile, provider);
 
+        console.log('EMAIL 44: ', email);
+        
       /**
        * if OAuth login has no email associated MY POLICY is it will not be accepted as an email address 
        * is required and unique for user profiles
@@ -475,6 +477,8 @@ export class AuthService {
         const jwtRefreshToken: string = await this.generateRefreshJwt();
         // check if profile already exists
         const existingUserProfile: Partial<UserProfile> = await this.sqlAuthService.findOneUserProfileByEmail(email);
+        console.log('existinguserProfile 99: ', existingUserProfile);
+        
 
         // if no profile exists create new profile before creating new login and set as userProfileForReturn
         if (!existingUserProfile) {
@@ -487,8 +491,10 @@ export class AuthService {
           const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject);
           userProfileForReturn = newUserProfile;
           console.log('validate OAuth: new user profile -- 1: ', newUserProfile);
-        } else if (existingUserLogin) {
+        } else if (existingUserProfile) {
           userProfileForReturn = await this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
+          console.log('HIT HERE#*(#**(RU:: ', userProfileForReturn);
+          
         }
 
 
@@ -516,7 +522,6 @@ export class AuthService {
     first_name: string,
     last_name: string,
     full_name: string,
-    img_url: string,
     oauth_provider: string,
     oauth_provider_user_id: string
   } {
@@ -525,35 +530,31 @@ export class AuthService {
     let first_name: string = '';
     let last_name: string = '';
     let full_name: string = '';
-    let img_url: string = '';
     let oauth_provider: string = '';
     let oauth_provider_user_id: string = '';
 
     switch (provider) {
       case 'google':
         email = profile.emails[0].value || '';
-        first_name: profile.name.givenName || '';
-        last_name: profile.name.familyName || '';
+        first_name = profile.name.givenName || '';
+        last_name = profile.name.familyName || '';
         full_name = profile.displayName || '';
-        img_url = profile.photos[0].value || '';
         oauth_provider = profile.provider;
         oauth_provider_user_id = profile.id;
         break;
       case 'facebook':
         email = profile.emails[0].value || '';
-        first_name: profile.name.givenName || '';
-        last_name: profile.name.familyName || '';
+        first_name = profile.name.givenName || '';
+        last_name = profile.name.familyName || '';
         full_name = `${profile.name.givenName} ${profile.name.familyName}` || '';
-        img_url = profile.photos[0].value || '';
         oauth_provider = profile.provider;
         oauth_provider_user_id = profile.id;
         break;
       case 'github':
         email = profile.emails[0].value || ''; // by defult does not include email. User may include for notifications, but not required, thus not depended on.
-        first_name: profile.name.givenName || '';
-        last_name: profile.name.familyName || '';
+        first_name = profile.name.givenName || '';
+        last_name = profile.name.familyName || '';
         full_name = profile.displayName || '';
-        img_url = profile.photos[0].value || '';
         oauth_provider = profile.provider;
         oauth_provider_user_id = profile.id
         break;
@@ -568,7 +569,6 @@ export class AuthService {
       first_name: first_name,
       last_name: last_name,
       full_name: full_name,
-      img_url: img_url,
       oauth_provider: oauth_provider,
       oauth_provider_user_id: oauth_provider_user_id
     };

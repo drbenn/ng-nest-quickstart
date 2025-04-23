@@ -32,7 +32,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
-    console.log(profile);
+    console.log('google PROFILE:: ', profile);
     
     try {
       const validatedUserProfile: Partial<UserProfile> | AuthResponseMessageDto  = await this.authService.validateOAuthLogin(profile, UserLoginProvider.google);

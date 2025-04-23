@@ -7,7 +7,6 @@ import { dispatch } from '@ngxs/store';
 import { DisplayToast } from '../../../store/app/app.actions';
 import { LoginUser } from '../../../store/auth/auth.actions';
 import { environment } from '../../../../environments/environment.development';
-import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'confirm-email',
@@ -40,26 +39,26 @@ export class ConfirmEmailComponent implements OnInit {
         .subscribe({
           next: (response: AuthResponseMessageDto) => {
             console.log('response from confirm Standard User: ', response);
-            
-            if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_SUCCESS) {
-              const user: UserProfile = response.user as UserProfile;
-              this.loginUser(user);
-              return response;
-            } else if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_FAILED) {
-              return response;
-            } else {
-              this.displayToast({ 
-                title: 'Error',
-                message: 'Error confirming standard email user. Please contact admin.',
-                bgColor: environment.toastDefaultDangerColors.bgColor,
-                textColor: environment.toastDefaultDangerColors.textColor
-              });
-              return response;
-            }
+            setTimeout(() => {
+              if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_SUCCESS) {
+                const user: UserProfile = response.user as UserProfile;
+                this.loginUser(user);
+                return response;
+              } else if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_FAILED) {
+                return response;
+              } else {
+                this.displayToast({ 
+                  title: 'Error',
+                  message: 'Error confirming standard email user. Please contact admin.',
+                  bgColor: environment.toastDefaultDangerColors.bgColor,
+                  textColor: environment.toastDefaultDangerColors.textColor
+                });
+                return response;
+              }
+            }, 3000)
           },
           error: (error: unknown) => this.standardAuthService.handleError(error)
         })
     });
-
   }
 }

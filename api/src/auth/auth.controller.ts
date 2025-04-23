@@ -346,6 +346,14 @@ export class AuthController {
     const response: Partial<UserProfile> | AuthResponseMessageDto = req['user'];  // user from database fetched in provider guard, not oauth user profile
     let userProfile: Partial<UserProfile> | null = response['message'] ? null : response;
 
+    console.log('RESPONSE:::: ', response);
+    console.log('===========================================');
+    console.log('===========================================');
+    console.log('userPRofile:: ', userProfile);
+    
+    
+    
+
     // if duplicate user attempt do not provide user and redirect to inform user of existing login method
     if (!userProfile) {
       const redirectUrl = `${process.env.FRONTEND_URL}/auth/existing-user/?email=${encodeURIComponent(response['email'])}&provider=${encodeURIComponent(response['provider'])}`;
