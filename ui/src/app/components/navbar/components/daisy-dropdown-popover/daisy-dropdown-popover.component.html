@@ -1,19 +1,19 @@
-<!-- <details [class]="popoverClass">
+<details #detailsDropdown [class]="popoverClass">
   <summary [class]="summaryClass">
+    <!-- Open Close -->
     <ng-content select="[open-button]"></ng-content>
   </summary>
   <ul class="menu dropdown-content bg-base-100 border border-neutral-content z-1 w-52 shadow-xs rounded-sm">
+    <!-- popovermenu content -->
     <ng-content select="[menu-content]"></ng-content>
   </ul>
-</details> -->
+</details>
 
-
-<button  class="cursor-pointer" popovertarget="popover-1" style="anchor-name:--anchor-1">
-  <!-- Open Close -->
+<!-- New Daisy UI method with anchor positioning -->
+<!-- <button  class="cursor-pointer" popovertarget="popover-1" style="anchor-name:--anchor-1">
   <ng-content select="[open-button]"></ng-content>
 </button>
 <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
-  popover id="popover-1" style="position-anchor:--anchor-1; top: calc(var(--anchor-y) + var(--anchor-height)); left: var(--anchor-x);"cd >
-  <!-- popovermenu content -->
+  popover id="popover-1" style="position-anchor:--anchor-1; top: calc(var(--anchor-y) + var(--anchor-height)); left: var(--anchor-x);">
   <ng-content select="[menu-content]"></ng-content>
-</ul>
+</ul> -->
