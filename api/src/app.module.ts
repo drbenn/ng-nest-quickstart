@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TodoModule } from './todo/todo.module';
@@ -83,7 +82,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
 
     // additional module imports
-    UsersModule, AuthModule, TodoModule, EmailModule],
+    AuthModule, TodoModule, EmailModule],
   controllers: [AppController],
   providers: [AppService, SqlTodoService],
 })

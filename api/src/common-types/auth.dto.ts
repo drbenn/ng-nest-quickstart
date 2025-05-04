@@ -1,3 +1,9 @@
+export interface User {
+  user_login: UserLogin,
+  user_profile: UserProfile,
+  user_org: UserOrg
+}
+
 export interface UserLogin {
   id: number,
   profile_id: number,                 // id of user_profile
@@ -28,6 +34,11 @@ export interface UserProfile {
   updated_at: Date,
   settings?: Record<string, any>,
   roles?: string[]
+}
+
+export interface UserOrg {
+  org_id: number,
+  org_role: string
 }
 
 export interface OAuthUser {

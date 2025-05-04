@@ -1,11 +1,10 @@
 import { ConflictException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConfirmStandardUserEmailDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Profile } from 'passport';
 import { randomBytes } from 'crypto';
-import { AuthMessages, AuthResponseMessageDto, LoginStatus, UserLogin, UserLoginProvider, UserProfile, CreateUserProfile } from '@common-types';
+import { AuthMessages, AuthResponseMessageDto, LoginStatus, UserLogin, UserLoginProvider, UserProfile, CreateUserProfile, ConfirmStandardUserEmailDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto } from '@common-types';
 import { EmailService } from 'src/email/email.service';
 import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
 import { SimpleStringHasherService } from './services/simple-string-hasher/simple-string-hasher.service';
@@ -112,8 +111,8 @@ export class AuthService {
   //////////////////////////////////////////////////////////////////////////////////
 
   // when user registers with standard email/ password combination as opposed to using OAuth.
-  async registerStandardUser(registerStandardUserDto: RegisterStandardUserDto): Promise<AuthResponseMessageDto> {
-    const { email, password } = registerStandardUserDto;
+  async registerStandardUser(createStandardUserDto: CreateStandardUserDto): Promise<AuthResponseMessageDto> {
+    const { email, password } = createStandardUserDto;
     
     // Check if the user already exists via email
     const existingStandardUserLogin: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
@@ -125,24 +124,20 @@ export class AuthService {
 
       // create access and refresh jwts for users first login 
       let userProfile: Partial<UserProfile>;
-      // const jwtAccessToken: string = await this.generateAccessJwt(Math.random().toString());
-      // const jwtRefreshToken: string = await this.generateRefreshJwt();
+
       // if no profile exists, insert new user to user_profiles and return user_profile
       if (!existingUserProfile) {
 
         const createProfileObject: CreateUserProfile = {
           email: email,
           first_name: '',
-          last_name: '',
-          // refresh_token: jwtRefreshToken
+          last_name: ''
         }
         const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject);
         userProfile = newUserProfile;
       }
       // if profile exists, user is adding standard email login method, insert new login to user_logins and return existing profile from user_profiles
       else if (existingUserProfile) {
-        // update refresh jwt in user_profiles table for future access for existing profile
-        // userProfileForReturn = await this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
         userProfile = existingUserProfile;
       }
 
@@ -543,16 +538,6 @@ export class AuthService {
 
 
 
-
-
-
-
-
-
-
-
-
-  
 
   excludePropsFromUserLoginType(userLogin: Partial<UserLogin>): Partial<UserLogin> {
     if ('standard_login_password' in userLogin) {

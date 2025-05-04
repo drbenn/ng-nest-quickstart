@@ -2,10 +2,9 @@ import { Body, Controller, Get, Inject, Logger, Post, Req, Res, UseGuards } from
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { LoginStandardUserDto, RegisterStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto } from 'src/users/dto/user.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { AuthMessages, AuthResponseMessageDto, UserLogin, UserProfile, LoginTrackingTypes, ConfirmStandardUserEmailDto } from '@common-types';
+import { AuthMessages, AuthResponseMessageDto, UserLogin, UserProfile, LoginTrackingTypes, ConfirmStandardUserEmailDto, LoginStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto } from '@common-types';
 import { SqlAuthService } from './sql-auth/sql-auth.service';
 
 
@@ -107,12 +106,12 @@ export class AuthController {
   // registers user then provides jwt for use in automatic login
   @Post('register-standard')
   async register(
-    @Body() registerStandardUserDto: RegisterStandardUserDto,
+    @Body() createStandardUserDto: CreateStandardUserDto,
     @Req() req: Request,                          // req for capturing and logging ip
     @Res({ passthrough: true }) res: Response,    // Enables passing response
   ): Promise<AuthResponseMessageDto> {
     try {
-      const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);   
+      const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(createStandardUserDto);   
       this.logger.warn(`newUserResponse from register-standard endpoint: ${newUserResponse}`);
       
       if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
@@ -126,7 +125,7 @@ export class AuthController {
       };
     } catch (error: unknown) {
       this.logger.error(`Error during standard registration: ${error}`);
-      this.logger.error(`Error during standard registration registerStandardUserDto: ${JSON.stringify(registerStandardUserDto)}`);
+      this.logger.error(`Error during standard registration registerStandardUserDto: ${JSON.stringify(createStandardUserDto)}`);
       const errorRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_ERROR
       };
