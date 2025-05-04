@@ -248,15 +248,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
 
   async insertUserProfile(createUserProfile: CreateUserProfile): Promise<Partial<UserProfile>> {
     const { email, first_name, last_name, refresh_token } = createUserProfile;
-    // let queryText: string;
-    console.log('refresh_tokKen:: ', refresh_token);
     
-    // if (!refresh_token) {
-    //   queryText = `INSERT INTO user_profiles (email, first_name, last_name) 
-    //   VALUES ($1, $2, $3) RETURNING *;`;
-    // } else if (refresh_token) {
-
-    // }
     const queryText: string = `INSERT INTO user_profiles (email, first_name, last_name, refresh_token) 
     VALUES ($1, $2, $3, $4) RETURNING *;`;
 

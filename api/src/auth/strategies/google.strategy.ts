@@ -31,13 +31,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     refreshToken: string,
     profile: Profile,
     done: VerifyCallback,
-  ): Promise<any> {
-    console.log('google PROFILE:: ', profile);
-    
+  ): Promise<any> {    
     try {
-      const validatedUserProfile: Partial<UserProfile> | AuthResponseMessageDto  = await this.authService.validateOAuthLogin(profile, UserLoginProvider.google);
-      console.log('validated user profile in google strategy: ', validatedUserProfile);
-      
+      const validatedUserProfile: Partial<UserProfile> | AuthResponseMessageDto  = await this.authService.validateOAuthLogin(profile, UserLoginProvider.google);      
       done(null, validatedUserProfile);
     } catch (err) {
       this.logger.log('warn', `Error with google guard strategy validate: ${err}`);

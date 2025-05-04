@@ -160,17 +160,11 @@ export class AuthService {
       // Create and save the new user login in user_logins table with LoginStatus.UNCONFIRMED_EMAIL
       const newUserLogin: Partial<UserLogin> = await this.sqlAuthService.insertStandardUserLogin(userProfile.id, email, hashedPassword, reset_id);
 
-
-      console.log("NEWEE USER LOGIN:: ", newUserLogin);
-      
-
       // provide success AuthResponseMessage from successful registration
       const successfulRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_SUCCESS,
         user: userProfile,
         email: email
-        // jwtAccessToken: jwtAccessToken,
-        // jwtRefreshToken: jwtRefreshToken
       };
       return successfulRegisterResponseMessage;
     } else if (existingStandardUserLogin) {
@@ -190,10 +184,11 @@ export class AuthService {
     const urlForEmail = `${process.env.FRONTEND_URL}/confirm-email/?email=${encodeURIComponent(email)}&confirm_id=${hashForConfirmationEmail}`;  // reset_id is already URL safe format so do no use encodeURIComponent
 
     try {
-      const smtpEmailResponse: { messageId: string } =  await this.emailService.sendConfirmationEmailForStandardLoginEmailSdk(email, urlForEmail);
+      const smtpEmailResponse: { messageId: string } =  await this.emailService.sendConfirmationEmailForStandardLoginEmail(email, urlForEmail);
       const confirmEmailResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_CONFIRM_EMAIL_SENT_SUCCESS,
-        message_two: `messageId: ${smtpEmailResponse.messageId}`
+        message_two: `messageId: ${smtpEmailResponse.messageId}`,
+        email: email
       };
       return confirmEmailResponseMessage;
     } catch (err:unknown) {
@@ -244,7 +239,7 @@ export class AuthService {
   }
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
-    const user: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmail(email);
+    const user: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
     const isPasswordMatch: boolean = await this.verifyPassword(password, user.standard_login_password);
 
     if (user === null) {
@@ -255,14 +250,6 @@ export class AuthService {
       };
       return noRegisteredUserResponseMessage;
 
-    // TODO: cleanup front end redirects from this...now accepting multiple logins that map to single user profile
-    // } else if (user && user.login_provider !== null) {
-    //   const existingOauthRegistrationResponseMessage: AuthResponseMessageDto = {
-    //     message: AuthMessages.STANDARD_LOGIN_FAILED_EXISTING,
-    //     email: email,
-    //     provider: user.login_provider
-    //   };
-    //   return existingOauthRegistrationResponseMessage;
     } else if (user && user.login_status === LoginStatus.UNCONFIRMED_EMAIL) {
       this.logger.log('warn', `Cannot login user. User email/password combination found, but user has not confirmed login by email response: ${email}`);
       const noConfirmedUserLoginResponseMessage: AuthResponseMessageDto = {
@@ -278,6 +265,7 @@ export class AuthService {
         provider: user.login_provider
       };
       return failedPasswordResponseMessage;
+      
     } else if (user && isPasswordMatch) {
       // otherwise return user information with tokens
       const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
@@ -303,18 +291,10 @@ export class AuthService {
     try {
       const { email } = requestResetStandardPasswordDto;
       const userLogin: Partial<UserLogin> = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
-      console.log('userLogin in emailStandardUserToResetPassword: ', userLogin);
-      
 
       if (!userLogin) {
         const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
           message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED
-        };
-        return failedPasswordResetRequestResponseMessage;
-      }
-      else if (userLogin && userLogin.login_status === LoginStatus.UNCONFIRMED_EMAIL) {
-        const failedPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
-          message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_FAILED_NO_CONFIRMATION
         };
         return failedPasswordResetRequestResponseMessage;
       }
@@ -323,8 +303,7 @@ export class AuthService {
         const urlForEmail = `${process.env.FRONTEND_URL}/reset-password/?email=${encodeURIComponent(email)}&reset_id=${reset_id}`;  // reset_id is already URL safe format so do no use encodeURIComponent
         
         try {
-          const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmailSdk(email, urlForEmail);
-          console.log('smtpEmailResponse: ', smtpEmailResponse);
+          const smtpEmailResponse: { messageId: string } =  await this.emailService.sendResetPasswordLinkEmail(email, urlForEmail);
           
           const successPasswordResetRequestResponseMessage: AuthResponseMessageDto = { 
             message: AuthMessages.STANDARD_PASSWORD_RESET_REQUEST_SUCCESS,
@@ -445,18 +424,12 @@ export class AuthService {
     let existingUserLogin: Partial<UserLogin> = await this.sqlAuthService
       .findOneUserLoginByEmailAndProvider(profile.emails[0].value || '', provider);
 
-      console.log('1235: ', profile.emails[0].value, provider);
-      
-      console.log('validate OAuth: existing user LOGIN: ', existingUserLogin);
-
     // if no existing user login, will need to create new login and potentially new profile
     if (!existingUserLogin) {
 
       const { email, first_name, last_name, full_name, oauth_provider, oauth_provider_user_id} = this
         .extractUserInformationFromOauthProviderProfile(profile, provider);
 
-        console.log('EMAIL 44: ', email);
-        
       /**
        * if OAuth login has no email associated MY POLICY is it will not be accepted as an email address 
        * is required and unique for user profiles
@@ -477,8 +450,6 @@ export class AuthService {
         const jwtRefreshToken: string = await this.generateRefreshJwt();
         // check if profile already exists
         const existingUserProfile: Partial<UserProfile> = await this.sqlAuthService.findOneUserProfileByEmail(email);
-        console.log('existinguserProfile 99: ', existingUserProfile);
-        
 
         // if no profile exists create new profile before creating new login and set as userProfileForReturn
         if (!existingUserProfile) {
@@ -490,22 +461,13 @@ export class AuthService {
           }
           const newUserProfile: Partial<UserProfile> = await this.sqlAuthService.insertUserProfile(createProfileObject);
           userProfileForReturn = newUserProfile;
-          console.log('validate OAuth: new user profile -- 1: ', newUserProfile);
         } else if (existingUserProfile) {
           userProfileForReturn = await this.updateUsersRefreshTokenInUserProfile(existingUserProfile.id, jwtRefreshToken);
-          console.log('HIT HERE#*(#**(RU:: ', userProfileForReturn);
-          
         }
-
-
-        console.log('validate OAuth: existing user profile: ', existingUserProfile);
-        console.log('validate OAuth: userProfileForReturn: ', userProfileForReturn);
-        
 
         // User now has user_profile, either fetched from existing or newly created, so can now create new user_login with profile_id
         const newUserLogin: Partial<UserLogin> = await this.sqlAuthService
           .insertOauthUserLogin(userProfileForReturn.id, email, full_name, oauth_provider, oauth_provider_user_id);
-        console.log('validate OAuth: new User Login: ', newUserLogin);
       }
 
     // user_login already exists, thus user_profile already exists, therefore fetch existing user profile

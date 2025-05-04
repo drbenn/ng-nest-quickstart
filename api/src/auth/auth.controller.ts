@@ -52,9 +52,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard) // Protect the route with the JWT Auth Guard which if cookie present will retrieve and include user data in req
   @Post('restore-user')
   async restoreUser(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<Partial<UserProfile>> {
-    // console.log('restore user req::::');
-    // console.log(req['user']);
-    
     try {
       const restoredUser: Partial<UserProfile> = req['user'];
       // get fresh token for user restoring session
@@ -116,16 +113,6 @@ export class AuthController {
   ): Promise<AuthResponseMessageDto> {
     try {
       const newUserResponse: AuthResponseMessageDto = await this.authService.registerStandardUser(registerStandardUserDto);   
-      console.log('YOLO');
-      
-      
-      console.log(newUserResponse);
-      console.log('YOLO-22222');
-      console.log('newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED:', newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED);
-      console.log(newUserResponse.message);
-      console.log('newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS: ', newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS);
-      
-      
       this.logger.warn(`newUserResponse from register-standard endpoint: ${newUserResponse}`);
       
       if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
@@ -134,26 +121,8 @@ export class AuthController {
       } 
       else if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS) {
         const { user, jwtAccessToken, jwtRefreshToken, message } = newUserResponse;
-        console.log('b4 sending email');
-        
         const sendConfirmEmailResponse: AuthResponseMessageDto = await this.authService.sendConfirmationEmailWithSimpleHash(user.email);
         return sendConfirmEmailResponse;
-
-
-
-        // NO LONGER SEND COOKIES...Require email confirmation
-        // this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
-        
-        // Return basic user info for ui
-        // const successfulRegisterResponseMessage: AuthResponseMessageDto = {
-        //   message: message,
-        //   user: user
-        // };
-        // return successfulRegisterResponseMessage;
-
-
-
-
       };
     } catch (error: unknown) {
       this.logger.error(`Error during standard registration: ${error}`);
@@ -243,11 +212,7 @@ export class AuthController {
   async resetStandardPasswordRequest(
     @Body() requestResetStandardPasswordDto: RequestResetStandardUserPasswordDto,
     @Res({ passthrough: true }) res: Response, // Enables passing response
-  ): Promise<AuthResponseMessageDto> {
-    console.log('reset standard req body: ');
-    console.log(requestResetStandardPasswordDto);
-    
-    
+  ): Promise<AuthResponseMessageDto> {  
     try {
       // send email to user with url params of email and existing resetId ONLY IF STANDARD USER CHECK!!!!
       const requestResetPasswordResponse: AuthResponseMessageDto = await this.authService.emailStandardUserToResetPassword(requestResetStandardPasswordDto);
@@ -344,15 +309,7 @@ export class AuthController {
    */
   private async handleOAuthRedirect(req: Request, res: Response): Promise<void> {
     const response: Partial<UserProfile> | AuthResponseMessageDto = req['user'];  // user from database fetched in provider guard, not oauth user profile
-    let userProfile: Partial<UserProfile> | null = response['message'] ? null : response;
-
-    console.log('RESPONSE:::: ', response);
-    console.log('===========================================');
-    console.log('===========================================');
-    console.log('userPRofile:: ', userProfile);
-    
-    
-    
+    let userProfile: Partial<UserProfile> | null = response['message'] ? null : response;    
 
     // if duplicate user attempt do not provide user and redirect to inform user of existing login method
     if (!userProfile) {
@@ -375,7 +332,6 @@ export class AuthController {
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
   
         this.logger.log('warn', `Successful OAuth login with cookies::: redirect_url: ${process.env.FRONTEND_URL}/oauth/callback`);
-
 
         // oauth requires redirect as ui redirected away from site, cannot return user data, 
         // thus redirecting to oath/callback in ui will fetch user data and then redirect accordingly

@@ -112,6 +112,8 @@ export class StandardAuthService {
   };
 
   private navigateToRegistrationSuccessPending(email: string): void {
+    console.log('nav to reg susccess pending email: ', email);
+    
     this.router.navigate(['auth/registration-success-pending'], {
       queryParams: {
         email: email

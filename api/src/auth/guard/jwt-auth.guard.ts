@@ -16,15 +16,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     // First, call the default JWT AuthGuard functionality to validate the access token
-    try {
-      console.log('jwt guard can activate context: ');
-
-      
-      console.log(request.cookies);
-
-      
-      
-      
+    try {      
       await super.canActivate(context);
       return true;  // Access token is valid
     } catch (error) {

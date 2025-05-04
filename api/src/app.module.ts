@@ -13,6 +13,7 @@ import * as winston from 'winston';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { EmailModule } from './email/email.module';
 import { SqlTodoService } from './todo/sql-todo/sql-todo.service';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -50,6 +51,35 @@ import { SqlTodoService } from './todo/sql-todo/sql-todo.service';
           new winston.transports.File({ filename: 'logs/combined.log' }),
         ],
       })
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule], // Import ConfigModule here to use ConfigService
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('BREVO_MAIL_HOST'),
+          port: configService.get<number>('BREVO_MAIL_PORT'),
+          secure: configService.get<number>('BREVO_MAIL_PORT') === 465, // true for 465, false for other ports (like 587)
+          auth: {
+            user: configService.get<string>('BREVO_MAIL_USER'),
+            pass: configService.get<string>('BREVO_MAIL_PASSWORD'),
+          },
+          // If using port 587 (TLS), often requireExplicitTLS might be needed
+          // depending on your environment/provider specifics. Brevo usually works without it.
+          // requireTLS: true, // uncomment if needed
+        },
+        defaults: {
+          from: configService.get<string>('BREVO_MAIL_FROM'),
+        },
+        // --- Optional: If using Templates (e.g., Handlebars) ---
+        // template: {
+        //   dir: join(__dirname, '..', 'templates'), // Path to your email templates directory
+        //   adapter: new HandlebarsAdapter(), // Use Handlebars adapter
+        //   options: {
+        //     strict: true, // Disallow accessing undefined properties in templates
+        //   },
+        // },
+      }),
+      inject: [ConfigService], // Inject ConfigService into the factory
     }),
 
     // additional module imports

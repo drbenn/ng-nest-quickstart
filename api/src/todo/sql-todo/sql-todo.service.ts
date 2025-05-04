@@ -48,11 +48,7 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     const queryText = `SELECT * FROM todos;`;
     try {
       const queryResult = await this.pool.query(queryText);
-      // console.log(queryResult);
-      
       const result: TodoDto[] = queryResult.rows;
-      console.log(result);
-      
       return result;
     } catch (error) {
       console.error(`Error Todos-SQL Service findAllTodos: ${error}`);
@@ -66,7 +62,6 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     const paramsToArray: [number] = [id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log(queryResult);
       const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
@@ -85,7 +80,6 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     const paramsToArray: [string, boolean] = [todo.detail, false];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log(queryResult);
       const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
@@ -101,7 +95,6 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     const paramsToArray: [string, boolean, number] = [todo.detail, is_completed, todo.id ];    
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log(queryResult);
       const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
@@ -116,7 +109,6 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
     const paramsToArray: [number] = [id];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log(queryResult);
       const result: TodoDto = queryResult.rows[0];
       return result;
     } catch (error) {
