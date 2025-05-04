@@ -41,8 +41,8 @@ export class ConfirmEmailComponent implements OnInit {
             console.log('response from confirm Standard User: ', response);
             setTimeout(() => {
               if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_SUCCESS) {
-                const user: UserProfile = response.user as UserProfile;
-                this.loginUser(user);
+                const userProfile: UserProfile = response.userProfile as UserProfile;
+                this.loginUser(userProfile);
                 return response;
               } else if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_FAILED) {
                 return response;

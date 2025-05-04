@@ -4,6 +4,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 import { Store } from '@ngxs/store';
 import { AuthState } from '../../../store/auth/auth.state';
+import { AuthResponseMessageDto } from '@common-types';
 
 
 @Injectable({
@@ -41,8 +42,8 @@ export class AuthService {
     });
   };
 
-  public logoutAuthenticatedUser(): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/logout`, null, {withCredentials: true})
+  public logoutAuthenticatedUser(): Observable<AuthResponseMessageDto> {
+    return this.http.post<AuthResponseMessageDto>(`${this.baseUrl}/logout`, null, {withCredentials: true})
       .pipe(
         catchError((error: HttpErrorResponse) => this.handleError(error))
       );

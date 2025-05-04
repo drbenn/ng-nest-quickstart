@@ -22,7 +22,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    console.log('Database connected');
+    // console.log('Database connected');
   }
 
   async query(queryText: string, params?: any[]) {
@@ -31,7 +31,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleDestroy() {
     await this.pool.end();
-    console.log('Database connection closed');
+    // console.log('Database connection closed');
   }
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -235,8 +235,6 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
       const result: Partial<UserProfile> = queryResult.rows[0];
-
-      console.warn('findoneuserProfile by email SQL REsult:: ', result)
       return result;
     } catch (error) {
       console.error(`Error Auth-SQL Service findOneUserProfileByEmail: ${error}`);
@@ -307,9 +305,7 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     const paramsToArray: [string, number] = [refreshToken, userProfileId];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      const result: Partial<UserProfile> = queryResult.rows[0];
-      console.log('uopdate uwer refresh token result::: ', result);
-      
+      const result: Partial<UserProfile> = queryResult.rows[0];      
       return result;
     } catch (error) {
       console.error(`Error Auth-SQL Service updateUsersRefreshTokenInUserProfiles: ${error}`);

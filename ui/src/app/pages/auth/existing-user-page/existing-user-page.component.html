@@ -3,7 +3,7 @@
     <div class="mt-20">
       The email address {{ email }} has already been registered on this site using 
       @if (provider === 'email') {
-        standard email and password login.
+        with standard email and password login.
       } @else {
         {{ provider }} OAuth as the login method.
       }
@@ -12,7 +12,7 @@
     <div class="mt-8">
       Please use the existing login method and 
       <a routerLink="/sign-in" routerLinkActive="active" ariaCurrentWhenActive="page">sign in</a>. 
-      Or if your have a standard email and password, 
+      Or if you forget your standard email login password, 
       <a routerLink="/request-password-reset" routerLinkActive="active" ariaCurrentWhenActive="page">request to reset your password</a>.
     </div>
 

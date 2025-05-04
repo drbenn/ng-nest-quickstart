@@ -4,8 +4,8 @@ import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { AuthMessages, AuthResponseMessageDto, UserLogin, UserProfile, LoginTrackingTypes, ConfirmStandardUserEmailDto, LoginStandardUserDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto } from '@common-types';
-import { SqlAuthService } from './sql-auth/sql-auth.service';
+import { AuthMessages, AuthResponseMessageDto, UserProfile, ConfirmStandardUserEmailDto, LoginStandardUserDto,
+  RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto } from '@common-types';
 
 
 
@@ -14,7 +14,6 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly sqlAuthService: SqlAuthService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
@@ -119,8 +118,8 @@ export class AuthController {
         return failedRegistrationResponseMessage;
       } 
       else if (newUserResponse.message === AuthMessages.STANDARD_REGISTRATION_SUCCESS) {
-        const { user, jwtAccessToken, jwtRefreshToken, message } = newUserResponse;
-        const sendConfirmEmailResponse: AuthResponseMessageDto = await this.authService.sendConfirmationEmailWithSimpleHash(user.email);
+        const { userProfile, jwtAccessToken, jwtRefreshToken, message } = newUserResponse;
+        const sendConfirmEmailResponse: AuthResponseMessageDto = await this.authService.sendConfirmationEmailWithSimpleHash(userProfile.email);
         return sendConfirmEmailResponse;
       };
     } catch (error: unknown) {
@@ -142,12 +141,12 @@ export class AuthController {
     try {
       const confirmResponse: AuthResponseMessageDto = await this.authService.confirmStandardUserEmailAndReturnUserProfile(confirmStandardUserEmailDto);
 
-      const { message, user, jwtAccessToken, jwtRefreshToken, message_two } = confirmResponse;
+      const { message, userProfile, jwtAccessToken, jwtRefreshToken, message_two } = confirmResponse;
       this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
       // return user profile in response
       const successConfirmEmailResponseMessage: AuthResponseMessageDto = {
         message: message,
-        user: user
+        userProfile: userProfile
       };
 
       if (message_two) {
@@ -186,13 +185,13 @@ export class AuthController {
         // if (loginResponse.user.id && req['ip']) {
         //   await this.sqlAuthService.insertUserLoginTracking(loginResponse.user.id, req['ip'], LoginTrackingTypes.ACTIVE_NAVIGATION);
         // }
-        const { message, user, jwtAccessToken, jwtRefreshToken } = loginResponse;
+        const { message, userProfile, jwtAccessToken, jwtRefreshToken } = loginResponse;
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
 
         // return user;
         const standardLoginSuccessResponseMessage: AuthResponseMessageDto = { 
           message: message,
-          user: user
+          userProfile: userProfile
         };
         return standardLoginSuccessResponseMessage;
       };
@@ -238,7 +237,7 @@ export class AuthController {
       // return user;
       const standardLoginPasswordResetSuccessResponseMessage: AuthResponseMessageDto = { 
         message: resetPasswordResponse.message,
-        user: resetPasswordResponse.user
+        userProfile: resetPasswordResponse.userProfile
       };
       return standardLoginPasswordResetSuccessResponseMessage;
     } catch (error: unknown) {

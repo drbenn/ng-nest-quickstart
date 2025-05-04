@@ -2,7 +2,7 @@ import { UserProfile } from "@common-types";
 
 export class LoginUser {
   static readonly type = '[Auth] Login User';
-  constructor(readonly loginData: UserProfile) {}
+  constructor(readonly userProfile: UserProfile) {}
 }
 
 export class LogoutUser {

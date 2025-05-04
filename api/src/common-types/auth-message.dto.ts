@@ -2,7 +2,7 @@ import { UserProfile } from "@common-types";
 
 export class AuthResponseMessageDto {
   message?: string;
-  user?: Partial<UserProfile>;
+  userProfile?: Partial<UserProfile>;
   email?: string;
   provider?: string;
   jwtAccessToken?: string;

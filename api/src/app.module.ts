@@ -69,14 +69,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
         defaults: {
           from: configService.get<string>('BREVO_MAIL_FROM'),
         },
-        // --- Optional: If using Templates (e.g., Handlebars) ---
-        // template: {
-        //   dir: join(__dirname, '..', 'templates'), // Path to your email templates directory
-        //   adapter: new HandlebarsAdapter(), // Use Handlebars adapter
-        //   options: {
-        //     strict: true, // Disallow accessing undefined properties in templates
-        //   },
-        // },
       }),
       inject: [ConfigService], // Inject ConfigService into the factory
     }),

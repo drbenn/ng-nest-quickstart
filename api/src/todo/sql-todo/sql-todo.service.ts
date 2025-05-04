@@ -35,12 +35,12 @@ export class SqlTodoService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    console.log('Database connected');
+    // console.log('Database connected');
   }
 
   async onModuleDestroy() {
     await this.pool.end();
-    console.log('Database connection closed');
+    // console.log('Database connection closed');
   }
 
 

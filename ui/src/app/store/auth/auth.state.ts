@@ -3,7 +3,7 @@ import { Action, Selector, State, StateContext, Store } from '@ngxs/store';
 import { CheckAuthenticatedUser, LoginUser, LogoutUser } from './auth.actions';
 import { Router } from '@angular/router';
 import { AuthService } from '../../pages/auth/services/auth.service';
-import { UserProfile } from '@common-types';
+import { AuthResponseMessageDto, UserProfile } from '@common-types';
 
 export interface NestedStateModel {
   option1: string[],
@@ -76,20 +76,20 @@ export class AuthState {
   }
 
   @Action(LoginUser)
-  loginUser( { patchState }: StateContext<AuthStateModel>, { loginData }: LoginUser) {
-    console.log('state loginData: ', loginData);
+  loginUser( { patchState }: StateContext<AuthStateModel>, { userProfile }: LoginUser) {
+    console.log('state loginData: ', userProfile);
     
     patchState({
-      id: loginData.id,
-      email: loginData.email,
-      first_name: loginData.first_name ? loginData.first_name : null,
-      last_name: loginData.last_name ? loginData.last_name : null,
-      full_name: loginData.first_name && loginData.last_name ? `${loginData.first_name} ${loginData.last_name}` : null,
-      img_url: loginData.img_url ? loginData.img_url : null,
-      created_at: loginData.created_at,
-      updated_at: loginData.updated_at,
-      roles: loginData.roles ? loginData.roles : null,
-      settings: loginData.settings ? loginData.settings : null
+      id: userProfile.id,
+      email: userProfile.email,
+      first_name: userProfile.first_name ? userProfile.first_name : null,
+      last_name: userProfile.last_name ? userProfile.last_name : null,
+      full_name: userProfile.first_name && userProfile.last_name ? `${userProfile.first_name} ${userProfile.last_name}` : null,
+      img_url: userProfile.img_url ? userProfile.img_url : null,
+      created_at: userProfile.created_at,
+      updated_at: userProfile.updated_at,
+      roles: userProfile.roles ? userProfile.roles : null,
+      settings: userProfile.settings ? userProfile.settings : null
     });
 
     this.router.navigate(['home']);
@@ -98,7 +98,7 @@ export class AuthState {
   @Action(LogoutUser)
   logoutUser( { patchState }: StateContext<AuthStateModel>) {
     this.authService.logoutAuthenticatedUser().subscribe({
-      next: (user: UserProfile) => {
+      next: (logoutResponse: AuthResponseMessageDto) => {
         patchState({
           id: null,
           email: null,

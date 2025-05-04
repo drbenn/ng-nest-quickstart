@@ -1,8 +1,3 @@
-export interface User {
-  user_login: UserLogin,
-  user_profile: UserProfile,
-  user_org: UserOrg
-}
 
 export interface UserLogin {
   id: number,
@@ -22,6 +17,11 @@ export interface UserLogin {
   login_status: string,
 }
 
+/**
+ * All information for use in UI should be returned in UserProfile. UserLogin should not be included as things like
+ * restore-user-session do not work with a login, there is no login and the JWT Guard finds user profile based on the refresh_token
+ * in the user profile, so no UserLogin would be available.
+ */
 export interface UserProfile {
   id: number,
   email: string,

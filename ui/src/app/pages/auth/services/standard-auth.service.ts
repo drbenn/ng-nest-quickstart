@@ -7,7 +7,9 @@ import { Router } from '@angular/router';
 import { DisplayToast } from '../../../store/app/app.actions';
 import { environment } from '../../../../environments/environment.development';
 import { PosthogAnalyticsService } from '../../../services/posthog-analytics.service';
-import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, UserProfile, LoginStandardUserDto, AuthMessages, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, ConfirmStandardUserEmailDto } from '@common-types';
+import { CreateStandardUserDto, UserLoginJwtDto, AuthResponseMessageDto, LoginStandardUserDto,
+  AuthMessages, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto,
+  ConfirmStandardUserEmailDto, UserProfile } from '@common-types';
 
 @Injectable({
   providedIn: 'root'
@@ -27,9 +29,7 @@ export class StandardAuthService {
     // with credentials: true allows the browser to STORE and SEND cookies.
     this.http.post<UserLoginJwtDto>(`${this.baseUrl}/register-standard`,createStandardUserDto, { withCredentials: true })
     .subscribe({
-      next: (response: AuthResponseMessageDto | any) => {
-        console.log('registration response: ', response);
-
+      next: (response: AuthResponseMessageDto) => {
         if (response.message === AuthMessages.STANDARD_CONFIRM_EMAIL_SENT_SUCCESS) {
           this.navigateToRegistrationSuccessPending(response.email);
         } else if (response.message === AuthMessages.STANDARD_REGISTRATION_FAILED) {
@@ -49,21 +49,6 @@ export class StandardAuthService {
             textColor: environment.toastDefaultDangerColors.textColor
           });
         }
-
-        // Registration successful and login/redirect newly registered user.
-        // if ('user' in response) {
-        //   const user: UserProfile = response.user;
-        //   this.displayToast({ 
-        //     title: 'Success',
-        //     message: response.message as unknown as string,
-        //     bgColor: environment.toastDefaultSuccessColors.bgColor,
-        //     textColor: environment.toastDefaultSuccessColors.textColor
-        //   });
-        //   this.loginUser(user);
-        // // Registration failed, email is already registered with site beit standard or oauth.
-        // } else {
-        //   this.navigateToAuthExistingUser(response.email, response.provider);
-        // };
       },
       error: (error: unknown) => this.handleError(error)
     })
@@ -73,16 +58,18 @@ export class StandardAuthService {
     this.http.post<UserLoginJwtDto>(`${this.baseUrl}/login-standard`,loginStandardUserDto, { withCredentials: true })
     .subscribe({
       next: (response: AuthResponseMessageDto | any) => {
+        console.log(response);
+        
         if (response.message === AuthMessages.STANDARD_LOGIN_SUCCESS) {
-          const user: UserProfile = response.user;
-          user.email ? this.posthogAnalyticsService.identifyUser(user.email, { email: user.email }) : '';
+          const userProfile: UserProfile = response.userProfile as UserProfile;
+          userProfile.email ? this.posthogAnalyticsService.identifyUser(userProfile.email, { email: userProfile.email }) : '';
           this.displayToast({ 
             title: 'Success',
             message: response.message as unknown as string,
             bgColor: environment.toastDefaultSuccessColors.bgColor,
             textColor: environment.toastDefaultSuccessColors.textColor
           });
-          this.loginUser(user);
+          this.loginUser(userProfile);
         }
         else if (response.message === AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED) {
           this.navigateToAuthFailedLogin(response.email);
@@ -147,8 +134,8 @@ export class StandardAuthService {
           console.log('response from reset Standard User password: ', response);
           
           if (response.message === AuthMessages.STANDARD_RESET_SUCCESS) {
-            const user: UserProfile = response.user as UserProfile;
-            this.loginUser(user);
+            const userProfile: UserProfile = response.userProfile as UserProfile;
+            this.loginUser(userProfile);
           };
           this.displayToast({ 
             title: 'Success',

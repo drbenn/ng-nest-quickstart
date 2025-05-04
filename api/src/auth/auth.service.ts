@@ -4,7 +4,8 @@ import * as bcrypt from 'bcrypt';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Profile } from 'passport';
 import { randomBytes } from 'crypto';
-import { AuthMessages, AuthResponseMessageDto, LoginStatus, UserLogin, UserLoginProvider, UserProfile, CreateUserProfile, ConfirmStandardUserEmailDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto } from '@common-types';
+import { AuthMessages, AuthResponseMessageDto, LoginStatus, UserLogin, UserLoginProvider, UserProfile, CreateUserProfile,
+  ConfirmStandardUserEmailDto, RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto } from '@common-types';
 import { EmailService } from 'src/email/email.service';
 import { SqlAuthService } from 'src/auth/sql-auth/sql-auth.service';
 import { SimpleStringHasherService } from './services/simple-string-hasher/simple-string-hasher.service';
@@ -158,7 +159,7 @@ export class AuthService {
       // provide success AuthResponseMessage from successful registration
       const successfulRegisterResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_REGISTRATION_SUCCESS,
-        user: userProfile,
+        userProfile: userProfile,
         email: email
       };
       return successfulRegisterResponseMessage;
@@ -211,15 +212,15 @@ export class AuthService {
       const updatedUserLogin: Partial<UserLogin> = await this.sqlAuthService.updateStandardUserLoginStatusToActive(email);
   
       // fetch user profile for return
-      const user: Partial<UserProfile> = await this.sqlAuthService.findOneUserProfileById(updatedUserLogin.profile_id);
+      const userProfile: Partial<UserProfile> = await this.sqlAuthService.findOneUserProfileById(updatedUserLogin.profile_id);
 
       // generate tokens for initial login
-      const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
+      const jwtAccessToken = await this.generateAccessJwt(userProfile.id.toString());
       const jwtRefreshToken = await this.generateRefreshJwt();
 
       const confirmEmailSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_CONFIRM_EMAIL_CONFIRMED_SUCCESS,
-        user: user,
+        userProfile: userProfile,
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -234,10 +235,10 @@ export class AuthService {
   }
 
   async loginStandardUser(email: string, password: string): Promise<AuthResponseMessageDto> {
-    const user: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
-    const isPasswordMatch: boolean = await this.verifyPassword(password, user.standard_login_password);
+    const userLogin: Partial<UserLogin> | null = await this.sqlAuthService.findOneUserLoginByEmailAndProvider(email, UserLoginProvider.email);
+    const isPasswordMatch: boolean = await this.verifyPassword(password, userLogin.standard_login_password);
 
-    if (user === null) {
+    if (userLogin === null) {
       this.logger.log('warn', `Cannot login user. User email/password combination not found: ${email}`);
       const noRegisteredUserResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_LOGIN_FAILED_NOT_REGISTERED,
@@ -245,7 +246,7 @@ export class AuthService {
       };
       return noRegisteredUserResponseMessage;
 
-    } else if (user && user.login_status === LoginStatus.UNCONFIRMED_EMAIL) {
+    } else if (userLogin && userLogin.login_status === LoginStatus.UNCONFIRMED_EMAIL) {
       this.logger.log('warn', `Cannot login user. User email/password combination found, but user has not confirmed login by email response: ${email}`);
       const noConfirmedUserLoginResponseMessage: AuthResponseMessageDto = {
         message: AuthMessages.STANDARD_LOGIN_FAILED_NOT_CONFIRMED,
@@ -253,17 +254,17 @@ export class AuthService {
       };
       return noConfirmedUserLoginResponseMessage;
 
-    } else if (user && !isPasswordMatch) {
+    } else if (userLogin && !isPasswordMatch) {
       const failedPasswordResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_LOGIN_FAILED_MISMATCH,
-        email: user.email ,
-        provider: user.login_provider
+        email: userLogin.email ,
+        provider: userLogin.login_provider
       };
       return failedPasswordResponseMessage;
       
-    } else if (user && isPasswordMatch) {
+    } else if (userLogin && isPasswordMatch) {
       // otherwise return user information with tokens
-      const jwtAccessToken = await this.generateAccessJwt(user.id.toString());
+      const jwtAccessToken = await this.generateAccessJwt(userLogin.id.toString());
       const jwtRefreshToken = await this.generateRefreshJwt();
 
       // fetch user profile with email from user_profiles table
@@ -274,7 +275,7 @@ export class AuthService {
       
       const standardLoginSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_LOGIN_SUCCESS,
-        user: existingUserProfile,
+        userProfile: existingUserProfile,
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
@@ -364,7 +365,7 @@ export class AuthService {
       
       const standardResetLoginSuccessResponseMessage: AuthResponseMessageDto = { 
         message: AuthMessages.STANDARD_RESET_SUCCESS,
-        user: existingUserProfile,
+        userProfile: existingUserProfile,
         jwtAccessToken: jwtAccessToken,
         jwtRefreshToken: jwtRefreshToken
       };
