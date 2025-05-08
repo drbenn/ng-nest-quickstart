@@ -19,6 +19,10 @@ export const navbarRoutes: any = {
     {
       name: 'Login',
       route: '/log-in',
+    },
+    {
+      name: 'Chat',
+      route: '/chat',
     }
   ],
   loggedInNavRoutes: [

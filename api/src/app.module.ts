@@ -13,6 +13,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { EmailModule } from './email/email.module';
 import { SqlTodoService } from './todo/sql-todo/sql-todo.service';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -74,7 +75,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
 
     // additional module imports
-    AuthModule, TodoModule, EmailModule],
+    AuthModule, TodoModule, EmailModule, ChatModule],
   controllers: [AppController],
   providers: [AppService, SqlTodoService],
 })

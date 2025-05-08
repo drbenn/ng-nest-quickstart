@@ -1,0 +1,59 @@
+<div class="p-4 max-w-2xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">Chat Room: {{ currentRoom || 'Public' }}</h2>
+
+  <div class="mb-4 p-4 border rounded-lg bg-base-200">
+    <h3 class="font-semibold mb-2">Room Control</h3>
+    <div class="flex gap-2 items-center">
+      <input
+        type="text"
+        placeholder="Enter Room Name"
+        class="input input-bordered flex-grow"
+        [(ngModel)]="roomInput"
+        (keyup.enter)="joinRoom()"
+      />
+      <button class="btn btn-primary" (click)="joinRoom()">Join Room</button>
+    </div>
+    <button
+        *ngIf="currentRoom !== 'public-room'"
+        class="btn btn-secondary btn-sm mt-2"
+        (click)="leaveCurrentRoom()">
+        Leave Room (Back to Public)
+    </button>
+      <button
+          *ngIf="currentRoom === 'public-room'"
+          class="btn btn-accent btn-sm mt-2"
+          (click)="leaveCurrentRoom()"> Go to Public Chat
+      </button>
+  </div>
+
+  <div class="mb-4 h-96 overflow-y-auto border rounded-lg p-4 bg-base-100 flex flex-col gap-2">
+    <div *ngFor="let msg of messages" class="chat" [ngClass]="{'chat-end': msg.sender === (senderName || 'Anonymous') || msg.sender === 'You', 'chat-start': msg.sender !== (senderName || 'Anonymous') && msg.sender !== 'You'}">
+      <div class="chat-header text-xs opacity-50">
+            {{ msg.sender || msg.senderId || 'Unknown' }}
+            <time class="text-xs opacity-50 ml-1">{{ msg.timestamp | date:'shortTime' }}</time>
+        </div>
+      <div class="chat-bubble" [ngClass]="{'chat-bubble-primary': msg.sender === (senderName || 'Anonymous') || msg.sender === 'You', 'chat-bubble-secondary': msg.sender !== (senderName || 'Anonymous') && msg.sender !== 'You' && msg.sender !== 'System', 'chat-bubble-accent': msg.sender === 'System' }">
+        {{ msg.message }}
+      </div>
+
+    </div>
+     <p *ngIf="messages.length === 0" class="text-center text-gray-500">No messages yet...</p>
+  </div>
+
+  <div class="flex gap-2">
+    <input
+      type="text"
+      placeholder="Your Name (Optional)"
+      class="input input-bordered w-1/4"
+      [(ngModel)]="senderName"
+    />
+    <input
+      type="text"
+      placeholder="Type your message..."
+      class="input input-bordered flex-grow"
+      [(ngModel)]="newMessage"
+      (keyup.enter)="sendMessage()"
+    />
+    <button class="btn btn-primary" (click)="sendMessage()">Send</button>
+  </div>
+</div>

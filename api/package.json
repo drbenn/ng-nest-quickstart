@@ -27,7 +27,9 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.4.17",
     "@nestjs/throttler": "^6.3.0",
+    "@nestjs/websockets": "^10.4.17",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "nest-winston": "^1.9.7",
@@ -41,6 +43,7 @@
     "pg": "^8.7.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.1",
     "winston": "^3.17.0"
   },
   "devDependencies": {

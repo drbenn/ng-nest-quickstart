@@ -37,6 +37,10 @@ export const routes: Routes = [
   { path: 'terms-of-use', component: TermsOfUsePageComponent },
   { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
   { path: 'cookie-policy', component: CookiePolicyPageComponent },
+  {
+    path: 'chat',
+    loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent)
+  },
 
   // AUTH Routes for login/register/callback
   { path: 'log-in', component: LogInPageComponent },

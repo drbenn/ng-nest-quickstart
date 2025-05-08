@@ -35,9 +35,7 @@ export class NavbarComponent {
 
 
   ngOnInit(): void {
-    this.listenForUser();
-    console.log(this.authUser);
-    
+    this.listenForUser();    
   }
 
   ngOnDestroy() {
@@ -48,7 +46,6 @@ export class NavbarComponent {
 
   private listenForUser(): void {
     this.authState$.pipe(takeUntil(this.destroy$)).subscribe((userData: Partial<AuthStateModel>) => {
-      console.log(userData);
       userData.id ? this.authUser = userData : this.authUser = null;
     });
   };
@@ -68,6 +65,7 @@ export class NavbarComponent {
 
   // LOGGED IN USER MENU
   private logout = dispatch(LogoutUser);
+  
   protected signOut(): void {
     this.logout();
     // this.close.emit();
