@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { dispatch, Store } from '@ngxs/store';
 import { PosthogAnalyticsService } from './services/posthog-analytics.service';
@@ -9,15 +9,19 @@ import { CommonModule } from '@angular/common';
 import { FooterComponent } from './components/footer/footer.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { DisplayToast } from './store/app/app.actions';
+import { ChatBoxComponent } from './features/chat/chat-box/chat-box.component';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroChatBubbleLeftRightSolid } from '@ng-icons/heroicons/solid';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, ChatBoxComponent, NgIcon],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  providers: [provideIcons({heroChatBubbleLeftRightSolid })],
 })
 export class AppComponent implements OnInit {
-  private theme$!: Observable<string>;
+  theme$: Observable<string> = inject(Store).select((state) => state.appState.theme);
   private toast$!: Observable<DaisyToastOptions | null>;
   protected toasts: DaisyToastOptions[] = [];
 
@@ -27,7 +31,6 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.theme$ = this.store.select((state) => state.appState.theme);
     this.toast$ = this.store.select((state) => state.appState.toast);
     this.listenForTheme();
     this.listenForToasts();
@@ -48,7 +51,10 @@ export class AppComponent implements OnInit {
 
   private listenForTheme(): void {
     this.theme$.subscribe((theme: string) => {
-      this.changeTheme(theme)
+      // set theme 
+      const lightTheme: string = 'winter';
+      const darkTheme: string = 'dim';
+      theme === 'light' ? this.changeTheme(lightTheme) : this.changeTheme(darkTheme);
     });
   };
 
@@ -67,4 +73,16 @@ export class AppComponent implements OnInit {
       }
     });
   };
+
+  protected isChatOpen: boolean = false;
+  protected chatIcon = heroChatBubbleLeftRightSolid;
+  protected openChatBox(): void {
+    this.isChatOpen = true;
+  }
+
+  protected closeChatBox(): void {
+    console.log('close chahahat');
+    
+    this.isChatOpen = false;
+  }
 }

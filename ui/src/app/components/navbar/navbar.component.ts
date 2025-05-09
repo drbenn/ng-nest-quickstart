@@ -51,16 +51,16 @@ export class NavbarComponent {
   };
 
   private updateTheme = dispatch(UpdateTheme);
-  activeTheme: string = 'winter';         // default light theme
+  activeTheme: string = 'light';         // default light theme
   protected selectTheme(): void {
-    if (this.activeTheme === 'winter') {
-      this.activeTheme = 'dim';           // dark theme
+    if (this.activeTheme === 'light') {
+      this.activeTheme = 'dark';           // dark theme
       this.isDarkMode = true;
     } else {
-      this.activeTheme = 'winter';        // light theme
+      this.activeTheme = 'light';        // light theme
       this.isDarkMode = false;
     };
-    this.updateTheme(this.activeTheme);
+    this.updateTheme(this.isDarkMode ? 'dark' : 'light');
   };
 
   // LOGGED IN USER MENU
