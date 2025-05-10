@@ -5,7 +5,7 @@ import { AuthState, AuthStateModel } from '../../store/auth/auth.state';
 import { dispatch, Store } from '@ngxs/store';
 import { navbarRoutes } from './navbar-routes';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroSwatchSolid, heroBars3Solid } from '@ng-icons/heroicons/solid';
+import { heroSwatchSolid, heroBars3Solid, heroShoppingCartSolid } from '@ng-icons/heroicons/solid';
 import { LogoutUser } from '../../store/auth/auth.actions';
 import { CommonModule, DatePipe } from '@angular/common';
 import { UpdateTheme } from '../../store/app/app.actions';
@@ -30,6 +30,7 @@ export class NavbarComponent {
 
   protected logoIcon = heroSwatchSolid;
   protected mobileBarsIcon = heroBars3Solid;
+  protected shoppingCartIcon = heroShoppingCartSolid;
   
   constructor (private store: Store) {}
 

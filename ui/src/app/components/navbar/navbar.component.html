@@ -42,10 +42,19 @@
         <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-100 subpixel-antialiased">
           @for (item of navRoutes.loggedOutNavRoutes; track item.name; let i = $index) {
             <li [class]="i !==0 ? 'ml-8' : '' ">
-              <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
-              class="transition duration-[20ms] ease-in hover:text-gray-500">
-                {{ item.name }}
-              </a>
+              @if (item.name === 'Cart'){
+                <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+                class="transition duration-[20ms] ease-in hover:text-gray-500">
+                  <div class="translate-y-0.5">
+                    <ng-icon [svg]="shoppingCartIcon" size="1.25rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+                  </div>
+                </a>
+              } @else {
+                <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+                class="transition duration-[20ms] ease-in hover:text-gray-500">
+                  {{ item.name }}
+                </a>
+              }
             </li>
           }
         </ul>
@@ -56,10 +65,19 @@
         <ul class="hidden mr-6 md:flex font-semibold text-[15px] opacity-100 subpixel-antialiased">
           @for (item of navRoutes.loggedInNavRoutes; track item.name; let i = $index) {
             <li [class]="i !==0 ? 'ml-8' : '' ">
-              <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
-              class="transition duration-[20ms] ease-in hover:text-gray-500">
-                {{ item.name }}
-              </a>
+              @if (item.name === 'Cart'){
+                <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+                class="transition duration-[20ms] ease-in hover:text-gray-500">
+                  <div class="translate-y-0.5">
+                    <ng-icon [svg]="shoppingCartIcon" size="1.25rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+                  </div>
+                </a>
+              } @else {
+                <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+                class="transition duration-[20ms] ease-in hover:text-gray-500">
+                  {{ item.name }}
+                </a>
+              }
             </li>
           }
         </ul>

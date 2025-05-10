@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroXCircleSolid, heroPaperAirplaneSolid } from '@ng-icons/heroicons/solid';
+import { heroXCircleSolid, heroPaperAirplaneSolid, heroChevronDownSolid, heroChevronUpSolid } from '@ng-icons/heroicons/solid';
 import { Store } from '@ngxs/store';
 import { Observable, Subscription } from 'rxjs';
 import { ChatMessage, ChatService } from '../chat.service';
@@ -21,9 +21,19 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
   theme$: Observable<string> = inject(Store).select((state) => state.appState.theme);
   protected closeIcon = heroXCircleSolid;
   protected sendIcon = heroPaperAirplaneSolid;
+  protected minimizeIcon = heroChevronDownSolid;
+  protected maximizeIcon = heroChevronUpSolid;
+
+  protected isChatMinimized: boolean = false;
 
 
-  
+  protected minimizeChat(): void {
+    this.isChatMinimized = true;
+  }
+
+  protected maximizeChat(): void {
+    this.isChatMinimized = false;
+  }
   
 
 

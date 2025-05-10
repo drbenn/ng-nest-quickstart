@@ -24,8 +24,7 @@ export class UserNavPopoverComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    console.log(this.user);
-    
+    // console.log(this.user);
   }
 
 }

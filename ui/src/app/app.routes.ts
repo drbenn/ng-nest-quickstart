@@ -8,6 +8,8 @@ import { ContactPageComponent } from './pages/public/contact-page/contact-page.c
 import { TermsOfUsePageComponent } from './pages/public/terms-of-use-page/terms-of-use-page.component';
 import { PrivacyPolicyPageComponent } from './pages/public/privacy-policy-page/privacy-policy-page.component';
 import { CookiePolicyPageComponent } from './pages/public/cookie-policy-page/cookie-policy-page.component';
+import { ChatPageComponent } from './pages/public/chat-page/chat-page.component';
+import { ShoppingCartPageComponent } from './pages/public/shopping-cart-page/shopping-cart-page.component';
 
 // AUTH Routes for login/register/callback
 import { LogInPageComponent } from './pages/auth/log-in-page/log-in-page.component';
@@ -39,8 +41,10 @@ export const routes: Routes = [
   { path: 'cookie-policy', component: CookiePolicyPageComponent },
   {
     path: 'chat',
-    loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent)
+    loadComponent: () => import('./pages/public/chat-page/chat-page.component').then(m => m.ChatPageComponent)
   },
+
+  { path: 'shopping-cart', component: ShoppingCartPageComponent },
 
   // AUTH Routes for login/register/callback
   { path: 'log-in', component: LogInPageComponent },

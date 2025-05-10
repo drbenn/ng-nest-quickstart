@@ -1,23 +1,28 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ChatMessage, ChatService } from './chat.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChatMessage, ChatService } from '../../../features/chat/chat.service';
+import { Store } from '@ngxs/store';
+import { AuthState } from '../../../store/auth/auth.state';
+import { UserProfile } from '@common-types';
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-chat-page',
   imports: [CommonModule, FormsModule],
-  templateUrl: './chat.component.html',
-  styleUrl: './chat.component.scss',
+  templateUrl: './chat-page.component.html',
+  styleUrl: './chat-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush, // Optimize change detection
 })
-export class ChatComponent {
+export class ChatPageComponent {
   private chatService = inject(ChatService);
   private cdRef = inject(ChangeDetectorRef); // Inject ChangeDetectorRef
 
+  constructor(private store: Store) {}
   // Component State
   messages: ChatMessage[] = [];
   newMessage: string = '';
+  senderUserId: number;
   senderName: string = ''; // Optional: User's display name
   currentRoom: string | null = 'public-room'; // Start in public room
   roomInput: string = ''; // For joining specific rooms
@@ -30,6 +35,8 @@ export class ChatComponent {
   // Add subs for other events if needed
 
   ngOnInit(): void {
+    this.setUserInfo();
+
     // Automatically join public room on init (handled server-side on connect now)
     // this.chatService.joinRoom('public-room'); // Explicit join might still be useful
 
@@ -38,7 +45,7 @@ export class ChatComponent {
 
      // Optional: Listen for connect/disconnect events for UI feedback
     this.chatService.onConnect().subscribe(() => {
-      console.log('Connected to WebSocket server');
+      // console.log('Connected to WebSocket server');
         // Re-join room if needed after reconnect
       if(this.currentRoom) {
         this.chatService.joinRoom(this.currentRoom);
@@ -47,7 +54,7 @@ export class ChatComponent {
     });
 
     this.chatService.onDisconnect().subscribe(() => {
-      console.log('Disconnected from WebSocket server');
+      // console.log('Disconnected from WebSocket server');
       this.cdRef.markForCheck();
     });
   }
@@ -67,10 +74,16 @@ export class ChatComponent {
     // this.chatService.disconnect();
   }
 
+  setUserInfo(): void {
+    const user = this.store.selectSnapshot(AuthState.getNavUserData);
+    this.senderUserId = user.id;
+    this.senderName = user.username || user.full_name || user.email;
+  }
+
   listenForMessages(): void {
     // Listen for public messages
     this.messageSubPublic = this.chatService.listenForMessagesPublic().subscribe((message: ChatMessage) => {
-      console.log('Public message received:', message);
+      // console.log('Public message received:', message);
       // Only add if we are in the public room OR if it's a global broadcast type
       if (this.currentRoom === 'public-room') {
         this.messages.push(message);
@@ -80,7 +93,7 @@ export class ChatComponent {
 
       // Listen for private/room messages
     this.messageSubPrivate = this.chatService.listenForMessagesPrivate().subscribe((message: ChatMessage) => {
-      console.log('Private message received:', message);
+      // console.log('Private message received:', message);
       // Only add if the message is for the room we are currently in
       if (message.roomName && this.currentRoom === message.roomName) {
         this.messages.push(message);
@@ -91,14 +104,14 @@ export class ChatComponent {
 
   listenForRoomEvents(): void {
     this.joinedRoomSub = this.chatService.listenForJoinedRoom().subscribe(roomName => {
-      console.log(`Successfully joined room: ${roomName}`);
+      // console.log(`Successfully joined room: ${roomName}`);
       // Add UI feedback if needed
       this.messages.push({ message: `You joined room: ${roomName}`, sender: 'System' });
       this.cdRef.markForCheck();
     });
 
     this.leftRoomSub = this.chatService.listenForLeftRoom().subscribe(roomName => {
-      console.log(`Successfully left room: ${roomName}`);
+      // console.log(`Successfully left room: ${roomName}`);
       // Add UI feedback if needed
       this.messages.push({ message: `You left room: ${roomName}`, sender: 'System' });
       this.cdRef.markForCheck();
@@ -140,7 +153,7 @@ export class ChatComponent {
     this.chatService.joinRoom(roomToJoin);
     this.currentRoom = roomToJoin;
     this.roomInput = ''; // Clear input
-    console.log(`Attempting to join room: ${roomToJoin}`);
+    // console.log(`Attempting to join room: ${roomToJoin}`);
     // Change detection will be triggered by the 'joinedRoom' event listener
   }
 
@@ -153,7 +166,7 @@ export class ChatComponent {
       this.chatService.joinRoom('public-room'); // Explicitly join public room again
       this.cdRef.markForCheck();
     } else {
-        console.log("Already in or switching to public room.");
+        // console.log("Already in or switching to public room.");
       if (this.currentRoom !== 'public-room') {
         this.currentRoom = 'public-room';
         this.messages = []; // Clear messages

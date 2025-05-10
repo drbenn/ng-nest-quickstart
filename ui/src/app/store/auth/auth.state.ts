@@ -123,10 +123,9 @@ export class AuthState {
   @Action(CheckAuthenticatedUser)
   async checkAuthenticatedUser( { patchState }: StateContext<AuthStateModel>) {
     console.log('checking authenticated user in state hit');
-    
+
     this.authService.getAuthenticatedUser().subscribe({
       next: (user: UserProfile) => {
-        console.log('User is logged in:', user);
         this.store.dispatch(new LoginUser(user));
         this.router.navigate(['home']);
       },

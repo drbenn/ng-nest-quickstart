@@ -21,8 +21,8 @@ export const navbarRoutes: any = {
       route: '/log-in',
     },
     {
-      name: 'Chat',
-      route: '/chat',
+      name: 'Cart',
+      route: '/shopping-cart',
     }
   ],
   loggedInNavRoutes: [
@@ -37,6 +37,14 @@ export const navbarRoutes: any = {
     {
       name: 'Todo',
       route: '/todo',
+    },
+    {
+      name: 'Chat',
+      route: '/chat',
+    },
+    {
+      name: 'Cart',
+      route: '/shopping-cart',
     }
   ]
 };

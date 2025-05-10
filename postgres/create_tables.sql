@@ -46,3 +46,31 @@ CREATE TABLE IF NOT EXISTS users_login_history (
   ip_address INET NOT NULL,
   type VARCHAR(20)
 );
+
+CREATE TABLE chat_rooms (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    type VARCHAR(50) NOT NULL DEFAULT 'public', -- 'public', 'private', 'group'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE chat_room_members (
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    room_id INT REFERENCES chat_rooms(id) ON DELETE CASCADE,
+    joined_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, room_id)
+);
+
+CREATE TABLE chat_messages (
+    id BIGSERIAL PRIMARY KEY, -- Use BIGSERIAL for potentially many messages
+    room_id INT NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
+    sender_id INT REFERENCES users(id) ON DELETE SET NULL, -- Or NOT NULL if sender must exist
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    message_type VARCHAR(50) DEFAULT 'text'
+);
+
+-- Crucial Indexes for Performance!
+CREATE INDEX idx_chat_messages_room_id_created_at ON chat_messages (room_id, created_at DESC);
+CREATE INDEX idx_chat_messages_sender_id ON chat_messages (sender_id);
+CREATE INDEX idx_chat_rooms_type ON chat_rooms (type);

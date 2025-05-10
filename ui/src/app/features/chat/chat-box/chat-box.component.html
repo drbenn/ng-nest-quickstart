@@ -1,15 +1,26 @@
 <ng-container *ngIf="theme$ | async as theme">
-  <div class="relative w-[18rem] h-[24rem] bg-base-100 border border-neutral rounded-sm cursor-pointer transition-opacity ease-in duration-150 fade-in-150">
+  <div 
+    class="relative w-[18rem] bg-base-100 border border-neutral rounded-sm cursor-pointer transition-opacity ease-in duration-150 fade-in-150"
+    [ngStyle]="isChatMinimized ? {'height': 'fit-content'} : {'height': '24rem'}"
+  >
     <div class="h-full w-full flex flex-col justify-start items-start">
       <div class="w-full flex flex-row flex-nowrap justify-between px-2 bg-primary text-primary-content">
         <div class="font-medium text-base">
           Chat - {{ currentRoom }}
         </div>
         <div class="mt-1">
+          @if (isChatMinimized) {
+            <ng-icon [svg]="maximizeIcon" size="1.25rem"  [color]="theme === 'dark' ? 'white' : 'white' " (click)="maximizeChat()" class="mr-1"/>
+          } @else {
+            <ng-icon [svg]="minimizeIcon" size="1.25rem"  [color]="theme === 'dark' ? 'white' : 'white' " (click)="minimizeChat()" class="mr-1"/>
+          }
           <ng-icon [svg]="closeIcon" size="1.25rem"  [color]="theme === 'dark' ? 'white' : 'white' " (click)="closeChatBox()"/>
         </div>
       </div>
-      <div class="grow-1 overflow-y-auto w-full py-1 px-3 text-sm">
+      <div
+        class="grow-1 overflow-y-auto w-full py-1 px-3 text-sm"
+        [ngStyle]="isChatMinimized ? {'height': '0rem', 'display': 'none'} : {'height': 'fit-content'}"
+      >
         <div *ngFor="let msg of messages" class="chat" [ngClass]="{'chat-end': msg.sender === (senderName || 'Anonymous') || msg.sender === 'You', 'chat-start': msg.sender !== (senderName || 'Anonymous') && msg.sender !== 'You'}">
           <div class="chat-header text-xs opacity-50">
                 {{ msg.sender || msg.senderId || 'Unknown' }}
@@ -22,7 +33,10 @@
         </div>
           <p *ngIf="messages.length === 0" class="text-center text-gray-500">No messages yet...</p>
       </div>
-      <div class="flex flex-row flex-nowrap justify-between items-end w-full py-2 pr-2 border-t border-neutral">
+      <div 
+        class="flex flex-row flex-nowrap justify-between items-end w-full py-2 pr-2 border-t border-neutral"
+        [ngStyle]="isChatMinimized ? {'height': '0rem', 'display': 'none'} : {'height': 'fit-content'}"
+      >
         <div class="mx-2 w-full">
           <input
             type="text"
