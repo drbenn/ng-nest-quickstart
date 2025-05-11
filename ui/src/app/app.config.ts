@@ -34,7 +34,14 @@ export const appConfig: ApplicationConfig = {
       initService.initializeApp();
     }),
 
-    importProvidersFrom(SocketIoModule.forRoot(config)),
+    importProvidersFrom(SocketIoModule.forRoot({
+    // url: environment.apiUrl,
+    url: 'http://localhost:3000',
+    options: {
+    transports: ['websocket'] // Optional: force websocket transport
+    // You can add other options here, like authentication tokens
+  }
+    })),
 
     // NGXS store config
     provideStore([AuthState, AppState]),

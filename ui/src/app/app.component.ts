@@ -52,8 +52,8 @@ export class AppComponent implements OnInit {
   private listenForTheme(): void {
     this.theme$.subscribe((theme: string) => {
       // set theme 
-      const lightTheme: string = 'winter';
-      const darkTheme: string = 'dim';
+      const lightTheme: string = environment.lightDaisyTheme;
+      const darkTheme: string = environment.darkDaisyTheme;
       theme === 'light' ? this.changeTheme(lightTheme) : this.changeTheme(darkTheme);
     });
   };

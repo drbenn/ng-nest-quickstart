@@ -1,18 +1,6 @@
 export const navbarRoutes: any = {
   loggedOutNavRoutes: [
     {
-      name: 'Landing',
-      route: '/',
-    },
-    {
-      name: 'Contact',
-      route: '/contact',
-    },
-    {
-      name: 'Todo',
-      route: '/todo',
-    },
-    {
       name: 'Register',
       route: '/register-account',
     },
@@ -29,10 +17,6 @@ export const navbarRoutes: any = {
     {
       name: 'Home',
       route: '/home',
-    },
-    {
-      name: 'Contact',
-      route: '/contact',
     },
     {
       name: 'Todo',
