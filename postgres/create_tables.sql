@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS todos (
   date_modified TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS users_login_history (
+CREATE TABLE IF NOT EXISTS user_login_history (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES user_logins(id) ON DELETE CASCADE,
   login_at TIMESTAMP DEFAULT NOW(),
@@ -55,7 +55,7 @@ CREATE TABLE chat_rooms (
 );
 
 CREATE TABLE chat_room_members (
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    user_id INT REFERENCES user_profiles(id) ON DELETE CASCADE,
     room_id INT REFERENCES chat_rooms(id) ON DELETE CASCADE,
     joined_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, room_id)
@@ -64,7 +64,7 @@ CREATE TABLE chat_room_members (
 CREATE TABLE chat_messages (
     id BIGSERIAL PRIMARY KEY, -- Use BIGSERIAL for potentially many messages
     room_id INT NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
-    sender_id INT REFERENCES users(id) ON DELETE SET NULL, -- Or NOT NULL if sender must exist
+    sender_id INT REFERENCES user_profiles(id) ON DELETE SET NULL, -- Or NOT NULL if sender must exist
     content TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     message_type VARCHAR(50) DEFAULT 'text'

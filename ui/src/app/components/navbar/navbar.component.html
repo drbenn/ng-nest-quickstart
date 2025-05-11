@@ -22,17 +22,6 @@
     </div>
   </section>
 
-  <!-- mobile only middle icon -->
-  <!-- <section class="flex w-1/3 md:hidden justify-center items-center">
-    <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page">
-      <div class="flex flex-row flex-nowrap justify-center items-center">
-        <div>
-          <i class="pi pi-qrcode" style="font-size: 1.25rem; color: #c3ff38"></i>
-        </div>
-      </div>
-    </a>
-  </section> -->
-
   <!-- right side -->
   <section class="w-fit flex flex-nowrap flex-row justify-end items-center select-none">
 
@@ -84,24 +73,6 @@
       }
 
     </div>
-
-    <!-- logged out sign in route -->
-    <!-- @if (authUser === null) {
-      <ul class="font-semibold text-[15px] md:flex opacity-100 subpixel-antialiased mr-6">
-        <li>
-          <a routerLink="/register" routerLinkActive="active" ariaCurrentWhenActive="page"
-          class="transition duration-[50ms] ease-in hover:text-gray-600 mr-6">
-            Register
-          </a>
-        </li>
-        <li>
-          <a routerLink="/log-in" routerLinkActive="active" ariaCurrentWhenActive="page"
-          class="transition duration-[50ms] ease-in hover:text-gray-600">
-            Log In
-          </a>
-        </li>
-      </ul>
-    } -->
 
     <!-- dark mode toggle -->
     <div class="h-6 w-6
@@ -182,7 +153,7 @@
 
     <!-- mobile nav hamburger icon popover trigger -->
     <div class="flex md:hidden
-    transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-2 cursor-pointer">
+    transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-2 cursor-pointer ml-1">
       <app-daisy-dropdown-popover
         position="dropdown-left"
         summaryClass="btn m-1 w-8 h-fit rounded-full">

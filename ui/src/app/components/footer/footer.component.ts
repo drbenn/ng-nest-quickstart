@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -5,7 +6,7 @@ import { heroSwatchSolid } from '@ng-icons/heroicons/solid';
 
 @Component({
   selector: 'footbar',
-  imports: [RouterLink, RouterLinkActive, NgIcon],
+  imports: [RouterLink, RouterLinkActive, NgIcon, CommonModule],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
   providers: [provideIcons({ heroSwatchSolid })],
