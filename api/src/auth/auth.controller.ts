@@ -5,7 +5,9 @@ import { Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AuthMessages, AuthResponseMessageDto, UserProfile, ConfirmStandardUserEmailDto, LoginStandardUserDto,
-  RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto } from '@common-types';
+  RequestResetStandardUserPasswordDto, ResetStandardUserPasswordDto, CreateStandardUserDto, 
+  LoginTrackingTypes} from '@common-types';
+import { SqlAuthService } from './sql-auth/sql-auth.service';
 
 
 
@@ -14,6 +16,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly sqlAuthService: SqlAuthService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
   ) {}
 
@@ -62,6 +65,11 @@ export class AuthController {
         sameSite: 'strict',                                       // Mitigates CSRF (adjust as per your requirements)
         maxAge: Number(process.env.JWT_ACCESS_TOKEN_EXPIRATION),  // Expiration time, time stored in browser, not validity
       });
+
+      // log user login
+      if (restoredUser.id && req['ip']) {
+        await this.sqlAuthService.insertUserLoginTracking(restoredUser.id, req['ip'], LoginTrackingTypes.REFRESH_TOKEN);
+      }
 
       // res.redirect(`${process.env.FRONTEND_URL}`);
       // Return basic user info for ui
@@ -186,6 +194,12 @@ export class AuthController {
         //   await this.sqlAuthService.insertUserLoginTracking(loginResponse.user.id, req['ip'], LoginTrackingTypes.ACTIVE_NAVIGATION);
         // }
         const { message, userProfile, jwtAccessToken, jwtRefreshToken } = loginResponse;
+
+        // log user login
+        if (userProfile.id && req['ip']) {
+          await this.sqlAuthService.insertUserLoginTracking(userProfile.id, req['ip'], LoginTrackingTypes.ACTIVE_NAVIGATION);
+        }
+
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
 
         // return user;
@@ -324,9 +338,11 @@ export class AuthController {
           this.logger.log('warn', `FRONTEND_URL is not set in environment variables`);
           throw new Error('FRONTEND_URL is not set in environment variables');
         };
-        // if (user.id && req['ip']) {
-        //   await this.sqlAuthService.insertUserLoginTracking(user.id, req['ip'], LoginTrackingTypes.ACTIVE_NAVIGATION);
-        // }
+
+        // log user login
+        if (userProfile.id && req['ip']) {
+          await this.sqlAuthService.insertUserLoginTracking(userProfile.id, req['ip'], LoginTrackingTypes.ACTIVE_NAVIGATION);
+        }
         this.sendSuccessfulLoginCookies(res, jwtAccessToken, jwtRefreshToken);
   
         this.logger.log('warn', `Successful OAuth login with cookies::: redirect_url: ${process.env.FRONTEND_URL}/oauth/callback`);

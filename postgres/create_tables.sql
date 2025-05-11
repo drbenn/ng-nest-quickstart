@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS todos (
 
 CREATE TABLE IF NOT EXISTS user_login_history (
   id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES user_logins(id) ON DELETE CASCADE,
+  user_profile_id INT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   login_at TIMESTAMP DEFAULT NOW(),
   ip_address INET NOT NULL,
   type VARCHAR(20)

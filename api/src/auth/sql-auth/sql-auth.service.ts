@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { CreateUserProfile, LoginStatus, UserLogin, UserLoginProvider, UserProfile } from '@common-types';
+import { CreateUserProfile, LoginStatus, LoginTrackingTypes, UserLogin, UserLoginProvider, UserProfile } from '@common-types';
 
 @Injectable()
 export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
@@ -137,7 +137,6 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
     const paramsToArray: (number | string)[] = [profile_id, email, hashedPassword, reset_id, UserLoginProvider.email, LoginStatus.UNCONFIRMED_EMAIL];
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log('insert standard user login result: ', queryResult.rows[0]);
       
       const result: Partial<UserLogin> = queryResult.rows[0]; 
       return result;
@@ -260,7 +259,6 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
 
     try {
       const queryResult = await this.pool.query(queryText, paramsToArray);
-      console.log('insert user profile result: ', queryResult);
       const result: Partial<UserProfile> = queryResult.rows[0]; 
       return result;
     } catch (error) {
@@ -321,20 +319,19 @@ export class SqlAuthService implements OnModuleInit, OnModuleDestroy {
   //                                                                              //
   //////////////////////////////////////////////////////////////////////////////////
 
-  // async insertUserLoginTracking(user_id: number, ip: string, type: LoginTrackingTypes): Promise<Partial<User>> {
-  //   const queryText = `
-  //     INSERT INTO users_login_history (user_id, ip, type)
-  //     VALUES ($1, $2, $3);
-  //   `;
-  //   const paramsToArray: [number, string, LoginTrackingTypes] = [user_id, ip, type];
-  //   try {
-  //     const queryResult = await this.pool.query(queryText, paramsToArray);
-  //     const result: Partial<User> = queryResult.rows[0];
-  //     return result;
-  //   } catch (error) {
-  //     console.error(`Error Auth-SQL Service insertUserLoginTracking: ${error}`);
-  //     this.logger.log('warn', `Error Auth-SQL Service insertUserLoginTracking: ${error}`);
-  //     throw new Error('Error Auth-SQL Service insertUserLoginTracking');
-  //   }
-  // }
+  async insertUserLoginTracking(user_profile_id: number, ip_address: string, type: LoginTrackingTypes): Promise<void> {
+    const queryText = `
+      INSERT INTO user_login_history (user_profile_id, ip_address, type)
+      VALUES ($1, $2, $3);
+    `;
+    const paramsToArray: [number, string, LoginTrackingTypes] = [user_profile_id, ip_address, type];
+    try {
+      const queryResult = await this.pool.query(queryText, paramsToArray);
+      const result = queryResult.rows[0];
+    } catch (error) {
+      console.error(`Error Auth-SQL Service insertUserLoginTracking: ${error}`);
+      this.logger.log('warn', `Error Auth-SQL Service insertUserLoginTracking: ${error}`);
+      throw new Error('Error Auth-SQL Service insertUserLoginTracking');
+    }
+  }
 }
