@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { dispatch, Store } from '@ngxs/store';
+import { dispatch, select, Store } from '@ngxs/store';
 import { PosthogAnalyticsService } from './services/posthog-analytics.service';
 import { Observable } from 'rxjs';
 import { DaisyToastOptions } from './types/app.types';
@@ -12,6 +12,7 @@ import { DisplayToast } from './store/app/app.actions';
 import { ChatBoxComponent } from './features/chat/chat-box/chat-box.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroChatBubbleLeftRightSolid } from '@ng-icons/heroicons/solid';
+import { AuthState } from './store/auth/auth.state';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +25,7 @@ export class AppComponent implements OnInit {
   theme$: Observable<string> = inject(Store).select((state) => state.appState.theme);
   private toast$!: Observable<DaisyToastOptions | null>;
   protected toasts: DaisyToastOptions[] = [];
+  protected userId = select(AuthState.getUserId);
 
   constructor (
     private store: Store,
@@ -81,8 +83,6 @@ export class AppComponent implements OnInit {
   }
 
   protected closeChatBox(): void {
-    console.log('close chahahat');
-    
     this.isChatOpen = false;
   }
 }

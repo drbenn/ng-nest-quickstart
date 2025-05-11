@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { Action, Selector, State, StateContext, Store } from '@ngxs/store';
+import { Action, createPropertySelectors, Selector, State, StateContext, Store } from '@ngxs/store';
 import { CheckAuthenticatedUser, LoginUser, LogoutUser } from './auth.actions';
 import { Router } from '@angular/router';
 import { AuthService } from '../../pages/auth/services/auth.service';
@@ -137,6 +137,7 @@ export class AuthState {
 
 
   };
+  
 
 
   /**
@@ -171,6 +172,10 @@ export class AuthState {
   //   setState(payload);
   // }
 }
+
+const _props = createPropertySelectors<AuthStateModel>(AuthState);
+
+export const getUserId = _props.id;
 
 
   /**

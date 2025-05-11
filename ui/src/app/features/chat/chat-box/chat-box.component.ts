@@ -57,10 +57,6 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const userData = this.store.selectSnapshot((state) => state.authState.getNavUserData)
-    console.log(userData);
-    console.log('BOOOOAYH');
-    
-    
     // Automatically join public room on init (handled server-side on connect now)
     // this.chatService.joinRoom('public-room'); // Explicit join might still be useful
 

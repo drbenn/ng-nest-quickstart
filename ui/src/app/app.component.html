@@ -15,19 +15,21 @@
 }
 
 <!-- chat open button/window -->
-<div class="">
-  @if (!isChatOpen) {
-    <ng-container *ngIf="theme$ | async as theme">
-      <div class="fixed bottom-10 right-10 z-50 w-[2.5rem] h-[2.5rem] bg-base-content rounded-full cursor-pointer tooltip tooltip-left" data-tip="Chat" (click)="openChatBox()">
-        <div class="h-full w-full flex flex-row justify-center items-center">
-          <ng-icon [svg]="chatIcon" size="1.5rem"  [color]="theme === 'dark' ? 'dimgray' : 'white' "/>
+@if (userId()) {
+  <div class="">
+    @if (!isChatOpen) {
+      <ng-container *ngIf="theme$ | async as theme">
+        <div class="fixed bottom-10 right-10 z-50 w-[2.5rem] h-[2.5rem] bg-base-content rounded-full cursor-pointer tooltip tooltip-left" data-tip="Chat" (click)="openChatBox()">
+          <div class="h-full w-full flex flex-row justify-center items-center">
+            <ng-icon [svg]="chatIcon" size="1.5rem"  [color]="theme === 'dark' ? 'dimgray' : 'white' "/>
+          </div>
         </div>
-      </div>
-    </ng-container>
-  } @else {
-    <chat-box (closeChat)="closeChatBox()" class="fixed bottom-2 right-4 z-50"></chat-box>
-  }
-</div>
+      </ng-container>
+    } @else {
+      <chat-box (closeChat)="closeChatBox()" class="fixed bottom-2 right-4 z-50"></chat-box>
+    }
+  </div>
+}
 
 <!-- <button class="btn btn-error">Error</button>
 <button class="btn bg-yellow-500" (click)="pushToast()">Push Toast</button> -->
