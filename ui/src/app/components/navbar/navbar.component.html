@@ -34,8 +34,13 @@
               @if (item.name === 'Cart'){
                 <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
                 class="transition duration-[20ms] ease-in hover:text-gray-500">
-                  <div class="translate-y-0.5">
-                    <ng-icon [svg]="shoppingCartIcon" size="1.25rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+                  <div class="translate-y-0.5 relative">
+                    @if (shoppingCartCount() > 0) {
+                      <div class="absolute bg-primary w-[1rem] h-[1rem] rounded-full top-0 right-0 text-primary-content text-[10px] flex justify-center items-center -translate-x-0 -translate-y-1">
+                        {{ shoppingCartCount() }}
+                      </div>
+                    }
+                    <ng-icon [svg]="shoppingCartIcon" size="1.5rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
                   </div>
                 </a>
               } @else {

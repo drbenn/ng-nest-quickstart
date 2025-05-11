@@ -1,23 +1,22 @@
-<standard-page-wrapper title="Shopping Cart">
-  
-  @if (!cartItems().length) {
-    <p>There are no items in your cart.</p>
-  }
+<standard-page-wrapper title="Store">
 
-  <ul class="list bg-base-100 shadow-md">
-
-    @for (item of cartItems(); track $index) {
+  <ul class="list">
+    
+    @for (item of storeMerch; track item) {
       <li class="list-row">
         <div><img class="size-10 rounded-box" [src]="item.imgUrl"/></div>
         <div>
           <div>{{ item.title }}</div>
           <div class="text-xs uppercase font-semibold opacity-60">{{ item.subTitle }}</div>
         </div>
-        <button class="btn" (click)="removeFromCart(item.id)">
-          Remove From Cart
+        <p class="list-col-wrap text-xs">
+          {{ item.detail }}
+        </p>
+        <button class="btn" (click)="addToCart(item)">
+          Add to Cart
         </button>
       </li>
-    }
-    
+    }    
   </ul>
+
 </standard-page-wrapper>

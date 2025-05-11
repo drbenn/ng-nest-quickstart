@@ -9,6 +9,10 @@ export const navbarRoutes: any = {
       route: '/log-in',
     },
     {
+      name: 'Store',
+      route: '/store',
+    },
+    {
       name: 'Cart',
       route: '/shopping-cart',
     }
@@ -25,6 +29,10 @@ export const navbarRoutes: any = {
     {
       name: 'Chat',
       route: '/chat',
+    },
+    {
+      name: 'Store',
+      route: '/store',
     },
     {
       name: 'Cart',

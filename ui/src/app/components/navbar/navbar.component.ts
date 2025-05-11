@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { AuthState, AuthStateModel } from '../../store/auth/auth.state';
-import { dispatch, Store } from '@ngxs/store';
+import { dispatch, select, Store } from '@ngxs/store';
 import { navbarRoutes } from './navbar-routes';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroSwatchSolid, heroBars3Solid, heroShoppingCartSolid } from '@ng-icons/heroicons/solid';
@@ -12,6 +12,7 @@ import { UpdateTheme } from '../../store/app/app.actions';
 import { MobileNavPopoverComponent } from './components/mobile-nav-popover/mobile-nav-popover.component';
 import { UserNavPopoverComponent } from './components/user-nav-popover/user-nav-popover.component';
 import { DaisyDropdownPopoverComponent } from './components/daisy-dropdown-popover/daisy-dropdown-popover.component';
+import { getShoppingCartCount } from '../../store/shopping-cart/shopping-cart.state';
 
 @Component({
   selector: 'navbar',
@@ -31,6 +32,7 @@ export class NavbarComponent {
   protected logoIcon = heroSwatchSolid;
   protected mobileBarsIcon = heroBars3Solid;
   protected shoppingCartIcon = heroShoppingCartSolid;
+  protected shoppingCartCount = select(getShoppingCartCount);
   
   constructor (private store: Store) {}
 

@@ -9,6 +9,7 @@ import { AuthState } from './store/auth/auth.state';
 import { AppInitializationService } from './services/app-initialization.service';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import { environment } from '../environments/environment.development';
+import { ShoppingCartState } from './store/shopping-cart/shopping-cart.state';
 
 const config: SocketIoConfig = {
   // url: environment.apiUrl,
@@ -44,7 +45,7 @@ export const appConfig: ApplicationConfig = {
     })),
 
     // NGXS store config
-    provideStore([AuthState, AppState]),
+    provideStore([AuthState, AppState, ShoppingCartState]),
     // devtools always last after NgxsModule
     importProvidersFrom(
       NgxsReduxDevtoolsPluginModule.forRoot({

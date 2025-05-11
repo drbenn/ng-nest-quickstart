@@ -55,6 +55,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/public/cookie-policy-page/cookie-policy-page.component').then(m => m.CookiePolicyPageComponent)
   },
   {
+    path: 'store',
+    loadComponent: () => import('./pages/public/store-page/store-page.component').then(m => m.StorePageComponent)
+  },
+  {
     path: 'shopping-cart',
     loadComponent: () => import('./pages/public/shopping-cart-page/shopping-cart-page.component').then(m => m.ShoppingCartPageComponent)
   },
@@ -62,11 +66,11 @@ export const routes: Routes = [
   // AUTH Routes for login/register/callback
   {
     path: 'log-in',
-    loadComponent: () => import('./pages/auth/log-in-page/log-in-page.component').then(m => m.LogInPageComponent)
+    component: LogInPageComponent
   },
   {
     path: 'register-account',
-    loadComponent: () => import('./pages/auth/register-page/register-page.component').then(m => m.RegisterPageComponent)
+    component: RegisterPageComponent
   },
   {
     path: 'confirm-email',
