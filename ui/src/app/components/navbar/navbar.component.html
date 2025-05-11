@@ -34,13 +34,15 @@
               @if (item.name === 'Cart'){
                 <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
                 class="transition duration-[20ms] ease-in hover:text-gray-500">
-                  <div class="translate-y-0.5 relative">
+                  <div class="-translate-y-0 relative">
                     @if (shoppingCartCount() > 0) {
                       <div class="absolute bg-primary w-[1rem] h-[1rem] rounded-full top-0 right-0 text-primary-content text-[10px] flex justify-center items-center -translate-x-0 -translate-y-1">
                         {{ shoppingCartCount() }}
                       </div>
                     }
-                    <ng-icon [svg]="shoppingCartIcon" size="1.5rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+                    <div class="transition duration-[20ms] ease-in hover:bg-gray-500 rounded-full px-1 pt-1">
+                      <ng-icon [svg]="shoppingCartIcon" size="1.25rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+                    </div>
                   </div>
                 </a>
               } @else {
@@ -62,8 +64,15 @@
               @if (item.name === 'Cart'){
                 <a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
                 class="transition duration-[20ms] ease-in hover:text-gray-500">
-                  <div class="translate-y-0.5">
-                    <ng-icon [svg]="shoppingCartIcon" size="1.25rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+                  <div class="-translate-y-0 relative">
+                    @if (shoppingCartCount() > 0) {
+                      <div class="absolute bg-primary w-[1rem] h-[1rem] rounded-full top-0 right-0 text-primary-content text-[10px] flex justify-center items-center -translate-x-0 -translate-y-1">
+                        {{ shoppingCartCount() }}
+                      </div>
+                    }
+                    <div class="transition duration-[20ms] ease-in hover:bg-gray-500 rounded-full px-1 pt-1">
+                      <ng-icon [svg]="shoppingCartIcon" size="1.25rem"  [color]="isDarkMode ? 'white' : '#161616' "/>
+                    </div>
                   </div>
                 </a>
               } @else {
@@ -82,7 +91,7 @@
     <!-- dark mode toggle -->
     <div class="h-6 w-6
     transition duration-150 ease-in-out hover:bg-gray-400 rounded-full p-1 cursor-pointer">
-      <label class="swap swap-rotate -translate-y-1.5">
+      <label class="swap swap-rotate -translate-y-2">
         <!-- this hidden checkbox controls the state -->
         <input type="checkbox" (click)="selectTheme()"/>
       
