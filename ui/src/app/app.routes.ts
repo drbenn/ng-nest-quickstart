@@ -8,7 +8,7 @@ import { ContactPageComponent } from './pages/public/contact-page/contact-page.c
 import { TermsOfUsePageComponent } from './pages/public/terms-of-use-page/terms-of-use-page.component';
 import { PrivacyPolicyPageComponent } from './pages/public/privacy-policy-page/privacy-policy-page.component';
 import { CookiePolicyPageComponent } from './pages/public/cookie-policy-page/cookie-policy-page.component';
-import { ChatPageComponent } from './pages/public/chat-page/chat-page.component';
+import { ChatPageComponent } from './pages/guarded/chat-page/chat-page.component';
 import { ShoppingCartPageComponent } from './pages/public/shopping-cart-page/shopping-cart-page.component';
 
 // AUTH Routes for login/register/callback
@@ -34,42 +34,91 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   // PUBLIC Routes accessible by all
   { path: '', component: LandingPageComponent },         // Default route
-  { path: 'about-us', component: AboutUsComponent },
-  { path: 'contact', component: ContactPageComponent },
-  { path: 'terms-of-use', component: TermsOfUsePageComponent },
-  { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
-  { path: 'cookie-policy', component: CookiePolicyPageComponent },
   {
-    path: 'chat',
-    loadComponent: () => import('./pages/public/chat-page/chat-page.component').then(m => m.ChatPageComponent)
+    path: 'about-us',
+    loadComponent: () => import('./pages/public/about-us/about-us.component').then(m => m.AboutUsComponent)
+  },
+  {
+    path: 'contact',
+    loadComponent: () => import('./pages/public/contact-page/contact-page.component').then(m => m.ContactPageComponent)
+  },
+  {
+    path: 'terms-of-use',
+    loadComponent: () => import('./pages/public/terms-of-use-page/terms-of-use-page.component').then(m => m.TermsOfUsePageComponent)
+  },
+  {
+    path: 'privacy-policy',
+    loadComponent: () => import('./pages/public/privacy-policy-page/privacy-policy-page.component').then(m => m.PrivacyPolicyPageComponent)
+  },
+  {
+    path: 'cookie-policy',
+    loadComponent: () => import('./pages/public/cookie-policy-page/cookie-policy-page.component').then(m => m.CookiePolicyPageComponent)
+  },
+  {
+    path: 'shopping-cart',
+    loadComponent: () => import('./pages/public/shopping-cart-page/shopping-cart-page.component').then(m => m.ShoppingCartPageComponent)
   },
 
-  { path: 'shopping-cart', component: ShoppingCartPageComponent },
-
   // AUTH Routes for login/register/callback
-  { path: 'log-in', component: LogInPageComponent },
-  { path: 'register-account', component: RegisterPageComponent },
-  { path: 'confirm-email', component: ConfirmEmailComponent },
-  { path: 'request-password-reset', component: RequestPassswordResetPageComponent },
-  { path: 'reset-password', component: ResetPasswordPageComponent }, 
-  { path: 'oauth/callback', component: OauthCallbackComponent },
+  {
+    path: 'log-in',
+    loadComponent: () => import('./pages/auth/log-in-page/log-in-page.component').then(m => m.LogInPageComponent)
+  },
+  {
+    path: 'register-account',
+    loadComponent: () => import('./pages/auth/register-page/register-page.component').then(m => m.RegisterPageComponent)
+  },
+  {
+    path: 'confirm-email',
+    loadComponent: () => import('./pages/auth/confirm-email/confirm-email.component').then(m => m.ConfirmEmailComponent)
+  },
+  {
+    path: 'request-password-reset',
+    loadComponent: () => import('./pages/auth/request-password-reset-page/request-password-reset-page.component').then(m => m.RequestPassswordResetPageComponent)
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./pages/auth/reset-password-page/reset-password-page.component').then(m => m.ResetPasswordPageComponent)
+  },
+  {
+    path: 'oauth/callback',
+    loadComponent: () => import('./pages/auth/oauth-callback/oauth-callback.component').then(m => m.OauthCallbackComponent)
+  },
+  {
+    path: 'auth/registration-success-pending',
+    loadComponent: () => import('./pages/auth/registration-success-pending/registration-success-pending.component').then(m => m.RegistrationSuccessPendingComponent)
+  },
+  {
+    path: 'auth/existing-user',
+    loadComponent: () => import('./pages/auth/existing-user-page/existing-user-page.component').then(m => m.ExistingUserPageComponent)
+  },
+  {
+    path: 'auth/failed-login',
+    loadComponent: () => import('./pages/auth/failed-login-page/failed-login-page.component').then(m => m.FailedLoginPageComponent)
+  },
+
   
-  { path: 'auth/registration-success-pending', component: RegistrationSuccessPendingComponent},
-  { path: 'auth/existing-user', component: ExistingUserPageComponent },
-  { path: 'auth/failed-login', component: FailedLoginPageComponent },
 
   // GUARDED Routes accessible by logged in users only
   { 
     path: 'home',
-    component: HomePageComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/guarded/home-page/home-page.component').then(m => m.HomePageComponent)
   },
   {
     path: 'todo',
-    component: TodoPageComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/guarded/todo-page/todo-page.component').then(m => m.TodoPageComponent)
+  },
+  {
+    path: 'chat',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/guarded/chat-page/chat-page.component').then(m => m.ChatPageComponent)
   },
 
   // Page not found catch all
-  { path: '**', component: PageNotFoundPageComponent },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/public/page-not-found-page/page-not-found-page.component').then(m => m.PageNotFoundPageComponent)
+  }
 ];
