@@ -23,6 +23,8 @@ export class UserNavPopoverComponent implements OnInit {
     this.close.emit();
   };
 
+  // blah
+  
   ngOnInit(): void {
     // console.log(this.user);
   }
