@@ -119,6 +119,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/guarded/chat-page/chat-page.component').then(m => m.ChatPageComponent)
   },
+  {
+    path: 'account-settings',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/auth/user-settings/user-settings.component').then(m => m.UserSettingsComponent)
+  },
 
   // Page not found catch all
   {
